@@ -1,0 +1,21 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+    body {
+        @apply border-gray-50 text-black;
+    }
+
+    .dark body {
+        @apply bg-gray-900 text-white;
+    }
+
+    button {
+        @apply bg-gray-300;
+    }
+
+    .dark button {
+        @apply bg-gray-500;
+    }
+}

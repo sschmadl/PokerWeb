@@ -2,9 +2,9 @@ spring:
   application:
     name: PokerBackend
   datasource:
-    url: jdbc:mysql://localhost:3306/pokerweb
-    username: admin
-    password: admin
+    url: ${SPRING_DATASOURCE_URL}
+    username: ${SPRING_DATASOURCE_USERNAME}
+    password: ${SPRING_DATASOURCE_PASSWORD}
   jpa:
     hibernate:
       ddl-auto: update
@@ -14,3 +14,6 @@ spring:
       hibernate:
         format_sql: true
         enable_lazy_load_no_trans: true
+  web:
+    resources:
+      static-locations: classpath:/static/

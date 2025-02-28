@@ -1,13 +1,10 @@
 package com.example.pokerbackend.model;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
+
 
 import java.util.Arrays;
 
-@Setter
-@Getter
 @Entity
 @Table(name = "profile_image")
 public class ProfileImage {
@@ -29,4 +26,43 @@ public class ProfileImage {
     @OneToOne(mappedBy = "profileImage")
     private Player player;
 
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getImageName() {
+        return imageName;
+    }
+
+    public void setImageName(String imageName) {
+        this.imageName = imageName;
+    }
+
+    public byte[] getImageData() {
+        return imageData;
+    }
+
+    public void setImageData(byte[] imageData) {
+        this.imageData = imageData;
+    }
+
+    public String getImageType() {
+        return imageType;
+    }
+
+    public void setImageType(String imageType) {
+        this.imageType = imageType;
+    }
+
+    public Player getPlayer() {
+        return player;
+    }
+
+    public void setPlayer(Player player) {
+        this.player = player;
+    }
 }

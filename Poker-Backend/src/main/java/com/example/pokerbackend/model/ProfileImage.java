@@ -24,7 +24,7 @@ public class ProfileImage {
     private String imageType;  // e.g., image/jpeg, image/png, etc.
 
     @OneToOne(mappedBy = "profileImage")
-    private Player player;
+    private User user;
 
     public Long getId() {
         return id;
@@ -58,11 +58,11 @@ public class ProfileImage {
         this.imageType = imageType;
     }
 
-    public Player getPlayer() {
-        return player;
+    public User getPlayer() {
+        return user;
     }
 
-    public void setPlayer(Player player) {
-        this.player = player;
+    public void setPlayer(User user) {
+        this.user = user;
     }
 }

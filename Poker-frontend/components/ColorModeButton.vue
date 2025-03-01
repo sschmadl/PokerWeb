@@ -1,19 +1,16 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { useColorMode } from '@vueuse/core'
 
 const colorMode = useColorMode()
-const icon = ref('solar:moon-bold')
 
 const moonIcon = 'solar:moon-bold'
 const sunIcon = 'ph:sun-fill'
 
-onMounted(() => {
-  icon.value = colorMode.value === 'dark' ? moonIcon : sunIcon
-})
+// Automatically change the icon based on the color mode
+const icon = computed(() => colorMode.value === 'dark' ? moonIcon : sunIcon)
 
 const toggleDarkMode = () => {
   colorMode.value = colorMode.value === 'dark' ? 'light' : 'dark'
-  icon.value = colorMode.value === 'dark' ? moonIcon : sunIcon
 }
 </script>
 

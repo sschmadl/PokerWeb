@@ -4,12 +4,12 @@ const links = [{
   icon: 'i-heroicons-home',
   to: '/'
 }, {
-  label: 'Test',
-  icon: 'stash:cloud-solid',
+  label: 'Settings',
+  icon: 'bi:gear',
   to: '/'
 }, {
-  label: 'Test',
-  icon: 'stash:cloud-solid',
+  label: 'About',
+  icon: 'lucide:info',
   to: '/'
 }]
 </script>
@@ -22,9 +22,10 @@ const links = [{
     </div>
 
     <div class="flex items-center gap-4">
+      <UButton class="rounded-md" to="login" label="Login" variant="ghost" />
+      <UButton class="rounded-md" to="register" label="Register" variant="ghost" />
+
       <ColorModeButton/>
-      <!-- Account Button -->
-      <UButton class="rounded-full" to="account" icon="lucide:user-round" />
     </div>
   </UContainer>
 </template>

@@ -4,8 +4,7 @@
 
 <template>
   <div>
-    <PokerSuitBackground/>
-    <NavBar/>
+    <h1>Account Page</h1>
   </div>
 </template>
 

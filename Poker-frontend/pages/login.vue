@@ -16,29 +16,39 @@ const state = reactive({
   password: undefined
 })
 
-let loginError = ''
+const loginError = ref('')
+
+type LoginResponse = {
+  token: string;
+}
 
 async function submit(event: FormSubmitEvent<Schema>) {
-  const loginResponse = await useFetch('/auth/login', {
-    method: 'POST',
-    headers: {},
-    body: {
-      'username': event.data.username,
-      'password': event.data.password,
-    }
-  })
+  try {
+    const loginResponse = await $fetch<LoginResponse>('/auth/login', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: {
+        username: event.data.username,
+        password: event.data.password,
+      }
+    })
 
-  if (loginResponse.status.value === 'success') {
-    console.log('success')
-    useJWT().value = loginResponse.data.value.token
+    console.log(loginResponse)
+
+    useJWT().value = loginResponse.token
     useUsername().value = event.data.username
     useLoggedIn().value = true
     navigateTo('/')
-  } else {
-    console.log('Error')
-    loginError = loginResponse.data.value.error
+  } catch (error: any) {
+    if (error.data?.error) {
+      loginError.value = error.data.error
+    } else {
+      loginError.value = 'An unexpected error occurred'
+    }
   }
 }
+
+
 </script>
 
 <template>
@@ -48,18 +58,18 @@ async function submit(event: FormSubmitEvent<Schema>) {
       <h2 class="text-2xl font-semibold text-center">Login</h2>
       <UForm :schema="schema" :state="state" @submit="submit" class="space-y-4">
         <UFormGroup name="username" class="pt-4">
-          <UInput v-model="state.username" placeholder="Username..." required />
+          <UInput v-model="state.username" placeholder="Username..." required/>
         </UFormGroup>
 
         <UFormGroup name="password" class="pt-4">
-          <UInput v-model="state.password" type="password" placeholder="Password..." required />
+          <UInput v-model="state.password" type="password" placeholder="Password..." required/>
         </UFormGroup>
 
 
         <UFormGroup name="submit" class="pt-4">
           <UButton type="submit" class="my-4" block>Login</UButton>
         </UFormGroup>
-        <p>{{ loginError }}</p>
+        <p class="text-red-700">{{ loginError }}</p>
       </UForm>
     </UCard>
   </div>

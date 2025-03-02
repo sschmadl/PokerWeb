@@ -3,6 +3,7 @@ package com.example.pokerbackend.service;
 import com.example.pokerbackend.Exceptions.InvalidUsernameOrPassword;
 import com.example.pokerbackend.Exceptions.UserAlreadyExistsException;
 import com.example.pokerbackend.model.User;
+import com.example.pokerbackend.repository.UserRepository;
 import com.example.pokerbackend.util.JwtUtil;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;

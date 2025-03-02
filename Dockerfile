@@ -12,7 +12,7 @@ RUN npm install
 COPY Poker-frontend ./
 
 # Build the frontend (ensure Nuxt generates static output)
-RUN npm run generate
+RUN npx nuxi generate
 
 # --- Backend Build Stage ---
 FROM eclipse-temurin:17-jdk AS backend-build

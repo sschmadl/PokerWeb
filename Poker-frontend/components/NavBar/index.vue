@@ -6,11 +6,7 @@ const links = [{
 }, {
   label: 'Settings',
   icon: 'bi:gear',
-  to: '/'
-}, {
-  label: 'About',
-  icon: 'lucide:info',
-  to: '/'
+  to: '/settings'
 }]
 </script>
 
@@ -25,7 +21,7 @@ const links = [{
       <UButton class="rounded-md" to="login" label="Login" variant="ghost" />
       <UButton class="rounded-md" to="register" label="Register" variant="ghost" />
 
-      <ColorModeButton/>
+      <NavBarColorModeButton/>
     </div>
   </UContainer>
 </template>

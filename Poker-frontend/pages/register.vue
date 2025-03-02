@@ -16,34 +16,43 @@ const state = reactive({
   password: undefined
 })
 
-async function onSubmit(event: FormSubmitEvent<Schema>) {
-  console.log(event.data)
+async function submit(event: FormSubmitEvent<Schema>) {
+  const registerResponse = await useFetch('/auth/register', {
+    method: 'POST',
+    headers: {},
+    body: {
+      'username': event.data.username,
+      'password': event.data.password,
+    }
+  })
+
+  if (registerResponse.status.value === 'success') {
+    navigateTo('/')
+  } else {
+    console.log('Error trying to register')
+  }
 }
 </script>
 
 <template>
   <NavBar/>
-  <UContainer class="flex justify-center items-start min-h-screen pt-24">
-    <div class="bg-indigo-300 dark:bg-indigo-800 p-8 rounded-lg shadow-lg max-w-96 w-full">
-      <h2 class="text-2xl font-bold text-center mb-4">Register</h2>
-      <UForm :schema="schema" :state="state" class="space-y-6 text-lg" @submit="onSubmit">
-        <div class=min-h-30>
-          <UFormGroup name="username" class="text-xl">
-            <UInput placeholder="Username..." v-model="state.username"/>
-          </UFormGroup>
-        </div>
-
-
-        <UFormGroup name="password" class="text-xl">
-          <UInput placeholder="Password..." v-model="state.password" type="password"/>
+  <div class="flex items-center justify-center pt-20">
+    <UCard class="w-full max-w-md p-6">
+      <h2 class="text-2xl font-semibold text-center">Register</h2>
+      <UForm :schema="schema" :state="state" @submit="submit" class="space-y-4">
+        <UFormGroup name="username" class="pt-4">
+          <UInput v-model="state.username" placeholder="Username..." required />
         </UFormGroup>
 
-        <div class="flex justify-center">
-          <UButton type="submit" class="w-full flex justify-center items-center text-center">
-            Submit
-          </UButton>
-        </div>
+        <UFormGroup name="password" class="pt-4">
+          <UInput v-model="state.password" type="password" placeholder="Password..." required />
+        </UFormGroup>
+
+
+        <UFormGroup name="submit" class="pt-4">
+          <UButton type="submit" class="my-4" block>Register</UButton>
+        </UFormGroup>
       </UForm>
-    </div>
-  </UContainer>
+    </UCard>
+  </div>
 </template>

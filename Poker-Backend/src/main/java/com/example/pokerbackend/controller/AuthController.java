@@ -1,6 +1,10 @@
 package com.example.pokerbackend.controller;
 
+import com.example.pokerbackend.Exceptions.InvalidUsernameOrPassword;
+import com.example.pokerbackend.Exceptions.UserAlreadyExistsException;
 import com.example.pokerbackend.service.AuthService;
+import org.springframework.http.HttpStatusCode;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -18,15 +22,24 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public String register(@RequestBody AuthRequest request) {
-        authService.register(request.getUsername(), request.getPassword());
-        return "User registered successfully!";
+    public ResponseEntity<?> register(@RequestBody AuthRequest request) {
+        try {
+            authService.register(request.getUsername(), request.getPassword());
+        } catch (UserAlreadyExistsException e) {
+            return ResponseEntity.status(400).body(new ErrorResponse(e.getMessage()));
+        }
+        return new ResponseEntity<>(HttpStatusCode.valueOf(200));
     }
 
     @PostMapping("/login")
-    public AuthResponse login(@RequestBody AuthRequest request) {
-        String token = authService.authenticate(request.getUsername(), request.getPassword());
-        return new AuthResponse(token);
+    public ResponseEntity<?> login(@RequestBody AuthRequest request) {
+        String token;
+        try {
+            token = authService.authenticate(request.getUsername(), request.getPassword());
+        } catch (InvalidUsernameOrPassword e) {
+            return ResponseEntity.status(400).body(new ErrorResponse(e.getMessage()));
+        }
+        return new ResponseEntity<>(new AuthResponse(token),HttpStatusCode.valueOf(200));
     }
 
     @PostMapping("/test")
@@ -71,5 +84,18 @@ class AuthResponse {
 
     public void setToken(String token) {
         this.token = token;
+    }
+}
+
+class ErrorResponse{
+    private String message;
+    public ErrorResponse(String message) {
+        this.message = message;
+    }
+    public String getMessage() {
+        return message;
+    }
+    public void setMessage(String message) {
+        this.message = message;
     }
 }

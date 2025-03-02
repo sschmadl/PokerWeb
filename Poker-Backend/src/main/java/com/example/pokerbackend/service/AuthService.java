@@ -1,5 +1,7 @@
 package com.example.pokerbackend.service;
 
+import com.example.pokerbackend.Exceptions.InvalidUsernameOrPassword;
+import com.example.pokerbackend.Exceptions.UserAlreadyExistsException;
 import com.example.pokerbackend.model.User;
 import com.example.pokerbackend.util.JwtUtil;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -19,17 +21,17 @@ public class AuthService {
         this.jwtUtil = jwtUtil;
     }
 
-    public String authenticate(String username, String password) {
+    public String authenticate(String username, String password) throws InvalidUsernameOrPassword {
         Optional<User> userOptional = userRepository.findByUsername(username);
         if (userOptional.isPresent() && passwordEncoder.matches(password, userOptional.get().getPassword())) {
             return jwtUtil.generateToken(username);
         }
-        throw new RuntimeException("Invalid username or password");
+        throw new InvalidUsernameOrPassword("Invalid username or password");
     }
 
-    public void register(String username, String password) {
+    public void register(String username, String password) throws UserAlreadyExistsException {
         if (userRepository.findByUsername(username).isPresent()) {
-            throw new RuntimeException("User already exists");
+            throw new UserAlreadyExistsException("User already exists");
         }
         User user = new User();
         user.setUsername(username);

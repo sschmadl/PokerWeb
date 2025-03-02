@@ -25,20 +25,26 @@ public class JwtFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
-        String authHeader = request.getHeader("Authorization");
+        try {
+            String token = request.getHeader("Authorization");
 
-        if (authHeader != null && authHeader.startsWith("Bearer ")) {
-            String token = authHeader.substring(7);
-            String username = jwtUtil.extractUsername(token);
+            if (token != null) {
+                String username = jwtUtil.extractUsername(token);
 
-            if (username != null && jwtUtil.validateToken(token)) {
-                UserDetails userDetails = User.withUsername(username).password("").authorities("USER").build();
-                UsernamePasswordAuthenticationToken authToken =
-                        new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
-                SecurityContextHolder.getContext().setAuthentication(authToken);
+                if (username != null && jwtUtil.validateToken(token)) {
+                    UserDetails userDetails = User.withUsername(username).password("").authorities("USER").build();
+                    UsernamePasswordAuthenticationToken authToken =
+                            new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+                    SecurityContextHolder.getContext().setAuthentication(authToken);
+                } else {
+                    response.sendError(HttpServletResponse.SC_FORBIDDEN, "Invalid or expired token");
+                    return; // Stop filter execution
+                }
             }
-        }
 
-        filterChain.doFilter(request, response);
+            filterChain.doFilter(request, response);
+        } catch (Exception e) {
+            response.sendError(HttpServletResponse.SC_FORBIDDEN, "Invalid token");
+        }
     }
 }

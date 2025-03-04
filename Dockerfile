@@ -28,7 +28,7 @@ COPY --from=frontend-build /app/.output/public ./src/main/resources/static
 RUN ./mvnw clean package -DskipTests
 
 # --- Final Stage ---
-FROM openjdk:21-jdk-slim
+FROM openjdk:17-jdk-slim
 
 WORKDIR /app
 

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import {object, string, type InferType} from 'yup'
 import type {FormSubmitEvent} from '#ui/types'
-import {useLoggedIn, useUsername} from "~/composables/states";
+import { useAuth } from '~/composables/useAuth'
 
 const schema = object({
   username: string().required('Required'),
@@ -35,10 +35,7 @@ async function submit(event: FormSubmitEvent<Schema>) {
 
     console.log(loginResponse)
 
-    useJWT().value = loginResponse.token
-    useUsername().value = event.data.username
-    useLoggedIn().value = true
-    navigateTo('/')
+    useAuth().login(event.data.username, loginResponse.token);
   } catch (error: any) {
     if (error.data?.error) {
       loginError.value = error.data.error

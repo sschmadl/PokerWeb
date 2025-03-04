@@ -1,25 +1,28 @@
 <script setup lang="ts">
-const links = [{
-  label: 'Home',
-  icon: 'i-heroicons-home',
-  to: '/'
-}, {
-  label: 'Settings',
-  icon: 'bi:gear',
-  to: '/settings'
-}]
+import {useLoggedIn, useUsername} from "~/composables/states";
+import { useAuth } from "~/composables/useAuth"; // If you have a useAuth composable
+
+const loggedIn = useLoggedIn();
 </script>
 
 <template>
-  <UContainer class="w-full flex justify-between items-center border-b border-gray-200 dark:border-gray-800 py-2">
+  <UContainer class="w-full flex justify-between items-center">
     <!-- Navigation -->
     <div class="flex items-center">
-      <UHorizontalNavigation :links="links" />
+      <UHorizontalNavigation :links="[{ label: 'Home', icon: 'i-heroicons-home', to: '/' }, { label: 'Settings', icon: 'bi:gear', to: '/settings' }]" />
     </div>
 
+    <!-- Conditional Buttons: Show Login/Register if NOT logged in, otherwise show Logout -->
     <div class="flex items-center gap-4">
-      <UButton class="rounded-md" to="login" label="Login" variant="ghost" />
-      <UButton class="rounded-md" to="register" label="Register" variant="ghost" />
+      <template v-if="!loggedIn">
+        <UButton class="rounded-md" to="/login" label="Login" variant="ghost" />
+        <UButton class="rounded-md" to="/register" label="Register" variant="ghost" />
+      </template>
+      <template v-else class="flex items-center gap-4">
+        <p>Logged in as: {{ useUsername().value }}</p>
+        <UButton class="rounded-md" label="Logout" variant="ghost" @click="useAuth().logout()" />
+      </template>
+
 
       <NavBarColorModeButton/>
     </div>

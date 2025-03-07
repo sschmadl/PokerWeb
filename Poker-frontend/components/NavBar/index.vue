@@ -19,10 +19,9 @@ const loggedIn = useLoggedIn();
         <UButton class="rounded-md" to="/register" label="Register" variant="ghost" />
       </template>
       <template v-else class="flex items-center gap-4">
-        <p>Logged in as: {{ useUsername().value }}</p>
+        <p>{{ useUsername().value }}</p>
         <UButton class="rounded-md" label="Logout" variant="ghost" @click="useAuth().logout()" />
       </template>
-
 
       <NavBarColorModeButton/>
     </div>

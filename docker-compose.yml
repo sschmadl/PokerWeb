@@ -29,7 +29,12 @@ services:
       - ./mysql:/var/lib/mysql
     networks:
       - poker_network  # Ensure both containers are on the same network
-    # Removed the ports section so this container is not exposed to the outside world
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 5s
+      retries: 10
+      start_period: 10s
+      timeout: 5s
 
 networks:
   poker_network:  # Defining a custom network

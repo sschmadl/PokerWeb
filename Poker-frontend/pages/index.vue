@@ -6,15 +6,14 @@ function onPlayPressed() {
   webSocket.onopen = async () => {
     console.log(webSocket.readyState);
   }
+
+  navigateTo('lobby-selection')
 }
 </script>
 
 <template>
   <div>
-    <PokerSuitBackground/>
     <NavBar/>
-    <p>Username: {{ useUsername() }}</p>
-    <p>JWT: {{ useJWT() }}</p>
 
     <div class="flex flex-col justify-center items-center text-9xl gap-10">
       <h1>Sigma Poker</h1>

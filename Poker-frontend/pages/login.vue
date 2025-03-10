@@ -66,7 +66,9 @@ async function submit(event: FormSubmitEvent<Schema>) {
         <UFormGroup name="submit" class="pt-4">
           <UButton type="submit" class="my-4" block>Login</UButton>
         </UFormGroup>
-        <p class="text-red-700">{{ loginError }}</p>
+        <div class="w-full text-center flex items-center justify-center">
+          <p class="text-red-700 w-full">{{ loginError }}</p>
+        </div>
       </UForm>
     </UCard>
   </div>

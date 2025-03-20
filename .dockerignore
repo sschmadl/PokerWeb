@@ -1,2 +1,5 @@
 /.output
 /node_modules
+/Poker-frontend/.output
+/Poker-frontend/node_modules
+/Poker-frontend/.nuxt

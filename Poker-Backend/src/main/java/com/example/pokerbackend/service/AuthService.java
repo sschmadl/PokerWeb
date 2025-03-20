@@ -39,4 +39,8 @@ public class AuthService {
         user.setPassword(passwordEncoder.encode(password));
         userRepository.save(user);
     }
+
+    public boolean isValidToken(String token){
+        return jwtUtil.validateToken(token);
+    }
 }

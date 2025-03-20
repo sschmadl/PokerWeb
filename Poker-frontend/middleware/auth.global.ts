@@ -1,15 +1,15 @@
-import { useLoggedIn } from '~/composables/states';
+import { isLoggedIn } from "~/composables/states";
 
-export default defineNuxtRouteMiddleware((to) => {
-    const loggedIn = useLoggedIn();
-
+export default defineNuxtRouteMiddleware(async (to) => {
     const publicPages = ['/login', '/', '/register'];
 
     if (publicPages.includes(to.path)) {
         return;
     }
 
-    if (!loggedIn.value) {
+    const loggedIn = await isLoggedIn();
+
+    if (!loggedIn) {
         console.log('Not logged in, redirecting to /login');
         return navigateTo('/login');
     }

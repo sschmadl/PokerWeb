@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import {useLoggedIn, useUsername} from "~/composables/states";
+import {isLoggedIn, useUsername} from "~/composables/states";
 import { useAuth } from "~/composables/useAuth"; // If you have a useAuth composable
 
-const loggedIn = useLoggedIn();
+const loggedIn = await isLoggedIn();
 </script>
 
 <template>

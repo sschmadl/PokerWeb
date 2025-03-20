@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import {useJWT, useUsername} from "~/composables/states";
 
 function onPlayPressed() {
   const webSocket = new WebSocket('ws://127.0.0.1:8080'); // change this

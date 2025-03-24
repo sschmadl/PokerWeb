@@ -47,6 +47,15 @@ public class AuthController {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         return authentication.getName();
     }
+
+    @PostMapping("/is-valid-token")
+    public ResponseEntity<?> isValidToken(@RequestBody ValidTokenRequest request) {
+        if (authService.isValidToken(request.getToken())){
+            return new ResponseEntity<>(HttpStatusCode.valueOf(200));
+        }else {
+            return new ResponseEntity<>(new ErrorResponse("invalid token"), HttpStatusCode.valueOf(400));
+        }
+    }
 }
 
 class AuthRequest {
@@ -70,7 +79,6 @@ class AuthRequest {
     }
 }
 
-
 class AuthResponse {
     private String token;
 
@@ -82,6 +90,19 @@ class AuthResponse {
         return token;
     }
 
+    public void setToken(String token) {
+        this.token = token;
+    }
+}
+
+class ValidTokenRequest{
+    private String token;
+    public ValidTokenRequest(String token) {
+        this.token = token;
+    }
+    public String getToken() {
+        return token;
+    }
     public void setToken(String token) {
         this.token = token;
     }

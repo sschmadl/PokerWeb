@@ -13,6 +13,7 @@ function onPlayPressed() {
 
 <template>
   <div>
+    <PokerSuitBackground/>
     <NavBar/>
 
     <div class="flex flex-col justify-center items-center text-9xl gap-10">

@@ -1,5 +1,6 @@
 package com.example.pokerbackend.service;
 
+import com.example.pokerbackend.Exceptions.InvalidOldPassword;
 import com.example.pokerbackend.Exceptions.InvalidUsernameOrPassword;
 import com.example.pokerbackend.Exceptions.UserAlreadyExistsException;
 import com.example.pokerbackend.model.User;
@@ -42,5 +43,17 @@ public class AuthService {
 
     public boolean isValidToken(String token){
         return jwtUtil.validateToken(token);
+    }
+
+    public void changePassword(String username, String oldPassword, String newPassword) throws Exception{
+        User user = userRepository.findUserByUsername(username);
+        String currentPassword = user.getPassword();
+        if (!passwordEncoder.matches(oldPassword, currentPassword)) {
+            throw new InvalidOldPassword("Old password is wrong");
+        }else {
+            String hashedPassword = passwordEncoder.encode(newPassword);
+            user.setPassword(hashedPassword);
+            userRepository.save(user);
+        }
     }
 }

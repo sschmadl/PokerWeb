@@ -5,7 +5,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 
 @Controller
 public class ForwardController {
-    @GetMapping("/{path:[^\\.]*}")
+    @GetMapping("/{path:^(?!ws$)[^\\.]*}")  // Verhindert die Weiterleitung von "/ws"
     public String forward() {
         return "forward:/index.html";
     }

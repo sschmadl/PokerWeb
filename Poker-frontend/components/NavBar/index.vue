@@ -22,6 +22,9 @@ const loggedIn = await isLoggedIn();
         <p>{{ useUsername().value }}</p>
         <UButton class="rounded-md" label="Logout" variant="ghost" @click="useAuth().logout()" />
       </template>
+      <template v-if="loggedIn">
+        <UButton class="rounded-md" to="user-management" label="Account" variant="ghost" />
+      </template>
 
       <NavBarColorModeButton/>
     </div>

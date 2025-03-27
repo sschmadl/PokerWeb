@@ -9,14 +9,11 @@ function onPlayPressed() {
   navigateTo('lobby-selection')
 }
 
-// Colors for the background animation
-const primaryColor = '';
-const secondaryColor = '';
 </script>
 
 <template>
   <div>
-    <BackgroundAnimation :primary-color="primaryColor" :secondary-color="secondaryColor" />
+    <BackgroundAnimation/>
     <NavBar/>
 
     <div class="flex flex-col justify-center items-center text-9xl gap-10">

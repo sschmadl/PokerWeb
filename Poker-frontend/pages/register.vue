@@ -16,22 +16,41 @@ const state = reactive({
   password: undefined
 })
 
-async function submit(event: FormSubmitEvent<Schema>) {
-  const registerResponse = await useFetch('/auth/register', {
-    method: 'POST',
-    headers: {},
-    body: {
-      'username': event.data.username,
-      'password': event.data.password,
-    }
-  })
+const registerError = ref('');
 
-  if (registerResponse.status.value === 'success') {
-    navigateTo('/')
-  } else {
-    console.log('Error trying to register')
+type RegisterResponse = {
+  status: string;
+  error?: string;
+};
+
+async function submit(event: FormSubmitEvent<Schema>) {
+  try {
+    const registerResponse = await $fetch<RegisterResponse>('/auth/register', {
+      method: 'POST',
+      body: {
+        username: event.data.username,
+        password: event.data.password,
+      }
+    });
+
+    if (registerResponse.status === 'success') {
+      navigateTo('/');
+    } else {
+      registerError.value = registerResponse.error || 'Registration failed';
+    }
+  } catch (error: any) {
+    console.error("Fetch error:", error);
+
+    if (error?.data?.error) {
+      registerError.value = error.data.error;
+    } else if (error?.message) {
+      registerError.value = error.message;
+    } else {
+      registerError.value = 'An unexpected error occurred';
+    }
   }
 }
+
 </script>
 
 <template>
@@ -41,17 +60,20 @@ async function submit(event: FormSubmitEvent<Schema>) {
       <h2 class="text-2xl font-semibold text-center">Register</h2>
       <UForm :schema="schema" :state="state" @submit="submit" class="space-y-4">
         <UFormGroup name="username" class="pt-4">
-          <UInput v-model="state.username" placeholder="Username..." required />
+          <UInput v-model="state.username" placeholder="Username..." required/>
         </UFormGroup>
 
         <UFormGroup name="password" class="pt-4">
-          <UInput v-model="state.password" type="password" placeholder="Password..." required />
+          <UInput v-model="state.password" type="password" placeholder="Password..." required/>
         </UFormGroup>
 
 
         <UFormGroup name="submit" class="pt-4">
           <UButton type="submit" class="my-4" block>Register</UButton>
         </UFormGroup>
+        <div class="w-full text-center flex items-center justify-center">
+          <p class="text-red-700 w-full">{{ registerError }}</p>
+        </div>
       </UForm>
     </UCard>
   </div>

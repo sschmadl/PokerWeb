@@ -1,14 +1,39 @@
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue';
-import {useColorMode} from "@vueuse/core";
+import { ref, onMounted, onUnmounted, watch } from 'vue';
+import { useColorMode } from '@vueuse/core';
 
 const props = defineProps({
-  primaryColor: String,
-  secondaryColor: String,
+  primaryColor: {
+    type: Array,
+    validator(value: unknown) {
+      return Array.isArray(value) && value.length === 2 && value.every(item => typeof item === 'string');
+    },
+    required: false,
+  },
+  secondaryColor: {
+    type: Array,
+    validator(value: unknown) {
+      return Array.isArray(value) && value.length === 2 && value.every(item => typeof item === 'string');
+    },
+    required: false,
+  },
 });
 
-const primaryColor = props.primaryColor || (useColorMode().value === 'dark' ? '#0b3b28' : '#228760');
-const secondaryColor = props.secondaryColor || (useColorMode().value === 'dark' ? '#07261a' : '#15543c');
+const colorMode = useColorMode();
+
+const primaryColor = computed(() => {
+  if (props.primaryColor) {
+    return colorMode.value === 'dark' ? props.primaryColor[1] : props.primaryColor[0];
+  }
+  return colorMode.value === 'dark' ? '#0b3b28' : '#228760'; // Default colors
+});
+
+const secondaryColor = computed(() => {
+  if (props.secondaryColor) {
+    return colorMode.value === 'dark' ? props.secondaryColor[1] : props.secondaryColor[0];
+  }
+  return colorMode.value === 'dark' ? '#07261a' : '#15543c'; // Default colors
+});
 
 const rectangles = ref<{ x: number; y: number; color: string; textColor: string }[]>([]);
 const rectSize = 100;
@@ -29,8 +54,8 @@ function createCheckerboard() {
       rectangles.value.push({
         x: col * rectSize,
         y: row * rectSize,
-        color: (row + col) % 2 === 0 ? primaryColor : secondaryColor,
-        textColor: ((row + col) % 2 === 0 ? primaryColor : secondaryColor) === primaryColor ? secondaryColor : primaryColor,
+        color: (row + col) % 2 === 0 ? primaryColor.value : secondaryColor.value,
+        textColor: ((row + col) % 2 === 0 ? primaryColor.value : secondaryColor.value) === primaryColor.value ? secondaryColor.value : primaryColor.value,
       });
     }
   }
@@ -61,6 +86,13 @@ function handleResize() {
   createCheckerboard();
   animate();
 }
+
+// Watch for color mode changes and update the colors accordingly
+watch(() => colorMode.value, (newColorMode) => {
+  primaryColor.value = newColorMode === 'dark' ? '#0b3b28' : '#228760';
+  secondaryColor.value = newColorMode === 'dark' ? '#07261a' : '#15543c';
+  createCheckerboard(); // Recreate the checkerboard with updated colors
+});
 
 onMounted(() => {
   calculateGridSize();

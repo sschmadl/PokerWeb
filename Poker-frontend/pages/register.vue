@@ -33,11 +33,7 @@ async function submit(event: FormSubmitEvent<Schema>) {
       }
     });
 
-    if (registerResponse.status === 'success') {
-      navigateTo('/');
-    } else {
-      registerError.value = registerResponse.error || 'Registration failed';
-    }
+    navigateTo('/')
   } catch (error: any) {
     console.error("Fetch error:", error);
 

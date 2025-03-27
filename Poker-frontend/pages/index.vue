@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import {useJWT, useUsername} from "~/composables/states";
 
 function onPlayPressed() {
   const webSocket = new WebSocket('ws://127.0.0.1:8080'); // change this
@@ -9,10 +8,16 @@ function onPlayPressed() {
 
   navigateTo('lobby-selection')
 }
+
+// Colors for the background animation
+const primaryColor = '';
+const secondaryColor = '';
 </script>
 
 <template>
   <div>
+    <PokerSuitBackground/>
+    <BackgroundAnimation :primary-color="primaryColor" :secondary-color="secondaryColor" />
     <NavBar/>
 
     <div class="flex flex-col justify-center items-center text-9xl gap-10">

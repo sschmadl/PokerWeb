@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import {useLoggedIn, useUsername} from "~/composables/states";
+import {isLoggedIn, useUsername} from "~/composables/states";
 import { useAuth } from "~/composables/useAuth"; // If you have a useAuth composable
 
-const loggedIn = useLoggedIn();
+const loggedIn = await isLoggedIn();
 </script>
 
 <template>
@@ -21,6 +21,9 @@ const loggedIn = useLoggedIn();
       <template v-else class="flex items-center gap-4">
         <p>{{ useUsername().value }}</p>
         <UButton class="rounded-md" label="Logout" variant="ghost" @click="useAuth().logout()" />
+      </template>
+      <template v-if="loggedIn">
+        <UButton class="rounded-md" to="user-management" label="Account" variant="ghost" />
       </template>
 
       <NavBarColorModeButton/>

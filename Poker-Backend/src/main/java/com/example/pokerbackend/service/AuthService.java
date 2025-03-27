@@ -47,11 +47,13 @@ public class AuthService {
 
     public void changePassword(String username, String oldPassword, String newPassword) throws Exception{
         User user = userRepository.findUserByUsername(username);
-        String hashedPassword = passwordEncoder.encode(oldPassword);
-        if (!passwordEncoder.matches(newPassword, hashedPassword)) {
+        String currentPassword = user.getPassword();
+        if (!passwordEncoder.matches(oldPassword, currentPassword)) {
             throw new InvalidOldPassword("Old password is wrong");
         }else {
+            String hashedPassword = passwordEncoder.encode(newPassword);
             user.setPassword(hashedPassword);
+            userRepository.save(user);
         }
     }
 }

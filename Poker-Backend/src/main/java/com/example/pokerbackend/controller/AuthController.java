@@ -1,5 +1,6 @@
 package com.example.pokerbackend.controller;
 
+import com.example.pokerbackend.Exceptions.InvalidOldPassword;
 import com.example.pokerbackend.Exceptions.InvalidUsernameOrPassword;
 import com.example.pokerbackend.Exceptions.UserAlreadyExistsException;
 import com.example.pokerbackend.service.AuthService;
@@ -54,6 +55,18 @@ public class AuthController {
             return new ResponseEntity<>(HttpStatusCode.valueOf(200));
         }else {
             return new ResponseEntity<>(new ErrorResponse("invalid token"), HttpStatusCode.valueOf(400));
+        }
+    }
+
+    @PostMapping("change-password")
+    public ResponseEntity<?> changePassword(@RequestBody ChangePasswordRequest request) {
+        try {
+            authService.changePassword(request.getUsername(), request.getOldPassword(), request.getNewPassword());
+            return new ResponseEntity<>(HttpStatusCode.valueOf(200));
+        }catch (InvalidOldPassword e){
+            return ResponseEntity.status(400).body(new ErrorResponse(e.getMessage()));
+        }catch (Exception e){
+            return ResponseEntity.status(400).body(new ErrorResponse("Alles Kaputt"));
         }
     }
 }
@@ -121,5 +134,40 @@ class ErrorResponse{
 
     public void setError(String error) {
         this.error = error;
+    }
+}
+
+class ChangePasswordRequest{
+    String oldPassword;
+    String newPassword;
+    String username;
+    public ChangePasswordRequest(String oldPassword, String newPassword, String username) {
+        this.oldPassword = oldPassword;
+        this.newPassword = newPassword;
+        this.username = username;
+    }
+
+    public String getOldPassword() {
+        return oldPassword;
+    }
+
+    public void setOldPassword(String oldPassword) {
+        this.oldPassword = oldPassword;
+    }
+
+    public String getNewPassword() {
+        return newPassword;
+    }
+
+    public void setNewPassword(String newPassword) {
+        this.newPassword = newPassword;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
     }
 }

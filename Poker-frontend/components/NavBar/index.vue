@@ -14,9 +14,6 @@ const loggedIn = await isLoggedIn();
 
     <!-- Conditional Buttons: Show Login/Register if NOT logged in, otherwise show Logout -->
     <div class="flex items-center gap-4">
-      <template v-if="loggedIn">
-        <UButton class="rounded-md" to="user-management" label="Manage" variant="ghost" />
-      </template>
       <template v-if="!loggedIn">
         <UButton class="rounded-md" to="/login" label="Login" variant="ghost" />
         <UButton class="rounded-md" to="/register" label="Register" variant="ghost" />
@@ -24,6 +21,9 @@ const loggedIn = await isLoggedIn();
       <template v-else class="flex items-center gap-4">
         <p>{{ useUsername().value }}</p>
         <UButton class="rounded-md" label="Logout" variant="ghost" @click="useAuth().logout()" />
+      </template>
+      <template v-if="loggedIn">
+        <UButton class="rounded-md" to="user-management" label="Account" variant="ghost" />
       </template>
 
       <NavBarColorModeButton/>

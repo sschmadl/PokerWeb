@@ -23,20 +23,20 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Build Spring Boot app
-        run: mvn clean package -DskipTests
-
       - name: Log in to Docker Hub
         run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
 
-      - name: Build Docker image
+      - name: Build, Tag, Push Docker image
         run: |
-          docker build -t sschmadl187/pokerweb .
-
-      - name: Tag Docker image
-        run: |
-          docker tag sschmadl187/pokerweb sschmadl187/pokerweb:latest
-
-      - name: Push Docker image
-        run: |
-          docker push sschmadl187/pokerweb:latest
+          docker buildx create --use
+          docker buildx build --platform linux/arm64 -t sschmadl187/pokerweb:latest --push .
+      - name: Deploy to Raspberry Pi (via password)
+        uses: appleboy/ssh-action@v0.1.10
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          password: ${{ secrets.SSH_PASSWORD }}  # Using password instead of SSH key
+          script: |
+            cd pokerweb 
+            echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+            ./startdocker.sh

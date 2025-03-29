@@ -1,5 +1,4 @@
 <template>
-  <BackgroundAnimation :primary-color="primaryColor" :secondary-color="secondaryColor" />
   <NavBar/>
   <div class="flex items-center justify-center pt-20">
     <UCard class="p-6 w-96">

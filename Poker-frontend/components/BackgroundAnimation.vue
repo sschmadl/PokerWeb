@@ -36,7 +36,8 @@ const secondaryColor = computed(() => {
 });
 
 const rectangles = ref<{ x: number; y: number; color: string; textColor: string }[]>([]);
-const rectSize = 100;
+const rectSize = 300;
+const fontSize = rectSize / 2;
 const speed = 1; // Movement speed per frame
 let columns = 0;
 let rows = 0;
@@ -121,7 +122,11 @@ onUnmounted(() => {
         color: rect.textColor,
       }"
     >
-      <span class="rectangle-text">∑</span>
+      <span class="rectangle-text" :style="{
+        fontSize: fontSize + 'px',
+        transform: 'translateY(' + -rectSize / 10 + 'px)'
+      }">∑</span>
+
     </div>
   </div>
 </template>
@@ -146,11 +151,8 @@ onUnmounted(() => {
   align-items: center;
   justify-content: center;
   text-align: center;
-  font-size: clamp(10px, 10vw, 50px);
   will-change: transform; /* Hint the browser to optimize for transform */
 }
 
-.rectangle-text {
-  transform: translateY(-9px); /* Move text inside the rectangle */
-}
+
 </style>

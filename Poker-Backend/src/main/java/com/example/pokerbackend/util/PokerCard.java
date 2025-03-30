@@ -19,7 +19,7 @@ public class PokerCard {
 
     @Override
     public String toString() {
-        return String.format("%2d of %s", getRankValue(), suit);
+        return String.format("%s of %s", rank, suit);
     }
 
     public int getRankValue() {

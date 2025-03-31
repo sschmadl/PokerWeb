@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title><!DOCTYPE html>
+        <html lang="en">
+        <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>WebSocket with JWT</title>
+</head>
+<body>
+<h2>WebSocket with JWT Example</h2>
+<button onclick="connect()">Connect</button>
+<p id="output"></p>
+
+<script>
+    let socket;
+
+    function connect() {
+        // WebSocket URL with JWT token passed in the headers
+        socket = new WebSocket("ws://localhost:8080/ws");
+
+        socket.onmessage = function (event) {
+            document.getElementById("output").innerHTML += "<br>Received: " + event.data;
+        };
+
+        socket.onclose = function () {
+            console.log("Connection closed.");
+        };
+    }
+    
+</script>
+</body>
+</html>
+</title>
+</head>
+<body>
+
+</body>
+</html>

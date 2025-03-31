@@ -1,12 +1,22 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, reactive } from 'vue';
 import { useUsername } from "~/composables/states";
-import { useRouter } from 'vue-router';
-import { object, string, type InferType } from 'yup';
+import { object, string, ref as yupRef, type InferType } from 'yup';
+import type { FormSubmitEvent } from '#ui/types';
 
-const router = useRouter();
+const schema = object({
+  oldPassword: string().required('Old password is required'),
+  newPassword: string()
+      .min(8, 'New password must be at least 8 characters')
+      .required('New password is required'),
+  newPasswordConfirm: string()
+      .oneOf([yupRef('newPassword')], "New passwords don't match!")
+      .required('Please confirm your new password')
+});
 
-const formData = ref({
+type Schema = InferType<typeof schema>;
+
+const state = reactive({
   oldPassword: '',
   newPassword: '',
   newPasswordConfirm: ''
@@ -14,36 +24,19 @@ const formData = ref({
 
 const errorMessage = ref('');
 
-const schema = object({
-  username: string().required('Required'),
-  password: string()
-      .min(8, 'Must be at least 8 characters')
-      .required('Required')
-});
-
-type Schema = InferType<typeof schema>;
-
-const submitForm = async () => {
-  if (formData.value.newPassword !== formData.value.newPasswordConfirm) {
-    errorMessage.value = "New passwords don't match!";
-    return;
-  }
-
-  errorMessage.value = ''; // Clear any previous errors
-
+const submitForm = async (event: FormSubmitEvent<Schema>) => {
   try {
     const changePasswordResponse = await useFetch('/auth/change-password', {
       method: 'POST',
-      headers: {},
       body: {
         username: useUsername().value,
-        newPassword: formData.value.newPassword,
-        oldPassword: formData.value.oldPassword,
+        oldPassword: event.data.oldPassword,
+        newPassword: event.data.newPassword
       }
     });
 
     if (changePasswordResponse.status.value === 'success') {
-      router.push('/user-management');
+      navigateTo('/user-management');
     } else {
       console.error('Error trying to change password');
     }
@@ -53,38 +46,35 @@ const submitForm = async () => {
 };
 
 const cancelChange = () => {
-  router.push('/user-management');
+  navigateTo('/user-management');
 };
 </script>
 
 <template>
   <NavBar />
+  <background-animation/>
   <div class="flex items-center justify-center pt-20">
     <UCard class="w-full max-w-md p-6">
-      <form @submit.prevent="submitForm">
-        <h2>Old Password:</h2>
+      <UForm :schema="schema" :state="state" @submit="submitForm" class="space-y-4">
         <UFormGroup name="oldPassword" class="pt-4">
-          <UInput v-model="formData.oldPassword" type="password" placeholder="Enter old password..." required />
+          <UInput v-model="state.oldPassword" type="password" placeholder="Enter old password..." required />
         </UFormGroup>
 
-        <h2>New Password:</h2>
         <UFormGroup name="newPassword" class="pt-4">
-          <UInput v-model="formData.newPassword" type="password" placeholder="Enter new password..." required />
+          <UInput v-model="state.newPassword" type="password" placeholder="Enter new password..." required />
         </UFormGroup>
 
-        <h2>Confirm New Password:</h2>
         <UFormGroup name="newPasswordConfirm" class="pt-4">
-          <UInput v-model="formData.newPasswordConfirm" type="password" placeholder="Enter new password again..." required />
+          <UInput v-model="state.newPasswordConfirm" type="password" placeholder="Confirm new password..." required />
         </UFormGroup>
 
-        <!-- Error message -->
         <p v-if="errorMessage" class="text-red-500 text-sm pt-2">{{ errorMessage }}</p>
 
         <div>
           <UButton type="submit" class="mt-6 px-6 py-3 text-lg">Submit</UButton>
-          <UButton @click.prevent="cancelChange" class="mt-6 px-6 py-3 text-lg">Cancel</UButton>
+          <UButton style="float: right" @click.prevent="cancelChange" class="mt-6 px-6 py-3 text-lg">Cancel</UButton>
         </div>
-      </form>
+      </UForm>
     </UCard>
   </div>
 </template>

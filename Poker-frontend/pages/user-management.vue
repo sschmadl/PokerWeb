@@ -1,5 +1,94 @@
+<script setup>
+
+import {useUsername} from "~/composables/states";
+import {ref} from 'vue';
+import {navigateTo} from "#app";
+
+
+// Reference for the file input
+const fileInput = ref(null);
+
+// Function to trigger file input click
+const triggerFileInput = () => {
+  fileInput.value.click(); // This triggers the file input when the button is clicked
+};
+
+const registerError = ref('');
+
+const handleFileUpload = async (event) => {
+  const file = event.target.files[0]; // Get the selected file
+  if (file) {
+    // Check if the file is an image
+    if (!file.type.startsWith('image/')) {
+      console.error('Selected file is not an image.');
+      alert('Please select a valid image file.');
+      return;
+    }
+
+    // Limit file size to 5MB
+    const maxSize = 5 * 1024 * 1024; // 5MB in bytes
+    if (file.size > maxSize) {
+      console.error('File is too large. Maximum size is 5MB.');
+      alert('File is too large. Maximum size is 5MB.');
+      return;
+    }
+
+    console.log('Selected file:', file);
+
+    // Display the image preview
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const imgUrl = e.target.result;
+      console.log('Image URL:', imgUrl);
+      // You can use this URL to show a preview in the UI
+    };
+    reader.readAsDataURL(file);
+
+    // Prepare the file for upload
+    const formData = new FormData();
+    formData.append('image', file);
+
+    try {
+      const token = useCookie('jwt', { default: () => '' }).value; // Get JWT token
+
+      const response = await useFetch('/user-info/change-profile-picture', {
+        method: 'POST',
+        headers: {Authorization: token}, // Only add header if token exists
+        body: formData,
+      });
+
+      const data = await response.json();
+      console.log('Upload successful:', data);
+      // Handle success (e.g., show uploaded image URL)
+    } catch (error) {
+      console.error('Error uploading image:', error);
+
+      if (error?.data?.error) {
+        registerError.value = error.data.error;
+      } else if (error?.message) {
+        registerError.value = error.message;
+      } else {
+        registerError.value = 'An unexpected error occurred';
+      }
+    }
+  }
+};
+
+
+
+// Function to handle navigation to the change-password page
+const goToChangePassword = () => {
+  navigateTo('/change-password');
+};
+
+if (useUsername().value===""){
+  useUsername().value="Poker Player"
+}
+
+</script>
 <template>
   <NavBar/>
+  <background-animation/>
   <div class="flex items-center justify-center pt-20">
     <UCard class="p-6 w-96">
       <!-- Profile Image & Name in a Row -->
@@ -36,50 +125,6 @@
     </UCard>
   </div>
 </template>
-
-<script setup>
-import {useUsername} from "~/composables/states";
-import {useRouter} from 'vue-router';
-import {ref} from 'vue';
-
-// Set up the router
-const router = useRouter();
-
-// Reference for the file input
-const fileInput = ref(null);
-
-// Function to trigger file input click
-const triggerFileInput = () => {
-  fileInput.value.click(); // This triggers the file input when the button is clicked
-};
-
-// Function to handle file upload
-const handleFileUpload = (event) => {
-  const file = event.target.files[0]; // Get the selected file
-  if (file) {
-    // Handle the file (e.g., preview the image, upload it, etc.)
-    console.log('Selected file:', file);
-
-    // Example: Display the image preview
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const imgUrl = e.target.result;
-      console.log('Image URL:', imgUrl);
-      // You can display the image preview or handle the upload logic here
-    };
-    reader.readAsDataURL(file);
-  }
-};
-
-// Function to handle navigation to the change-password page
-const goToChangePassword = () => {
-  router.push('/change-password');
-};
-
-if (useUsername().value===""){
-  useUsername().value="Poker Player"
-}
-</script>
 
 <style scoped>
 /* You can add custom styles here */

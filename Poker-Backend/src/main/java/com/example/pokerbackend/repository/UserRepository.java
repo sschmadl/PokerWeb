@@ -1,5 +1,6 @@
 package com.example.pokerbackend.repository;
 
+import com.example.pokerbackend.model.ProfileImage;
 import com.example.pokerbackend.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 
@@ -9,4 +10,5 @@ public interface UserRepository extends JpaRepository<User, Integer> {
     Optional<User> findByUsername(String username);
 
     User findUserByUsername(String username);
+    ProfileImage findProfileImageByUser(User user);
 }

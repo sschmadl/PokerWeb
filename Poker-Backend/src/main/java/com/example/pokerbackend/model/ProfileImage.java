@@ -20,9 +20,6 @@ public class ProfileImage {
     @Column(name = "image_data")
     private byte[] imageData;
 
-    @Column(name = "imageType")
-    private String imageType;  // e.g., image/jpeg, image/png, etc.
-
     @OneToOne(mappedBy = "profileImage")
     private User user;
 
@@ -48,14 +45,6 @@ public class ProfileImage {
 
     public void setImageData(byte[] imageData) {
         this.imageData = imageData;
-    }
-
-    public String getImageType() {
-        return imageType;
-    }
-
-    public void setImageType(String imageType) {
-        this.imageType = imageType;
     }
 
     public User getPlayer() {

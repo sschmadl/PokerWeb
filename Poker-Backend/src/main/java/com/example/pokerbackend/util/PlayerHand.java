@@ -239,9 +239,9 @@ public class PlayerHand {
         }};
 
         allCards.sort(Comparator.comparingInt(PokerCard::getRankValue).reversed());
-        bestHand = allCards.subList(0, 6);
+        bestHand = allCards.subList(0, 5);
         bestHandForXCommunityCards = communityCards.size();
-        return allCards.subList(0, 6);
+        return allCards.subList(0, 5);
     }
 
     // this function assumes that a straight flush is possible

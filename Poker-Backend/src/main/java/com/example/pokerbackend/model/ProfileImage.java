@@ -17,7 +17,7 @@ public class ProfileImage {
     private String imageName;
 
     @Lob  // Large object for storing binary data (Blob)
-    @Column(name = "image_data")
+    @Column(name = "image_data", columnDefinition = "MEDIUMBLOB")
     private byte[] imageData;
 
     @OneToOne(mappedBy = "profileImage")

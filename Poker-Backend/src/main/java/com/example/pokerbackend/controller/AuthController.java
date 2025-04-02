@@ -6,6 +6,7 @@ import com.example.pokerbackend.Exceptions.UserAlreadyExistsException;
 import com.example.pokerbackend.service.AuthService;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -41,12 +42,6 @@ public class AuthController {
             return ResponseEntity.status(400).body(new ErrorResponse(e.getMessage()));
         }
         return new ResponseEntity<>(new AuthResponse(token),HttpStatusCode.valueOf(200));
-    }
-
-    @PostMapping("/test")
-    public String test() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        return authentication.getName();
     }
 
     @PostMapping("/is-valid-token")

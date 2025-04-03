@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import {object, string, type InferType} from 'yup'
 import type {FormSubmitEvent} from '#ui/types'
+import {useAuth} from "~/composables/useAuth";
 
 const schema = object({
   username: string().required('Required'),
@@ -23,6 +24,10 @@ type RegisterResponse = {
   error?: string;
 };
 
+type LoginResponse = {
+  token: string;
+}
+
 async function submit(event: FormSubmitEvent<Schema>) {
   try {
     const registerResponse = await $fetch<RegisterResponse>('/auth/register', {
@@ -33,7 +38,21 @@ async function submit(event: FormSubmitEvent<Schema>) {
       }
     });
 
+    const loginResponse = await $fetch<LoginResponse>('/auth/login', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: {
+        username: event.data.username,
+        password: event.data.password,
+      }
+    })
+
+    console.log(loginResponse)
+
+    useAuth().login(event.data.username, loginResponse.token);
+
     navigateTo('/')
+
   } catch (error: any) {
     console.error("Fetch error:", error);
 

@@ -19,9 +19,9 @@ const handleFileUpload = async (event) => {
   const file = event.target.files[0]; // Get the selected file
   if (file) {
     // Check if the file is an image
-    if (!file.type.startsWith('image/')) {
-      console.error('Selected file is not an image.');
-      alert('Please select a valid image file.');
+    if (!(file.type === 'image/jpeg' || file.type === 'image/jpg')) {
+      console.error('Selected file is not an acceptable file format.');
+      alert('Please select a valid image file. (.jpeg)');
       return;
     }
 
@@ -85,6 +85,7 @@ if (useUsername().value===""){
   useUsername().value="Poker Player"
 }
 
+
 </script>
 <template>
   <NavBar/>
@@ -94,8 +95,8 @@ if (useUsername().value===""){
       <!-- Profile Image & Name in a Row -->
       <div class="flex items-center space-x-4">
         <!-- Circular Profile Image -->
-        <NuxtImg
-            src="https://images.pexels.com/photos/771742/pexels-photo-771742.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1"
+        <img
+            :src="`/user-info/${useUsername().value}/profile-picture`"
             alt="Profile Picture"
             class="w-16 h-16 rounded-full object-cover"
         />

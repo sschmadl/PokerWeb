@@ -25,7 +25,7 @@ COPY Poker-Backend/.mvn .mvn
 COPY Poker-Backend/src ./src
 COPY --from=frontend-build /app/.output/public ./src/main/resources/static
 RUN chmod +x mvnw
-RUN ./mvnw dependency:go-offline
+#RUN ./mvnw dependency:go-offline
 RUN ./mvnw clean package -DskipTests
 
 # --- Final Stage ---

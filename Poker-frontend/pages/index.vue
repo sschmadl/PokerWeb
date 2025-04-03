@@ -31,11 +31,11 @@ function flip() {
   </div>
   <button @click="flip">Flip</button>
   <PlayerStatMenu :menu-width="200" />
-  <br>
-  <PlayerStatMenu :menu-width="400" />
-  <br>
+  <br><br><br><br>
+  <PlayerStatMenu :menu-width="400" :profile-border-color="'#00FF00'" />
+  <br><br><br><br>
   <PlayerStatMenu :menu-width="600" />
-  <br>
+  <br><br><br><br>
 </template>
 
 <style scoped>

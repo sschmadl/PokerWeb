@@ -39,14 +39,12 @@ public class UserInfoService {
         if (image.getSize() > (10*1024*1024)) throw new ImageTooBigException("Image is too big");
         if (profileImage == null) {
             profileImage = new ProfileImage();
-            profileImage.setImageName(image.getOriginalFilename());
             profileImage.setImageData(image.getBytes());
             profileImageRepository.save(profileImage);
             user.setProfileImage(profileImage);
             userRepository.save(user);
         }else {
             profileImage.setImageData(image.getBytes());
-            profileImage.setImageName(image.getOriginalFilename());
             profileImageRepository.save(profileImage);
         }
     }
@@ -55,6 +53,7 @@ public class UserInfoService {
         User user = userRepository.findUserByUsername(username);
         if (user == null) return;
         ProfileImage profileImage = profileImageRepository.findProfileImageByUser(user);
+        user.setProfileImage(null);
         if (profileImage != null) {
             profileImageRepository.delete(profileImage);
         }

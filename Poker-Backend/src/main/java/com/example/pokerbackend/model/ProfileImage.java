@@ -13,9 +13,6 @@ public class ProfileImage {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "imageName")
-    private String imageName;
-
     @Lob  // Large object for storing binary data (Blob)
     @Column(name = "image_data", columnDefinition = "MEDIUMBLOB")
     private byte[] imageData;
@@ -29,14 +26,6 @@ public class ProfileImage {
 
     public void setId(Long id) {
         this.id = id;
-    }
-
-    public String getImageName() {
-        return imageName;
-    }
-
-    public void setImageName(String imageName) {
-        this.imageName = imageName;
     }
 
     public byte[] getImageData() {

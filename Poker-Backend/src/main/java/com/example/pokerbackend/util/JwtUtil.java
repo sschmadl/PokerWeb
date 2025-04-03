@@ -1,5 +1,8 @@
 package com.example.pokerbackend.util;
 
+import com.example.pokerbackend.model.User;
+import com.example.pokerbackend.repository.UserRepository;
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import org.springframework.stereotype.Component;
@@ -10,6 +13,11 @@ import java.util.Date;
 public class JwtUtil {
     private String secretKey = "FortniteBalls19DollarFortniteCardFemboyThighs";
     private long expirationMs = 86400000; // 24 hours
+    private UserRepository userRepository;
+
+    public JwtUtil(UserRepository userRepository) {
+        this.userRepository = userRepository;
+    }
 
     public String generateToken(String username, Date passwordChangedDate) {
         return Jwts.builder()
@@ -32,9 +40,24 @@ public class JwtUtil {
     public boolean validateToken(String token) {
         try {
             Jwts.parser().setSigningKey(secretKey).build().parseClaimsJws(token);
-            return true;
+            User user = userRepository.findUserByUsername(extractUsername(token));
+            if (user == null) return false;
+            return user.getPasswordChangedDate().getTime() == Long.parseLong(extractClaim(token, "passwordChangedDate"));
         } catch (Exception e) {
             return false;
         }
+    }
+
+    public String extractClaim(String token, String claimKey) {
+        Claims claims = extractAllClaims(token);
+        return claims.get(claimKey, String.class); // Extrahieren des spezifischen Claims
+    }
+
+    public Claims extractAllClaims(String token) {
+        return Jwts.parser()
+                .setSigningKey(secretKey)
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
     }
 }

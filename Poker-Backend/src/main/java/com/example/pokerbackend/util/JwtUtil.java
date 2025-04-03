@@ -22,7 +22,7 @@ public class JwtUtil {
     public String generateToken(String username, Date passwordChangedDate) {
         return Jwts.builder()
                 .setSubject(username)
-                .claim("passwordChangedDate", passwordChangedDate.getTime())
+                .claim("passwordChangedDate", String.valueOf(passwordChangedDate.getTime()))
                 .setIssuedAt(new Date())
                 .signWith(SignatureAlgorithm.HS256, secretKey)
                 .compact();
@@ -40,10 +40,17 @@ public class JwtUtil {
     public boolean validateToken(String token) {
         try {
             Jwts.parser().setSigningKey(secretKey).build().parseClaimsJws(token);
+            System.out.println("validate");
             User user = userRepository.findUserByUsername(extractUsername(token));
+            System.out.println(user.getUsername());
             if (user == null) return false;
+            System.out.println(user.getPasswordChangedDate().getTime());
+            System.out.println(extractClaim(token, "passwordChangedDate"));
+            System.out.println(Long.parseLong(extractClaim(token, "passwordChangedDate")));
+            System.out.println(user.getPasswordChangedDate().getTime() == Long.parseLong(extractClaim(token, "passwordChangedDate")));
             return user.getPasswordChangedDate().getTime() == Long.parseLong(extractClaim(token, "passwordChangedDate"));
         } catch (Exception e) {
+            e.printStackTrace();
             return false;
         }
     }

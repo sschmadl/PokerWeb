@@ -2,6 +2,7 @@ package com.example.pokerbackend.model;
 
 import jakarta.persistence.*;
 
+import java.util.Date;
 
 
 @Entity
@@ -17,6 +18,9 @@ public class User {
 
     @Column(name = "password", nullable = false)
     private String password;
+
+    @Column(name = "password_changed_date")
+    private Date passwordChangedDate;
 
     @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinColumn(name = "profile_image_id")
@@ -52,5 +56,13 @@ public class User {
 
     public void setProfileImage(ProfileImage profileImage) {
         this.profileImage = profileImage;
+    }
+
+    public Date getPasswordChangedDate() {
+        return passwordChangedDate;
+    }
+
+    public void setPasswordChangedDate(Date passwordChangedDate) {
+        this.passwordChangedDate = passwordChangedDate;
     }
 }

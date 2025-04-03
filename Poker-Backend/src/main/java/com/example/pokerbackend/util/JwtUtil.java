@@ -11,9 +11,10 @@ public class JwtUtil {
     private String secretKey = "FortniteBalls19DollarFortniteCardFemboyThighs";
     private long expirationMs = 86400000; // 24 hours
 
-    public String generateToken(String username) {
+    public String generateToken(String username, Date passwordChangedDate) {
         return Jwts.builder()
                 .setSubject(username)
+                .claim("passwordChangedDate", passwordChangedDate.getTime())
                 .setIssuedAt(new Date())
                 .signWith(SignatureAlgorithm.HS256, secretKey)
                 .compact();

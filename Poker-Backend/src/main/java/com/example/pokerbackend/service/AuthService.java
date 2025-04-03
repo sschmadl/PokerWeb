@@ -10,6 +10,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.Optional;
 
 @Service
@@ -26,7 +27,7 @@ public class AuthService {
     public String authenticate(String username, String password) throws InvalidUsernameOrPassword {
         Optional<User> userOptional = userRepository.findByUsername(username);
         if (userOptional.isPresent() && passwordEncoder.matches(password, userOptional.get().getPassword())) {
-            return jwtUtil.generateToken(username);
+            return jwtUtil.generateToken(username, userOptional.get().getPasswordChangedDate());
         }
         throw new InvalidUsernameOrPassword("Invalid username or password");
     }
@@ -37,6 +38,7 @@ public class AuthService {
         }
         User user = new User();
         user.setUsername(username);
+        user.setPasswordChangedDate(new Date());
         user.setPassword(passwordEncoder.encode(password));
         userRepository.save(user);
     }
@@ -53,6 +55,7 @@ public class AuthService {
         }else {
             String hashedPassword = passwordEncoder.encode(newPassword);
             user.setPassword(hashedPassword);
+            user.setPasswordChangedDate(new Date());
             userRepository.save(user);
         }
     }

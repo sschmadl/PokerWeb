@@ -1,6 +1,6 @@
 package com.example.pokerbackend.configuration;
 
-import com.example.pokerbackend.handler.MyWebSocketHandler;
+import com.example.pokerbackend.handler.GlobalChatWebsocketHandler;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.socket.config.annotation.EnableWebSocket;
@@ -13,12 +13,12 @@ public class WebsocketConfig implements WebSocketConfigurer {
 
     @Override
     public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
-        registry.addHandler(new MyWebSocketHandler(), "/ws")
+        registry.addHandler(new GlobalChatWebsocketHandler(), "/ws")
                 .setAllowedOrigins("*");
     }
 
     @Bean
-    public MyWebSocketHandler myWebSocketHandler() {
-        return new MyWebSocketHandler();
+    public GlobalChatWebsocketHandler myWebSocketHandler() {
+        return new GlobalChatWebsocketHandler();
     }
 }

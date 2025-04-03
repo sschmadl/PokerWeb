@@ -1,92 +1,3 @@
-<script setup>
-
-import {useUsername} from "~/composables/states";
-import {ref} from 'vue';
-import {navigateTo} from "#app";
-
-
-// Reference for the file input
-const fileInput = ref(null);
-
-// Function to trigger file input click
-const triggerFileInput = () => {
-  fileInput.value.click(); // This triggers the file input when the button is clicked
-};
-
-const registerError = ref('');
-
-const handleFileUpload = async (event) => {
-  const file = event.target.files[0]; // Get the selected file
-  if (file) {
-    // Check if the file is an image
-    if (!(file.type === 'image/jpeg' || file.type === 'image/jpg')) {
-      console.error('Selected file is not an acceptable file format.');
-      alert('Please select a valid image file. (.jpeg)');
-      return;
-    }
-
-    // Limit file size to 5MB
-    const maxSize = 5 * 1024 * 1024; // 5MB in bytes
-    if (file.size > maxSize) {
-      console.error('File is too large. Maximum size is 5MB.');
-      alert('File is too large. Maximum size is 5MB.');
-      return;
-    }
-
-    console.log('Selected file:', file);
-
-    // Display the image preview
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const imgUrl = e.target.result;
-      console.log('Image URL:', imgUrl);
-      // You can use this URL to show a preview in the UI
-    };
-    reader.readAsDataURL(file);
-
-    // Prepare the file for upload
-    const formData = new FormData();
-    formData.append('image', file);
-
-    try {
-      const token = useCookie('jwt', { default: () => '' }).value; // Get JWT token
-
-      const response = await useFetch('/user-info/change-profile-picture', {
-        method: 'POST',
-        headers: {Authorization: token}, // Only add header if token exists
-        body: formData,
-      });
-
-      const data = await response.json();
-      console.log('Upload successful:', data);
-      // Handle success (e.g., show uploaded image URL)
-    } catch (error) {
-      console.error('Error uploading image:', error);
-
-      if (error?.data?.error) {
-        registerError.value = error.data.error;
-      } else if (error?.message) {
-        registerError.value = error.message;
-      } else {
-        registerError.value = 'An unexpected error occurred';
-      }
-    }
-  }
-};
-
-
-
-// Function to handle navigation to the change-password page
-const goToChangePassword = () => {
-  navigateTo('/change-password');
-};
-
-if (useUsername().value===""){
-  useUsername().value="Poker Player"
-}
-
-
-</script>
 <template>
   <NavBar/>
   <background-animation/>
@@ -96,21 +7,27 @@ if (useUsername().value===""){
       <div class="flex items-center space-x-4">
         <!-- Circular Profile Image -->
         <img
-            :src="`/user-info/${useUsername().value}/profile-picture`"
+            :src="`${profilePictureUrl}?t=${cacheBuster}`"
             alt="Profile Picture"
             class="w-16 h-16 rounded-full object-cover"
         />
         <!-- Name & Role -->
         <div>
-          <h3 class="text-lg font-semibold">{{useUsername().value}}</h3>
+          <h3 class="text-lg font-semibold">{{ useUsername().value }}</h3>
           <p class="text-gray-500 text-sm">Poker Enthusiast</p>
         </div>
       </div>
 
-      <div class="mt-4">
+      <div class="mt-2">
         <!-- Change Profile Picture Button -->
         <UButton @click="triggerFileInput" block>
           Change Profile Picture
+        </UButton>
+      </div>
+      <div class="mt-2">
+        <!-- Delete Profile Picture Button -->
+        <UButton @click="deletePfp" block>
+          Delete Profile Picture
         </UButton>
       </div>
 
@@ -127,6 +44,77 @@ if (useUsername().value===""){
   </div>
 </template>
 
-<style scoped>
-/* You can add custom styles here */
-</style>
+<script setup>
+import { useUsername } from "~/composables/states";
+import { ref } from 'vue';
+import { navigateTo } from "#app";
+
+const fileInput = ref(null);
+const cacheBuster = ref(Date.now()); // Reactive timestamp to force image refresh
+const profilePictureUrl = ref(`/user-info/${useUsername().value}/profile-picture`);
+
+const triggerFileInput = () => {
+  fileInput.value.click();
+};
+
+const deletePfp = async () => {
+  const token = useCookie('jwt', {default: () => ''}).value;
+
+  try {
+    await $fetch('/user-info/delete-profile-picture', {
+      method: 'POST',
+      headers: { Authorization: token },
+    });
+
+    console.log('Profile picture deleted');
+    cacheBuster.value = Date.now(); // Update cache-buster to force image reload
+  } catch (error) {
+    console.error('Error deleting profile picture:', error);
+  }
+};
+
+const registerError = ref('');
+
+const handleFileUpload = async (event) => {
+  const file = event.target.files[0];
+  if (file) {
+    if (!(file.type === 'image/jpeg' || file.type === 'image/jpg')) {
+      alert('Please select a valid image file. (.jpeg)');
+      return;
+    }
+
+    const maxSize = 5 * 1024 * 1024;
+    if (file.size > maxSize) {
+      alert('File is too large. Maximum size is 5MB.');
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append('image', file);
+
+    try {
+      const token = useCookie('jwt', {default: () => ''}).value;
+
+      await $fetch('/user-info/change-profile-picture', {
+        method: 'POST',
+        headers: { Authorization: token },
+        body: formData,
+      });
+
+      console.log('Profile picture uploaded');
+      cacheBuster.value = Date.now(); // Update cache-buster to force image reload
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      registerError.value = error?.message || 'An unexpected error occurred';
+    }
+  }
+};
+
+const goToChangePassword = () => {
+  navigateTo('/change-password');
+};
+
+if (useUsername().value === "") {
+  useUsername().value = "Poker Player";
+}
+</script>

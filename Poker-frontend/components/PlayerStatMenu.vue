@@ -6,7 +6,12 @@ const props = defineProps({
     required: true,
   },
   profileBorderColor: String,
+  cards: {
+    type: Array as PropType<Array<{ frontImage: string; faceDown: boolean; highlighted: boolean; }>>,
+    required: true,
+  },
 });
+
 
 // Colors
 const profilePictureDiameter = Math.floor(props.menuWidth * 0.4);
@@ -51,9 +56,16 @@ const personalCardHeight = (userNameContainerHeight + pokerhandContainerHeight) 
       marginLeft: profilePictureDiameter + profilePictureTextMargin / 3 + 'px',
       marginBottom: personalCardHeight + 'px',
     }">
-      <Card :face-down="false" :front-image="'/cards_default/AS.svg'" :height="personalCardHeight" />
-      <Card :face-down="false" :front-image="'/cards_default/AH.svg'" :height="personalCardHeight" />
+      <Card
+          v-for="(card, index) in cards"
+          :key="index"
+          :face-down="card.faceDown"
+          :front-image="card.frontImage"
+          :height="personalCardHeight"
+          :highlighted="card.highlighted"
+      />
     </div>
+
     <div class="player-stat-container" :style="{
       width: informationContainerWidth + 'px',
       paddingLeft: profilePictureMenuPadding + 'px',
@@ -94,8 +106,6 @@ const personalCardHeight = (userNameContainerHeight + pokerhandContainerHeight) 
 
       </div>
     </div>
-
-
   </div>
 </template>
 

@@ -1,65 +1,108 @@
 <script setup lang="ts">
-import { ref } from 'vue';
 
-const Check = () => {
-  console.log("Check");
-};
+const tableWidth = ref(window.innerWidth / 2.5);
+const tableHeight = ref(window.innerHeight / 2);
 
-const Fold = () => {
-  console.log("Fold");
-};
+const cards = ref([
+  { frontImage: '/cards_default/AS.svg', faceDown: false, highlighted: false },
+  { frontImage: '/cards_default/2S.svg', faceDown: false, highlighted: false },
+  { frontImage: '/cards_default/3S.svg', faceDown: false, highlighted: false },
+  { frontImage: '/cards_default/4S.svg', faceDown: false, highlighted: false },
+  { frontImage: '/cards_default/5S.svg', faceDown: false, highlighted: false },
+]);
+const cardHeight = ref(tableHeight.value / 3);
 
-const Raise = () => {
-  console.log("Raise");
-  showInput.value = true; // Show the input field when "Raise" is clicked
-};
+function updateSizes() {
+  tableWidth.value = window.innerWidth / 2.5;
+  tableHeight.value = window.innerHeight / 2;
+  cardHeight.value = tableHeight.value / 3;
+}
 
-const ConfirmRaise = () => {
-  // Check if the input is a valid number and greater than 0
-  if (!raiseAmount.value || raiseAmount.value <= 0 || isNaN(raiseAmount.value)) {
-    alert("Please enter a valid raise amount");
-    return; // Don't proceed if invalid input
-  }
+onMounted(() => {
+  window.addEventListener('resize', updateSizes);
+});
 
-  console.log(`Raise confirmed with amount: ${raiseAmount.value}`);
-  // Add any logic for submitting the raise, e.g., sending to an API or updating the game state.
+onBeforeUnmount(() => {
+  window.removeEventListener('resize', updateSizes);
+});
 
-  showInput.value = false; // Hide the input field after confirmation
-};
+function flipCards() {
+  cards.value.forEach((card) => {
+    card.faceDown = !card.faceDown;
+  })
+}
 
-const showInput = ref(false); // State to show/hide the input field
-const raiseAmount = ref<number | null>(null); // State to hold the raised amount
 </script>
 
 <template>
-  <div class="min-h-screen flex items-end justify-center px-[20vw]">
-    <UCard class="w-full text-center">
-      <h2 class="text-xl font-semibold mb-4">Choose an Option</h2>
-
-      <div class="flex justify-center gap-4 mb-4">
-        <UButton color="primary" @click="Check" size="xl">Check</UButton>
-        <UButton color="primary" @click="Fold" size="xl">Fold</UButton>
-        <UButton color="primary" @click="Raise" size="xl">Raise</UButton>
+  <div class="game-container">
+    <div class="poker-table-container">
+      <div class="left-edge rounded-full poker-table" :style="{
+        width: tableHeight + 'px',
+        height: tableHeight + 'px',
+        marginRight: tableWidth + 'px'
+      }"></div>
+      <div class="middle-part poker-table" :style="{
+        width: tableWidth + 'px',
+        height: tableHeight + 'px',
+      }">
       </div>
-
-      <!-- Conditional rendering for the raise amount input field -->
-      <div v-if="showInput" class="mt-4">
-        <input
-            v-model="raiseAmount"
-            type="number"
-            placeholder="Enter raise amount"
-            class="border p-2 rounded-lg"
+      <div class="right-edge rounded-full poker-table" :style="{
+        width: tableHeight + 'px',
+        height: tableHeight + 'px',
+        marginLeft: tableWidth + 'px',
+      }"></div>
+      <div class="community-cards">
+        <Card
+            v-for="(card, index) in cards"
+            :key="index"
+            :face-down="card.faceDown"
+            :front-image="card.frontImage"
+            :height="cardHeight"
+            :highlighted="card.highlighted"
         />
       </div>
-
-      <!-- Confirm button appears only when input field is visible -->
-      <div v-if="showInput" class="mt-4">
-        <UButton color="primary" @click="ConfirmRaise" size="xl">Confirm Raise</UButton>
-      </div>
-    </UCard>
+      <UButton @click="flipCards" :style="{
+        zIndex: 15,
+      }">Flip</UButton>
+    </div>
   </div>
 </template>
 
 <style scoped>
-/* You can add custom styles if needed */
+
+.game-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+.poker-table-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+}
+
+.poker-table {
+  background: #35654D;
+  position: absolute;
+}
+
+.left-edge,
+.right-edge {
+  border-radius: 50%;
+  z-index: -1;
+}
+
+.community-cards {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 10;
+  user-select: none;
+  pointer-events: none;
+}
+
 </style>

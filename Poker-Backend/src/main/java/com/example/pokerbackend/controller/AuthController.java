@@ -30,6 +30,7 @@ public class AuthController {
         } catch (UserAlreadyExistsException e) {
             return ResponseEntity.status(400).body(new ErrorResponse(e.getMessage()));
         }
+        System.out.println("User registered: " + request.getUsername());
         return new ResponseEntity<>(HttpStatusCode.valueOf(200));
     }
 
@@ -41,6 +42,7 @@ public class AuthController {
         } catch (InvalidUsernameOrPassword e) {
             return ResponseEntity.status(400).body(new ErrorResponse(e.getMessage()));
         }
+        System.out.println("User logged in: " + request.getUsername());
         return new ResponseEntity<>(new AuthResponse(token),HttpStatusCode.valueOf(200));
     }
 
@@ -57,6 +59,7 @@ public class AuthController {
     public ResponseEntity<?> changePassword(@RequestBody ChangePasswordRequest request) {
         try {
             authService.changePassword(request.getUsername(), request.getOldPassword(), request.getNewPassword());
+            System.out.println("Password changed for user: " + request.getUsername());
             return new ResponseEntity<>(HttpStatusCode.valueOf(200));
         }catch (InvalidOldPassword e){
             return ResponseEntity.status(400).body(new ErrorResponse(e.getMessage()));

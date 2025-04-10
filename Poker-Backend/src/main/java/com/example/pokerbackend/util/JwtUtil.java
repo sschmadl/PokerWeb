@@ -44,13 +44,8 @@ public class JwtUtil {
             User user = userRepository.findUserByUsername(extractUsername(token));
             System.out.println(user.getUsername());
             if (user == null) return false;
-            System.out.println(user.getPasswordChangedDate().getTime());
-            System.out.println(extractClaim(token, "passwordChangedDate"));
-            System.out.println(Long.parseLong(extractClaim(token, "passwordChangedDate")));
-            System.out.println(user.getPasswordChangedDate().getTime() == Long.parseLong(extractClaim(token, "passwordChangedDate")));
             return user.getPasswordChangedDate().getTime() == Long.parseLong(extractClaim(token, "passwordChangedDate"));
         } catch (Exception e) {
-            e.printStackTrace();
             return false;
         }
     }

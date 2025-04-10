@@ -33,14 +33,15 @@ public class UserInfoController {
     @PostMapping("/change-profile-picture")
     public ResponseEntity<?> changeProfilePicture(@RequestParam("image") MultipartFile file) {
         if (file.isEmpty()) return ResponseEntity.badRequest().body(new ErrorResponse("File is empty"));
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         try {
-            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             userInfoService.saveProfilePicture(file, authentication.getName());
         } catch (ImageTooBigException | InvalidImageFormat e) {
             return ResponseEntity.badRequest().body(new ErrorResponse(e.getMessage()));
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(new ErrorResponse("File is not an image"));
         }
+        System.out.println(authentication.getName() + " changed profile picture");
         return ResponseEntity.ok().build();
     }
 
@@ -50,6 +51,7 @@ public class UserInfoController {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String username = authentication.getName();
         userInfoService.deleteProfilePicture(username);
+        System.out.println(username + " deleted profile picture");
         return ResponseEntity.ok().build();
     }
 

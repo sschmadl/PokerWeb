@@ -25,26 +25,33 @@ public class JwtFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
-        try {
-            String token = request.getHeader("Authorization");
+        String token = request.getHeader("Authorization");
 
-            if (token != null) {
+        if (token != null) {
+            try {
                 String username = jwtUtil.extractUsername(token);
 
                 if (username != null && jwtUtil.validateToken(token)) {
-                    UserDetails userDetails = User.withUsername(username).password("").authorities("USER").build();
+                    UserDetails userDetails = User.withUsername(username)
+                            .password("")
+                            .authorities("USER")
+                            .build();
+
                     UsernamePasswordAuthenticationToken authToken =
                             new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+
                     SecurityContextHolder.getContext().setAuthentication(authToken);
                 } else {
                     response.sendError(HttpServletResponse.SC_FORBIDDEN, "Invalid or expired token");
-                    return; // Stop filter execution
+                    return;
                 }
+            } catch (Exception e) {
+                response.sendError(HttpServletResponse.SC_FORBIDDEN, "Invalid or expired token");
+                return;
             }
-
-            filterChain.doFilter(request, response);
-        } catch (Exception e) {
-            response.sendError(HttpServletResponse.SC_FORBIDDEN, "Invalid token");
         }
+
+        // Always call this unless you explicitly want to block
+        filterChain.doFilter(request, response);
     }
 }

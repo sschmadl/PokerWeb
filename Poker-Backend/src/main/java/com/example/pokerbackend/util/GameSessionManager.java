@@ -10,7 +10,7 @@ public class GameSessionManager {
     private static GameSessionManager instance;
     private GameSessionManager() {
         // @Todo remove when no testcases are needed
-        GameSession session = new GameSession("Leon stinkt", 2, 10, 20);
+        GameSession session = new GameSession("Leon stinkt", 10, 20, 6, 9);
         addSession(session);
         //
     }

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import {type InferType, number, object, string} from "yup";
+import {number, object} from "yup";
 
 type LobbyItems = {
   gameId: string;
@@ -13,9 +13,7 @@ const schema = object({
   playerCount: number().required('Required'),
   smallBlind: number().required('Required'),
   bigBlind: number().required('Required'),
-})
-
-type Schema = InferType<typeof schema>
+});
 
 const state = reactive({
   playerCount: 4,  // Default value
@@ -23,7 +21,7 @@ const state = reactive({
   bigBlind: 4,
 });
 
-const smallBlindMax = 1000
+const smallBlindMax = 1000;
 
 function calculateBigBlind() {
   state.bigBlind = state.smallBlind * 2;
@@ -31,21 +29,17 @@ function calculateBigBlind() {
 }
 
 const filterInput = (event: KeyboardEvent) => {
-  // Allow numbers and backspace key
   if (!/\d/.test(event.key) && event.key !== 'Backspace') {
     event.preventDefault();
     return;
   }
 
-  // Get the current input and simulate adding the pressed key
   const newValue = Number(state.smallBlind + event.key);
 
-  // Prevent input if the value will go past the max or set to 0
   if (newValue > smallBlindMax || newValue === 0) {
     event.preventDefault();
   }
 };
-
 
 const items = [
   {
@@ -62,7 +56,7 @@ const items = [
   },
 ];
 
-const gameTableRows: LobbyItems[] = [
+const gameTableRows = ref<LobbyItems[]>([
   {
     gameId: "wgpor034nj",
     name: "XirouMMMMMMMMMM's game",
@@ -77,14 +71,33 @@ const gameTableRows: LobbyItems[] = [
     smallBlind: "50€",
     bigBlind: "100€",
   },
-];
+]);
 
 const gameTableColumns = [
-  {key: "name", label: "Name"},
-  {key: "playerCount", label: "Players"},
-  {key: "smallBlind", label: "Small Blind"},
-  {key: "bigBlind", label: "Big Blind"},
+  { key: "name", label: "Name" },
+  { key: "playerCount", label: "Players" },
+  { key: "smallBlind", label: "Small Blind" },
+  { key: "bigBlind", label: "Big Blind" },
 ];
+
+async function fetchExistingGames() {
+  try {
+    const response = await $fetch<LobbyItems[]>("/game-info/existing-games", {
+      method: "GET",
+      headers: { "Content-Type": "application/json" },
+    });
+
+    console.log(response);
+    gameTableRows.value = response.games;
+
+  } catch (error: any) {
+    if (error.data?.error) {
+      console.log(error.data?.error);
+    } else {
+      console.log("Geh scheißn");
+    }
+  }
+}
 
 const selected = ref<LobbyItems | null>(null);
 
@@ -92,22 +105,23 @@ function onSelect(row: LobbyItems) {
   selected.value = row;
 }
 
-
 function submit(tabType: string) {
-  if (tabType === 'find-game') {
+  if (tabType === "find-game") {
     console.log(selected.value);
-    navigateTo('/poker-game');
-  } else if (tabType === 'create-game') {
+    navigateTo("/poker-game");
+  } else if (tabType === "create-game") {
     if (state.smallBlind > 0) {
       // @Todo Simon den schaß geben
-      navigateTo('/poker-game');
+      navigateTo("/poker-game");
     }
   }
 }
+
+fetchExistingGames();
 </script>
 
 <template>
-  <NavBar/>
+  <NavBar />
   <UContainer class="w-1/2">
     <UTabs :items="items">
       <template #item="{ item }">
@@ -129,37 +143,42 @@ function submit(tabType: string) {
             </div>
 
             <div
-                v-for="(row, rowIndex) in gameTableRows"
-                :key="rowIndex"
-                @click="onSelect(row)"
-                class="current-games flex px-4 py-2 rounded cursor-pointer transition-colors duration-200"
-                :class="selected?.name === row.name
-                  ? 'bg-gray-200 dark:bg-gray-600'
-                  : 'hover:bg-gray-100 dark:hover:bg-gray-700'"
+                v-for="(row, rowIndex) in gameTableRows.values()"
+            :key="rowIndex"
+            @click="onSelect(row)"
+            class="current-games flex px-4 py-2 rounded cursor-pointer transition-colors duration-200"
+            :class="selected?.name === row.name
+            ? 'bg-gray-200 dark:bg-gray-600'
+            : 'hover:bg-gray-100 dark:hover:bg-gray-700'"
             >
-              <span class="current-games-text flex-1 text-center text-sm text-gray-800 dark:text-gray-200">
+            <span class="current-games-text flex-1 text-center text-sm text-gray-800 dark:text-gray-200">
                 {{ row.name }}
               </span>
-              <span class="current-games-text flex-1 text-center text-sm text-gray-800 dark:text-gray-200">
+            <span class="current-games-text flex-1 text-center text-sm text-gray-800 dark:text-gray-200">
                 {{ row.playerCount }}
               </span>
-              <span class="current-games-text flex-1 text-center text-sm text-gray-800 dark:text-gray-200">
+            <span class="current-games-text flex-1 text-center text-sm text-gray-800 dark:text-gray-200">
                 {{ row.smallBlind }}
               </span>
-              <span class="current-games-text flex-1 text-center text-sm text-gray-800 dark:text-gray-200">
+            <span class="current-games-text flex-1 text-center text-sm text-gray-800 dark:text-gray-200">
                 {{ row.bigBlind }}
               </span>
-            </div>
-
-
           </div>
+          </div>
+
           <div v-else-if="item.key === 'create-game'" class="space-y-3">
             <UForm :schema="schema" :state="state">
               <p class="text-left">Player Count: {{ state.playerCount }}</p>
-              <URange v-model="state.playerCount" :min="2" :max="10" :default-value="4"/>
+              <URange v-model="state.playerCount" :min="2" :max="10" :default-value="4" />
               <p class="text-left">Small Blind:</p>
-              <UInput v-model="state.smallBlind" type="number" placeholder="Enter a number (Max: 1000 €)" :min="1"
-                      :max="100" @keydown="filterInput"></UInput>
+              <UInput
+                  v-model="state.smallBlind"
+                  type="number"
+                  placeholder="Enter a number (Max: 1000 €)"
+                  :min="1"
+                  :max="100"
+                  @keydown="filterInput"
+              ></UInput>
               <p class="text-left">Big Blind:</p>
               <p class="text-left">{{ calculateBigBlind() }} €</p>
             </UForm>
@@ -199,5 +218,4 @@ function submit(tabType: string) {
   flex: 1;
   text-align: center;
 }
-
 </style>

@@ -44,7 +44,6 @@ async function submit(event: FormSubmitEvent<Schema>) {
   }
 }
 
-const usernameValue = ref('');
 const maxCharLength = 15;
 </script>
 
@@ -68,7 +67,7 @@ const maxCharLength = 15;
                   aria-live="polite"
                   role="status"
               >
-                {{ usernameValue?.length }}/{{ maxCharLength }}
+                {{ state.username.length }}/{{ maxCharLength }}
               </div>
             </template>
           </UInput>

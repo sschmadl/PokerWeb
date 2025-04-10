@@ -3,11 +3,6 @@
 import {Card} from "#components";
 
 function onPlayPressed() {
-  const webSocket = new WebSocket('ws://127.0.0.1:8080'); // change this
-  webSocket.onopen = async () => {
-    console.log(webSocket.readyState);
-  }
-
   navigateTo('lobby-selection')
 }
 

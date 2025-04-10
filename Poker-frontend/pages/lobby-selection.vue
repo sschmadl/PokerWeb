@@ -65,7 +65,7 @@ const items = [
 const gameTableRows: LobbyItems[] = [
   {
     gameId: "wgpor034nj",
-    name: "Xirou's game",
+    name: "XirouMMMMMMMMMM's game",
     playerCount: "2/6",
     smallBlind: "5€",
     bigBlind: "10€",
@@ -134,16 +134,21 @@ function submit(tabType: string) {
                 @click="onSelect(row)"
                 class="current-games flex px-4 py-2 rounded cursor-pointer transition-colors duration-200"
                 :class="selected?.name === row.name
-    ? 'bg-gray-200 dark:bg-gray-600'
-    : 'hover:bg-gray-100 dark:hover:bg-gray-700'"
+                  ? 'bg-gray-200 dark:bg-gray-600'
+                  : 'hover:bg-gray-100 dark:hover:bg-gray-700'"
             >
-  <span
-      v-for="(label, colIndex) in Object.values(row)"
-      :key="colIndex"
-      class="current-games-text flex-1 text-center text-sm text-gray-800 dark:text-gray-200"
-  >
-    {{ label }}
-  </span>
+              <span class="current-games-text flex-1 text-center text-sm text-gray-800 dark:text-gray-200">
+                {{ row.name }}
+              </span>
+              <span class="current-games-text flex-1 text-center text-sm text-gray-800 dark:text-gray-200">
+                {{ row.playerCount }}
+              </span>
+              <span class="current-games-text flex-1 text-center text-sm text-gray-800 dark:text-gray-200">
+                {{ row.smallBlind }}
+              </span>
+              <span class="current-games-text flex-1 text-center text-sm text-gray-800 dark:text-gray-200">
+                {{ row.bigBlind }}
+              </span>
             </div>
 
 
@@ -174,7 +179,7 @@ function submit(tabType: string) {
 <style scoped>
 .current-games-header {
   display: flex;
-  justify-content: space-between; /* or space-around */
+  justify-content: space-between;
   align-items: center;
 }
 

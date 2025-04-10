@@ -45,7 +45,7 @@ async function submit(event: FormSubmitEvent<Schema>) {
 }
 
 const usernameValue = ref('');
-const maxCharLength = 20;
+const maxCharLength = 15;
 </script>
 
 <template>

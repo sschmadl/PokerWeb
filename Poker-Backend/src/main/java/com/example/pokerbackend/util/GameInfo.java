@@ -3,7 +3,7 @@ package com.example.pokerbackend.util;
 public class GameInfo {
     private String gameId = PokerGameIDGenerator.generateID();
     private String name;
-    private int playerCount;
+    private String playerCount;
     private int bigBlind;
     private int smallBlind;
 
@@ -15,12 +15,12 @@ public class GameInfo {
         this.name = name;
     }
 
-    public int getPlayerCount() {
+    public String getPlayerCount() {
         return playerCount;
     }
 
-    public void setPlayerCount(int playerCount) {
-        this.playerCount = playerCount;
+    public void setPlayerCount(int playerCount, int maxPlayers) {
+        this.playerCount = playerCount + "/" + maxPlayers;
     }
 
     public int getBigBlind() {

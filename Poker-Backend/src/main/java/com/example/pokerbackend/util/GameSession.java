@@ -6,14 +6,16 @@ import java.util.List;
 import java.util.Map;
 
 public class GameSession {
+    private static final int MAX_PLAYERS = 10;
+    private int currentPlayer = 0;
     private GameInfo gameInfo = new GameInfo();
     private Map<String, Player> players = new HashMap<>();
     private PokerDeck deck = new PokerDeck();
     private List<PokerCard> communityCards = new ArrayList<>();
 
-    public GameSession(String name, int playerCount, int smallBlind, int bigBlind) {
+    public GameSession(String name, int smallBlind, int bigBlind, int currentPlayers, int maxPlayer) {
         gameInfo.setName(name);
-        gameInfo.setPlayerCount(playerCount);
+        gameInfo.setPlayerCount(currentPlayers,maxPlayer);
         gameInfo.setSmallBlind(smallBlind);
         gameInfo.setBigBlind(bigBlind);
     }

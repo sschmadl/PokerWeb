@@ -22,10 +22,14 @@ COPY Poker-Backend/pom.xml .
 COPY Poker-Backend/mvnw .
 COPY Poker-Backend/.mvn .mvn
 
+# Cache dependencies here
+RUN ./mvnw dependency:go-offline
+
 COPY Poker-Backend/src ./src
+
 COPY --from=frontend-build /app/.output/public ./src/main/resources/static
+
 RUN chmod +x mvnw
-# RUN ./mvnw dependency:go-offline
 RUN ./mvnw clean package -DskipTests
 
 # --- Final Stage ---

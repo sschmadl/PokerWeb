@@ -1,11 +1,12 @@
 package com.example.pokerbackend.util;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 public class GameSessionManager {
-    private Map<String, GameSession> sessions;
+    private Map<String, GameSession> sessions = new HashMap<>();
 
     private static GameSessionManager instance;
     private GameSessionManager() {

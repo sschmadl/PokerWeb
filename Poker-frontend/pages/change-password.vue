@@ -52,7 +52,6 @@ const cancelChange = () => {
 
 <template>
   <NavBar />
-  <background-animation/>
   <div class="flex items-center justify-center pt-20">
     <UCard class="w-full max-w-md p-6">
       <UForm :schema="schema" :state="state" @submit="submitForm" class="space-y-4">

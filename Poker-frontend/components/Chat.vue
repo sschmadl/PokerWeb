@@ -1,23 +1,46 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, nextTick } from 'vue';
+import { useUsername } from "~/composables/states";
 
 // State for the chat input and messages
-const messageInput = ref(''); // The message the user types
-const messages = ref<{ username: string, message: string }[]>([]); // Array to store chat messages
+const messageInput = ref('');
+const messages = ref<{ username: string, message: string }[]>([]);
+
+// Ref for the chat messages container
+const chatMessagesRef = ref<HTMLElement | null>(null);
+
+// Function to check if the scroll is near the bottom
+const isNearBottom = () => {
+  const container = chatMessagesRef.value;
+  if (!container) return false;
+
+  const threshold = 30; // px from bottom
+  const distanceFromBottom = container.scrollHeight - container.scrollTop - container.clientHeight;
+  return distanceFromBottom <= threshold;
+};
 
 // Function to send a message
-const sendMessage = () => {
+const sendMessage = async () => {
   if (messageInput.value.trim()) {
-    messages.value.push({ username: 'Player', message: messageInput.value });
-    messageInput.value = ''; // Clear the input after sending
+    const shouldAutoScroll = isNearBottom(); // Check before DOM updates
+
+    messages.value.push({ username: useUsername().value, message: messageInput.value });
+    messageInput.value = '';
+
+    await nextTick();
+
+    if (shouldAutoScroll && chatMessagesRef.value) {
+      chatMessagesRef.value.scrollTop = chatMessagesRef.value.scrollHeight;
+    }
   }
 };
 </script>
 
+
 <template>
   <div class="chat-container">
     <!-- Display all chat messages -->
-    <div class="chat-messages">
+    <div ref="chatMessagesRef" class="chat-messages">
       <div v-for="(msg, index) in messages" :key="index" class="chat-message">
         <span class="username">{{ msg.username }}:</span>
         <span class="message">{{ msg.message }}</span>
@@ -31,11 +54,13 @@ const sendMessage = () => {
           type="text"
           placeholder="Type a message..."
           class="message-input"
+          @keydown.enter="sendMessage"
       />
       <button @click="sendMessage" class="send-button">Send</button>
     </div>
   </div>
 </template>
+
 
 <style scoped>
 .chat-container {

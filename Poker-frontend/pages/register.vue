@@ -4,7 +4,9 @@ import type { FormSubmitEvent } from '#ui/types';
 import { useAuth } from "~/composables/useAuth";
 
 const schema = object({
-  username: string().required('Username is required'),
+  username: string()
+      .required('Username is required')
+      .matches(/^[a-zA-Z0-9_-]*$/, 'Username can only contain letters, numbers, dashes, and underscores'),
   password: string().required('Password is required'),
 });
 
@@ -64,6 +66,10 @@ async function submit(event: FormSubmitEvent<Schema>) {
 }
 
 const maxCharLength = 15;
+
+function validateUsername() {
+  state.username = state.username.replace(/[^a-zA-Z0-9_-]/g, '');
+}
 </script>
 
 <template>
@@ -78,6 +84,7 @@ const maxCharLength = 15;
               :maxlength="maxCharLength"
               aria-describedby="character-count"
               placeholder="Username..."
+              @input="validateUsername"
           >
             <template #trailing>
               <div

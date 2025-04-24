@@ -19,8 +19,6 @@ public class JwtUtil {
         this.userRepository = userRepository;
     }
 
-    public JwtUtil() {}
-
     public String generateToken(String username, Date passwordChangedDate) {
         return Jwts.builder()
                 .setSubject(username)
@@ -43,7 +41,6 @@ public class JwtUtil {
         try {
             Jwts.parser().setSigningKey(secretKey).build().parseClaimsJws(token);
             User user = userRepository.findUserByUsername(extractUsername(token));
-            System.out.println(user.getUsername());
             if (user == null) return false;
             return user.getPasswordChangedDate().getTime() == Long.parseLong(extractClaim(token, "passwordChangedDate"));
         } catch (Exception e) {

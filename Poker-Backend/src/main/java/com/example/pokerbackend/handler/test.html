@@ -19,7 +19,7 @@
 
     function connect() {
         // WebSocket URL with JWT token passed in the headers
-        socket = new WebSocket("ws://localhost:8080/ws");
+        socket = new WebSocket("ws://localhost:8080/ws/game-info-socket");
 
         socket.onmessage = function (event) {
             document.getElementById("output").innerHTML += "<br>Received: " + event.data;

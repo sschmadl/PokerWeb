@@ -21,13 +21,14 @@ public class GameSessionWebsocketHandler extends TextWebSocketHandler {
     private GameSessionManager gameSessionManager = GameSessionManager.getInstance();
 
     public GameSessionWebsocketHandler(PlayerFactoryService playerFactory, JwtUtil jwtUtil) {
+        System.out.println("GameSessionWebsocketHandler created");
         this.playerFactory = playerFactory;
         this.jwtUtil = jwtUtil;
     }
 
     @Override
     public void afterConnectionEstablished(WebSocketSession session) throws Exception {
-        super.afterConnectionEstablished(session);
+        System.out.println("Incoming connection");
         URI uri = session.getUri();
         String query = uri.getQuery();
 

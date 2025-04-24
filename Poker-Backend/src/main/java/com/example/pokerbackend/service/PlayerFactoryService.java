@@ -11,6 +11,7 @@ public class PlayerFactoryService {
     private final UserRepository userRepository;
 
     public PlayerFactoryService(UserRepository userRepository) {
+        System.out.println("PlayerFactoryService created");
         this.userRepository = userRepository;
     }
 

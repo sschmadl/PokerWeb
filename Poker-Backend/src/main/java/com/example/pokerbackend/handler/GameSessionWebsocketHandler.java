@@ -17,11 +17,12 @@ import java.util.Map;
 @Component
 public class GameSessionWebsocketHandler extends TextWebSocketHandler {
     private final PlayerFactoryService playerFactory;
-    private final JwtUtil jwtUtil = new JwtUtil();
+    private final JwtUtil jwtUtil;
     private GameSessionManager gameSessionManager = GameSessionManager.getInstance();
 
-    public GameSessionWebsocketHandler(PlayerFactoryService playerFactory) {
+    public GameSessionWebsocketHandler(PlayerFactoryService playerFactory, JwtUtil jwtUtil) {
         this.playerFactory = playerFactory;
+        this.jwtUtil = jwtUtil;
     }
 
     @Override

@@ -1,6 +1,5 @@
 package com.example.pokerbackend.controller;
 
-import com.example.pokerbackend.util.GameInfo;
 import com.example.pokerbackend.util.GameSessionManager;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;

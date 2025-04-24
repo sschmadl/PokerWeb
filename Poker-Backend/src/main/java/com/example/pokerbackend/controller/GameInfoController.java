@@ -1,6 +1,5 @@
 package com.example.pokerbackend.controller;
 
-import com.example.pokerbackend.util.GameInfo;
 import com.example.pokerbackend.util.GameSessionManager;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -16,9 +15,9 @@ import java.util.Map;
 public class GameInfoController {
 
     @GetMapping("/existing-games")
-    public ResponseEntity<Map<String, List<GameInfo>>> getExistingGames(){
+    public ResponseEntity<Map<String, List<Map<String, Object>>>> getExistingGames(){
         GameSessionManager sessionManager = GameSessionManager.getInstance();
-        Map<String, List<GameInfo>> map = new HashMap<>();
+        Map<String, List<Map<String, Object>>> map = new HashMap<>();
         map.put("games", sessionManager.getGameSessionInfos());
         return ResponseEntity.ok(map);
     }

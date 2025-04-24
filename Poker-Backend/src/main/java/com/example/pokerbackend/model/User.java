@@ -26,6 +26,13 @@ public class User {
     @JoinColumn(name = "profile_image_id")
     private ProfileImage profileImage;
 
+    @Column(name = "credits")
+    private int credits;
+
+    public User() {
+        this.credits = 1000;
+    }
+
     public Integer getId() {
         return id;
     }
@@ -64,5 +71,13 @@ public class User {
 
     public void setPasswordChangedDate(Date passwordChangedDate) {
         this.passwordChangedDate = passwordChangedDate;
+    }
+
+    public int getCredits() {
+        return credits;
+    }
+
+    public void setCredits(int credits) {
+        this.credits = credits;
     }
 }

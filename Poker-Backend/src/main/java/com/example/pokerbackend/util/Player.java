@@ -1,5 +1,9 @@
 package com.example.pokerbackend.util;
 
+import com.example.pokerbackend.repository.UserRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
 public class Player {
     private String name;
     private int credits;
@@ -7,7 +11,6 @@ public class Player {
     public Player(String name, int credits) {
         this.name = name;
         this.credits = credits;
-        this.hand = new PlayerHand();
     }
 
     public String getName() {

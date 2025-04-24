@@ -16,7 +16,7 @@ const schema = object({
 });
 
 const state = reactive({
-  playerCount: 4,  // Default value
+  playerCount: 4,
   smallBlind: 2,
   bigBlind: 4,
 });
@@ -117,7 +117,7 @@ function submit(tabType: string) {
   }
 }
 
-fetchExistingGames();
+await fetchExistingGames();
 </script>
 
 <template>
@@ -185,9 +185,15 @@ fetchExistingGames();
           </div>
 
           <template #footer>
-            <UButton type="submit" @click="submit(item.key)">
-              {{ item.buttonText }}
-            </UButton>
+            <div class="relative w-full flex justify-center">
+              <UButton type="submit" @click="submit(item.key)">
+                {{ item.buttonText }}
+              </UButton>
+
+              <div v-if="item.key === 'find-game'" class="absolute right-0">
+                <UButton class="rounded-full" :icon="'material-symbols:refresh-rounded'" @click="fetchExistingGames" />
+              </div>
+            </div>
           </template>
         </UCard>
       </template>

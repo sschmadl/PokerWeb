@@ -11,7 +11,7 @@ public class GameSessionManager {
     private static GameSessionManager instance;
     private GameSessionManager() {
         // @Todo remove when no testcases are needed
-        GameSession session = new GameSession("Leon stinkt", 10, 20, 6, 9);
+        GameSession session = new GameSession("Not a real Game", 10, 20, 6, 9);
         addSession(session);
         //
     }
@@ -24,11 +24,11 @@ public class GameSessionManager {
     }
 
     public void addSession(GameSession session) {
-        sessions.put(session.getGameInfo().getGameId(), session);
+        sessions.put(session.getGameId(), session);
     }
 
-    public List<GameInfo> getGameSessionInfos() {
-        List<GameInfo> sessionInfo = new ArrayList<>();
+    public List<Map<String, Object>> getGameSessionInfos() {
+        List<Map<String, Object>> sessionInfo = new ArrayList<>();
         for (GameSession session : sessions.values()) {
             sessionInfo.add(session.getGameInfo());
         }

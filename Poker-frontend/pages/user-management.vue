@@ -1,6 +1,5 @@
 <template>
   <NavBar/>
-  <background-animation/>
   <div class="flex items-center justify-center pt-20">
     <UCard class="p-6 w-96">
       <!-- Profile Image & Name in a Row -->

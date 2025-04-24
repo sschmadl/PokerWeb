@@ -1,5 +1,5 @@
 <script setup>
-import { computed } from 'vue';
+import { computed, ref, watch } from 'vue';
 
 const props = defineProps({
   faceDown: {
@@ -15,22 +15,71 @@ const props = defineProps({
 });
 
 const card_back = '/cards_default/2B.svg';
-const card_front = computed(() => props.frontImage !== undefined ? props.frontImage : '/cards_default/1J.svg');
-const highlighted = computed(() => props.highlighted !== undefined ? props.highlighted : false);
+const card_front = computed(() => props.frontImage ?? '/cards_default/1J.svg');
+const highlighted = computed(() => props.highlighted ?? false);
+
+const isFlipped = ref(props.faceDown);
+watch(() => props.faceDown, (newVal) => {
+  isFlipped.value = newVal;
+});
 </script>
 
+
 <template>
-  <div class="card-container" :class="{ faceDown: props.faceDown }" :style="highlighted ? 'box-shadow: 0 0 40px rgba(255, 255, 255, 0.5);' : ''" v-if="!props.faceDown">
-    <img class="card-front" :src="card_front" :style="{ height: props.height + 'px' }" alt="Playing Card Front"/>
-  </div>
-  <div class="card-container" v-else>
-    <img class="card-front" :src="card_back" :style="{ height: props.height + 'px' }" alt="Playing Card Back"/>
+  <div
+      class="card"
+      :style="{
+      height: props.height + 'px',
+      width: props.height * 0.7 + 'px', // card aspect ratio 0.7
+      boxShadow: highlighted ? '0 0 40px rgba(255, 255, 255, 0.5)' : '',
+    }"
+  >
+    <div class="card-inner" :class="{ flipped: isFlipped }">
+      <div class="card-face card-front">
+        <img :src="card_front" alt="Front of card" />
+      </div>
+      <div class="card-face card-back">
+        <img :src="card_back" alt="Back of card" />
+      </div>
+    </div>
   </div>
 </template>
 
+
 <style scoped>
-.card-container {
+.card {
+  perspective: 1000px;
   display: inline-block;
-  transition: box-shadow 0.3s ease-in-out;
+  position: relative;
 }
+
+.card-inner {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  transition: transform 0.4s;
+  transform-style: preserve-3d;
+}
+
+.card-inner.flipped {
+  transform: rotateY(180deg);
+}
+
+.card-face {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  backface-visibility: hidden;
+}
+
+.card-face img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.card-back {
+  transform: rotateY(180deg);
+}
+
 </style>

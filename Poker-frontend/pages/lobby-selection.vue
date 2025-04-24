@@ -117,7 +117,7 @@ function submit(tabType: string) {
   }
 }
 
-fetchExistingGames();
+await fetchExistingGames();
 </script>
 
 <template>

@@ -1,5 +1,7 @@
 <script setup lang="ts">
 
+import {useRequestURL} from "#app";
+
 function onPlayPressed() {
   navigateTo('lobby-selection')
 }
@@ -10,7 +12,6 @@ let cards = ref([
   { frontImage: '/cards_default/AS.svg', faceDown: false, highlighted: false },
   { frontImage: '/cards_default/AC.svg', faceDown: false, highlighted: false },
 ]);
-
 
 </script>
 

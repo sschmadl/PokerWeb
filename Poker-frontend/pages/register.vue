@@ -52,15 +52,32 @@ async function submit(event: FormSubmitEvent<Schema>) {
     useAuth().login(event.data.username, loginResponse.token);
 
     navigateTo('/');
+    useToast().add({
+      title: 'Registered successfully',
+      icon: 'hugeicons:information-circle',
+      color: 'green',
+    });
   } catch (error: any) {
     console.error('Fetch error:', error);
 
     if (error?.data?.error) {
-      registerError.value = error.data.error;
+      useToast().add({
+        title: error.data.error,
+        icon: 'hugeicons:information-circle',
+        color: 'red',
+      });
     } else if (error?.message) {
-      registerError.value = error.message;
+      useToast().add({
+        title: error.message,
+        icon: 'hugeicons:information-circle',
+        color: 'red',
+      });
     } else {
-      registerError.value = 'An unexpected error occurred';
+      useToast().add({
+        title: 'An unexpected error occurred.',
+        icon: 'hugeicons:information-circle',
+        color: 'red',
+      });
     }
   }
 }

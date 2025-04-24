@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useColorMode } from '@vueuse/core'
+import {useColorMode} from '@vueuse/core'
 
 const colorMode = useColorMode()
 
@@ -15,5 +15,5 @@ const toggleDarkMode = () => {
 </script>
 
 <template>
-  <UButton class="rounded-full" :icon="icon" @click="toggleDarkMode" />
+  <UButton class="rounded-full" :icon="icon" @click="toggleDarkMode"/>
 </template>

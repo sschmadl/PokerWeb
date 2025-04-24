@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import {number, object} from "yup";
+import {useGameSocket} from "~/stores/useGameSocket";
 
 type LobbyItems = {
   gameId: string;
@@ -16,11 +17,13 @@ const schema = object({
 });
 
 const state = reactive({
+  gameName: '',
   playerCount: 4,
   smallBlind: 2,
   bigBlind: 4,
 });
 
+const gameNameMaxCharLength = 20;
 const smallBlindMax = 1000;
 
 function calculateBigBlind() {
@@ -87,7 +90,6 @@ async function fetchExistingGames() {
       headers: { "Content-Type": "application/json" },
     });
 
-    console.log(response);
     gameTableRows.value = response.games;
 
   } catch (error: any) {
@@ -105,19 +107,64 @@ function onSelect(row: LobbyItems) {
   selected.value = row;
 }
 
-function submit(tabType: string) {
+await fetchExistingGames();
+
+const gameSocket = useGameSocket();
+
+onMounted(() => {
+  gameSocket.connect();
+});
+
+onBeforeUnmount(() => {
+  // gameSocket.disconnect();
+});
+
+async function submit(tabType: string) {
   if (tabType === "find-game") {
-    console.log(selected.value);
-    navigateTo("/poker-game");
+    const message = {
+      command: 'join-game',
+      gameId: selected.value?.gameId,
+    }
+
+    gameSocket.sendMessage(JSON.stringify(message));
+    try {
+      const response = await gameSocket.waitForMessageOnce();
+      const data = JSON.parse(response);
+      console.log("Join game response:", data);
+
+      if (data.success) {
+        navigateTo("/poker-game");
+      } else {
+        console.error("Failed to join game:", data.message);
+      }
+    } catch (e) {
+      console.error("Failed to receive server response", e);
+    }
   } else if (tabType === "create-game") {
-    if (state.smallBlind > 0) {
-      // @Todo Simon den schaß geben
-      navigateTo("/poker-game");
+    const message = {
+      command: 'create-game',
+      gameName: selected.value?.name,
+      smallBlind: selected.value?.smallBlind,
+      bigBlind: selected.value?.bigBlind,
+      maxPlayerCount: selected.value?.playerCount,
+    }
+
+    gameSocket.sendMessage(JSON.stringify(message));
+    try {
+      const response = await gameSocket.waitForMessageOnce();
+      const data = JSON.parse(response);
+      console.log("Create game response:", data);
+
+      if (data.success) {
+        navigateTo("/poker-game");
+      } else {
+        console.error("Failed to create game:", data.message);
+      }
+    } catch (e) {
+      console.error("Failed to receive server response", e);
     }
   }
 }
-
-await fetchExistingGames();
 </script>
 
 <template>
@@ -168,6 +215,25 @@ await fetchExistingGames();
 
           <div v-else-if="item.key === 'create-game'" class="space-y-3">
             <UForm :schema="schema" :state="state">
+              <UFormGroup name="gameName" class="pt-4">
+                <p class="text-left">Game - Name</p>
+                <UInput
+                    v-model="state.gameName"
+                    :maxlength="gameNameMaxCharLength"
+                    aria-describedby="character-count"
+                >
+                  <template #trailing>
+                    <div
+                        id="character-count"
+                        class="text-xs text-gray-500 tabular-nums"
+                        aria-live="polite"
+                        role="status"
+                    >
+                      {{ state.gameName.length }}/{{ gameNameMaxCharLength }}
+                    </div>
+                  </template>
+                </UInput>
+              </UFormGroup>
               <p class="text-left">Player Count: {{ state.playerCount }}</p>
               <URange v-model="state.playerCount" :min="2" :max="10" :default-value="4" />
               <p class="text-left">Small Blind:</p>

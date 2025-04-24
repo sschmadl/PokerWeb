@@ -35,9 +35,18 @@ async function submit(event: FormSubmitEvent<Schema>) {
     console.log(loginResponse);
 
     useAuth().login(event.data.username, loginResponse.token);
+    useToast().add({
+      title: 'Logged in successfully',
+      icon: 'hugeicons:information-circle',
+      color: 'green'
+    });
   } catch (error: any) {
     if (error.data?.error) {
-      loginError.value = error.data.error;
+      useToast().add({
+        title: error.data.error,
+        icon: 'hugeicons:information-circle',
+        color: 'red'
+      });
     } else {
       loginError.value = 'An unexpected error occurred';
     }

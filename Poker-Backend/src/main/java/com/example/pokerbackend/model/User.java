@@ -29,6 +29,10 @@ public class User {
     @Column(name = "credits")
     private int credits;
 
+    public User() {
+        this.credits = 1000;
+    }
+
     public Integer getId() {
         return id;
     }

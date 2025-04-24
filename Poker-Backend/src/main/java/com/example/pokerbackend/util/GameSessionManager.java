@@ -7,6 +7,7 @@ import java.util.Map;
 
 public class GameSessionManager {
     private Map<String, GameSession> sessions = new HashMap<>();
+    private Map<String, Player> players = new HashMap<>();
 
     private static GameSessionManager instance;
     private GameSessionManager() {
@@ -33,5 +34,9 @@ public class GameSessionManager {
             sessionInfo.add(session.getGameInfo());
         }
         return sessionInfo;
+    }
+
+    public void addPlayer(Player player) {
+        players.put(player.getName(), player);
     }
 }

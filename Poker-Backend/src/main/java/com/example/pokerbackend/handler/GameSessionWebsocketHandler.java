@@ -68,20 +68,69 @@ public class GameSessionWebsocketHandler extends TextWebSocketHandler {
         switch (map.get("command").toString()){
             case "create-game":
                 System.out.println("Creating game");
-                createLobby(session, map);
+                createGameCommand command = gson.fromJson(messageContent, createGameCommand.class);
+                createLobby(session, command);
                 break;
         }
     }
 
-    private void createLobby(WebSocketSession session, Map<String, Object> map){
+    private void createLobby(WebSocketSession session, createGameCommand command){
 
-        String name = session.getAttributes().get("username").toString();
-        int smallBlind = Integer.parseInt(map.get("smallBlind").toString());
-        int bigBlind = Integer.parseInt(map.get("bigBlind").toString());
-        int maxPlayerCount = Integer.parseInt(map.get("maxPlayerCount").toString());
-        gameSessionManager.createSession(name,smallBlind,bigBlind,maxPlayerCount, session);
+        String lobbyName = command.getName();
+        int smallBlind = command.getSmallBind();
+        int bigBlind = command.getBigBlind();
+        int maxPlayerCount = command.getMaxPlayerCount();
+        gameSessionManager.createSession(lobbyName,smallBlind,bigBlind,maxPlayerCount, session);
         try {
             session.sendMessage(new TextMessage("success"));
         }catch (Exception e){}
+    }
+}
+
+class createGameCommand{
+    String command;
+    String name;
+    int smallBind;
+    int bigBlind;
+    int maxPlayerCount;
+
+    public String getCommand() {
+        return command;
+    }
+
+    public void setCommand(String command) {
+        this.command = command;
+    }
+
+    public int getSmallBind() {
+        return smallBind;
+    }
+
+    public void setSmallBind(int smallBind) {
+        this.smallBind = smallBind;
+    }
+
+    public int getBigBlind() {
+        return bigBlind;
+    }
+
+    public void setBigBlind(int bigBlind) {
+        this.bigBlind = bigBlind;
+    }
+
+    public int getMaxPlayerCount() {
+        return maxPlayerCount;
+    }
+
+    public void setMaxPlayerCount(int maxPlayerCount) {
+        this.maxPlayerCount = maxPlayerCount;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 }

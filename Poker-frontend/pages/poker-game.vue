@@ -3,6 +3,8 @@ import { ref, onMounted, onBeforeUnmount } from 'vue';
 import ActionButtons from '~/components/action-buttons.vue'; // Import the action buttons component
 import Chat from '~/components/Chat.vue'; // Import the Chat component
 
+const gameSocket = useGameSocket();
+
 // Poker game logic
 const tableWidth = ref(window.innerWidth / 2.5);
 const tableHeight = ref(window.innerHeight / 2);
@@ -25,10 +27,12 @@ function updateSizes() {
 
 onMounted(() => {
   window.addEventListener('resize', updateSizes);
+  gameSocket.connect();
 });
 
 onBeforeUnmount(() => {
   window.removeEventListener('resize', updateSizes);
+  gameSocket.disconnect();
 });
 
 function flipCards() {

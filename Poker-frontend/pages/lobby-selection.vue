@@ -91,6 +91,7 @@ async function fetchExistingGames() {
     });
 
     gameTableRows.value = response.games;
+    console.log(response.games);
 
   } catch (error: any) {
     if (error.data?.error) {
@@ -129,13 +130,10 @@ async function submit(tabType: string) {
     gameSocket.sendMessage(JSON.stringify(message));
     try {
       const response = await gameSocket.waitForMessageOnce();
-      const data = JSON.parse(response);
-      console.log("Join game response:", data);
-
-      if (data.success) {
+      if (response === 'success') {
         navigateTo("/poker-game");
       } else {
-        console.error("Failed to join game:", data.message);
+        console.error("Failed to join game");
       }
     } catch (e) {
       console.error("Failed to receive server response", e);
@@ -143,22 +141,22 @@ async function submit(tabType: string) {
   } else if (tabType === "create-game") {
     const message = {
       command: 'create-game',
-      gameName: selected.value?.name,
-      smallBlind: selected.value?.smallBlind,
-      bigBlind: selected.value?.bigBlind,
-      maxPlayerCount: selected.value?.playerCount,
+      gameName: state.gameName,
+      smallBlind: state.smallBlind,
+      bigBlind: state.bigBlind,
+      maxPlayerCount: state.playerCount,
     }
+    console.log(message);
 
     gameSocket.sendMessage(JSON.stringify(message));
     try {
       const response = await gameSocket.waitForMessageOnce();
-      const data = JSON.parse(response);
-      console.log("Create game response:", data);
+      console.log("Create game response:", response);
 
-      if (data.success) {
+      if (response === 'success') {
         navigateTo("/poker-game");
       } else {
-        console.error("Failed to create game:", data.message);
+        console.error("Failed to create game");
       }
     } catch (e) {
       console.error("Failed to receive server response", e);

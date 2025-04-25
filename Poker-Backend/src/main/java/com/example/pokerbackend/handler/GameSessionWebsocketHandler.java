@@ -76,8 +76,8 @@ public class GameSessionWebsocketHandler extends TextWebSocketHandler {
 
     private void createLobby(WebSocketSession session, createGameCommand command){
 
-        String lobbyName = command.getName();
-        int smallBlind = command.getSmallBind();
+        String lobbyName = command.getGameName();
+        int smallBlind = command.getSmallBlind();
         int bigBlind = command.getBigBlind();
         int maxPlayerCount = command.getMaxPlayerCount();
         gameSessionManager.createSession(lobbyName,smallBlind,bigBlind,maxPlayerCount, session);
@@ -89,8 +89,8 @@ public class GameSessionWebsocketHandler extends TextWebSocketHandler {
 
 class createGameCommand{
     String command;
-    String name;
-    int smallBind;
+    String gameName;
+    int smallBlind;
     int bigBlind;
     int maxPlayerCount;
 
@@ -102,12 +102,20 @@ class createGameCommand{
         this.command = command;
     }
 
-    public int getSmallBind() {
-        return smallBind;
+    public String getGameName() {
+        return gameName;
     }
 
-    public void setSmallBind(int smallBind) {
-        this.smallBind = smallBind;
+    public void setGameName(String gameName) {
+        this.gameName = gameName;
+    }
+
+    public int getSmallBlind() {
+        return smallBlind;
+    }
+
+    public void setSmallBlind(int smallBlind) {
+        this.smallBlind = smallBlind;
     }
 
     public int getBigBlind() {
@@ -124,13 +132,5 @@ class createGameCommand{
 
     public void setMaxPlayerCount(int maxPlayerCount) {
         this.maxPlayerCount = maxPlayerCount;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
     }
 }

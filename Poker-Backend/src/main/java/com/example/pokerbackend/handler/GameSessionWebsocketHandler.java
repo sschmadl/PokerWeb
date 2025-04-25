@@ -5,6 +5,7 @@ import com.example.pokerbackend.util.GameSessionManager;
 import com.example.pokerbackend.util.JwtUtil;
 import com.example.pokerbackend.util.Player;
 import com.example.pokerbackend.util.QueryUtils;
+import com.google.gson.Gson;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.TextMessage;
@@ -56,5 +57,31 @@ public class GameSessionWebsocketHandler extends TextWebSocketHandler {
         gameSessionManager.addPlayer(player);
 
         session.sendMessage(new TextMessage("Welcome " + username));
+    }
+
+    @Override
+    protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
+        String messageContent = message.getPayload();
+        Gson gson = new Gson();
+        Map<String, Object> map = gson.fromJson(messageContent, Map.class);
+        System.out.println(messageContent);
+        switch (map.get("command").toString()){
+            case "create-game":
+                System.out.println("Creating game");
+                createLobby(session, map);
+                break;
+        }
+    }
+
+    private void createLobby(WebSocketSession session, Map<String, Object> map){
+
+        String name = session.getAttributes().get("username").toString();
+        int smallBlind = Integer.parseInt(map.get("smallBlind").toString());
+        int bigBlind = Integer.parseInt(map.get("bigBlind").toString());
+        int maxPlayerCount = Integer.parseInt(map.get("maxPlayerCount").toString());
+        gameSessionManager.createSession(name,smallBlind,bigBlind,maxPlayerCount, session);
+        try {
+            session.sendMessage(new TextMessage("success"));
+        }catch (Exception e){}
     }
 }

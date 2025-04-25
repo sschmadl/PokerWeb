@@ -1,5 +1,7 @@
 package com.example.pokerbackend.util;
 
+import org.springframework.web.socket.WebSocketSession;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -12,7 +14,7 @@ public class GameSessionManager {
     private static GameSessionManager instance;
     private GameSessionManager() {
         // @Todo remove when no testcases are needed
-        GameSession session = new GameSession("Not a real Game", 10, 20, 6, 9);
+        GameSession session = new GameSession("Not a real Game", 10, 20, 9);
         addSession(session);
         //
     }
@@ -38,5 +40,13 @@ public class GameSessionManager {
 
     public void addPlayer(Player player) {
         players.put(player.getName(), player);
+    }
+
+    public void createSession(String name, int smallBlind, int bigBind, int maxPlayer, WebSocketSession creatingPlayer){
+        GameSession gameSession = new GameSession(name, smallBlind, bigBind, maxPlayer);
+        sessions.put(gameSession.getGameId(), gameSession);
+        creatingPlayer.getAttributes().put("gameId", gameSession.getGameId());
+        gameSession.addPlayer(players.get(creatingPlayer.getAttributes().get("name").toString()));
+        addSession(gameSession);
     }
 }

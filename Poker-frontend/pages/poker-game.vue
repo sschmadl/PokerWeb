@@ -44,6 +44,7 @@ function flipCards() {
 
 <template>
   <div class="game-container">
+    <PokerhandInfoButton class="absolute top-0 right-0 m-5 z-20" />
     <!-- Poker Table Wrapper -->
     <div class="table-wrapper">
       <div class="poker-table-container">

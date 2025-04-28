@@ -59,7 +59,8 @@ public class GameSessionWebsocketHandler extends TextWebSocketHandler {
         Map<String, String> map = new HashMap<>();
         map.put("command","server-message");
         map.put("message", "test Server message");
-        session.sendMessage(new TextMessage(map.toString()));
+        Gson gson = new Gson();
+        session.sendMessage(new TextMessage(gson.toJson(map)));
        //session.sendMessage(new TextMessage("Welcome " + username));
     }
 

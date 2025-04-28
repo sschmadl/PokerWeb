@@ -84,7 +84,6 @@ public class UserInfoController {
             return ResponseEntity.badRequest().build();
         }
 
-        System.out.println("Final Content-Type: " + contentType);
         return ResponseEntity.ok()
                 .header("Content-Type", contentType)
                 .body(imageData);

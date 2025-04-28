@@ -1,9 +1,15 @@
 package com.example.pokerbackend.util;
 
+import org.antlr.v4.runtime.misc.Pair;
+import org.springframework.web.socket.TextMessage;
+import org.springframework.web.socket.WebSocketSession;
+
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class GameSession {
     private String gameId = PokerGameIDGenerator.generateID();
@@ -12,7 +18,7 @@ public class GameSession {
     private int smallBlind;
 
     private final int MAX_PLAYERS;
-    private Map<String, Player> players = new HashMap<>();
+    private ConcurrentHashMap<String, Pair<Player, WebSocketSession>> players = new ConcurrentHashMap<>();
     private PokerDeck deck = new PokerDeck();
     private List<PokerCard> communityCards = new ArrayList<>();
 
@@ -38,7 +44,17 @@ public class GameSession {
         return gameId;
     }
 
-    public void addPlayer(Player player){
-        players.put(player.getName(), player);
+    public void addPlayer(Player player, WebSocketSession session){
+        players.put(player.getName(), new Pair<>(player, session));
+    }
+
+    public void broadCast(String message){
+        for (Pair<Player, WebSocketSession> pair : players.values()) {
+            try {
+                pair.b.sendMessage(new TextMessage(message));
+            }catch (IOException e){
+                e.printStackTrace();
+            }
+        }
     }
 }

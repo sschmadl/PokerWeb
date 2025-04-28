@@ -1,15 +1,17 @@
 package com.example.pokerbackend.util;
 
+import org.antlr.v4.runtime.misc.Pair;
 import org.springframework.web.socket.WebSocketSession;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class GameSessionManager {
-    private Map<String, GameSession> sessions = new HashMap<>();
-    private Map<String, Player> players = new HashMap<>();
+    private ConcurrentHashMap<String, GameSession> sessions = new ConcurrentHashMap<>();
+    private ConcurrentHashMap<String, Pair<Player, WebSocketSession>> players = new ConcurrentHashMap<>();
 
     private static GameSessionManager instance;
     private GameSessionManager() {
@@ -38,14 +40,18 @@ public class GameSessionManager {
         return sessionInfo;
     }
 
-    public void addPlayer(Player player) {
-        players.put(player.getName(), player);
+    public void addPlayer(Player player, WebSocketSession session) {
+        players.put(player.getName(), new Pair<>(player, session));
     }
 
     public void createSession(String name, int smallBlind, int bigBind, int maxPlayer, WebSocketSession creatingPlayer){
         GameSession gameSession = new GameSession(name, smallBlind, bigBind, maxPlayer);
         creatingPlayer.getAttributes().put("gameId", gameSession.getGameId());
-        gameSession.addPlayer(players.get(creatingPlayer.getAttributes().get("username").toString()));
+        gameSession.addPlayer(players.get(creatingPlayer.getAttributes().get("username").toString()).a, creatingPlayer);
         addSession(gameSession);
+    }
+
+    public void joinGame(WebSocketSession webSocketSession, Player player, String gameId){
+        GameSession session = sessions.get(gameId);
     }
 }

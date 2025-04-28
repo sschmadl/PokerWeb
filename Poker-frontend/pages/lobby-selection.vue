@@ -167,10 +167,10 @@ async function submit(tabType: string) {
 
 <template>
   <NavBar />
-  <UContainer class="w-1/2">
+  <UContainer class="w-3/4">
     <UTabs :items="items">
       <template #item="{ item }">
-        <UCard class="align-items-center text-center">
+        <UCard class="align-items-center text-center w-full">
           <template #header>
             <p class="text-base font-semibold leading-6 text-gray-900 dark:text-white">
               {{ item.label }}

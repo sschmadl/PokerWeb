@@ -42,7 +42,7 @@ const sendMessage = async () => {
     <!-- Display all chat messages -->
     <div ref="chatMessagesRef" class="chat-messages">
       <div v-for="(msg, index) in messages" :key="index" class="chat-message">
-        <span class="username">{{ msg.username }}:</span>
+        <span class="username">{{ msg.username }} : </span>
         <span class="message">{{ msg.message }}</span>
       </div>
     </div>

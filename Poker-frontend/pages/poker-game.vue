@@ -12,8 +12,8 @@ const tableHeight = ref(window.innerHeight / 2);
 const cards = ref([
   { frontImage: '/cards_default/TS.svg', faceDown: false, highlighted: false },
   { frontImage: '/cards_default/TH.svg', faceDown: false, highlighted: false },
-  { frontImage: '/cards_default/TD.svg', faceDown: false, highlighted: false },
   { frontImage: '/cards_default/TC.svg', faceDown: false, highlighted: false },
+  { frontImage: '/cards_default/TD.svg', faceDown: false, highlighted: false },
   { frontImage: '/cards_default/AS.svg', faceDown: false, highlighted: false },
 ]);
 

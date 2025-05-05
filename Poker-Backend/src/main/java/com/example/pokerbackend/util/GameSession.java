@@ -1,5 +1,10 @@
 package com.example.pokerbackend.util;
 
+import com.example.pokerbackend.util.commands.ChatMessageCommand;
+import com.example.pokerbackend.util.commands.JoinGameStatus;
+import com.example.pokerbackend.util.commands.PlayerJoinedGame;
+import com.example.pokerbackend.util.commands.PlayerLeaveCommand;
+import com.google.gson.Gson;
 import org.antlr.v4.runtime.misc.Pair;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
@@ -10,12 +15,17 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.locks.ReentrantLock;
 
 public class GameSession {
     private String gameId = PokerGameIDGenerator.generateID();
     private String name;
     private int bigBlind;
     private int smallBlind;
+    private static final Map<String, ReentrantLock> lobbyLocks = new ConcurrentHashMap<>();
+    private static final GameSessionManager gameSessionManager = GameSessionManager.getInstance();
+    private Gson gson = new Gson();
+
 
     private final int MAX_PLAYERS;
     private ConcurrentHashMap<String, Pair<Player, WebSocketSession>> players = new ConcurrentHashMap<>();
@@ -55,6 +65,66 @@ public class GameSession {
             }catch (IOException e){
                 e.printStackTrace();
             }
+        }
+    }
+
+    public void broadCastExceptSender(String sendingPlayer, String message){
+        for (Pair<Player, WebSocketSession> pair : players.values()) {
+            if (sendingPlayer.equals(pair.a.getName())) continue;
+            try {
+                pair.b.sendMessage(new TextMessage(message));
+            }catch (IOException e){
+                e.printStackTrace();
+            }
+        }
+    }
+
+    public void joinGame(Player player, WebSocketSession session){
+        ReentrantLock lock = lobbyLocks.computeIfAbsent(gameId, id -> new ReentrantLock());
+        lock.lock();
+        Gson gson = new Gson();
+        try {
+            if (players.size() == MAX_PLAYERS) {
+                session.sendMessage(new TextMessage(gson.toJson(JoinGameStatus.joinFailed("Lobby is full"))));
+            }else {
+                session.sendMessage(new TextMessage(gson.toJson(JoinGameStatus.joinSuccess())));
+                session.getAttributes().put("gameId", this.getGameId());
+                PlayerJoinedGame playerJoinedGame = new PlayerJoinedGame(player);
+                broadCastExceptSender(player.getName(), gson.toJson(playerJoinedGame));
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+        }finally {
+            lock.unlock();
+        }
+    }
+
+    public void sendChatMessage(ChatMessageCommand chatMessageCommand){
+        ReentrantLock lock = lobbyLocks.computeIfAbsent(gameId, id -> new ReentrantLock());
+        lock.lock();
+        try {
+            broadCastExceptSender(chatMessageCommand.getSender(), gson.toJson(chatMessageCommand.getMessage()));
+        }catch (Exception e){
+            e.printStackTrace();
+        }finally {
+            lock.unlock();
+        }
+    }
+
+    public void leave(Player player){
+        ReentrantLock lock = lobbyLocks.computeIfAbsent(gameId, id -> new ReentrantLock());
+        lock.lock();
+        try{
+            players.remove(player.getName());
+            PlayerLeaveCommand  playerLeaveCommand = new PlayerLeaveCommand(player.getName());
+            broadCastExceptSender(player.getName(), gson.toJson(playerLeaveCommand));
+            if (players.isEmpty()) {
+                gameSessionManager.removeSession(this.gameId);
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+        }finally {
+            lock.unlock();
         }
     }
 }

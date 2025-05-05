@@ -85,7 +85,7 @@ public class GameSession {
         Gson gson = new Gson();
         try {
             if (players.size() == MAX_PLAYERS) {
-                session.sendMessage(new TextMessage(gson.toJson(JoinGameStatus.joinFailed())));
+                session.sendMessage(new TextMessage(gson.toJson(JoinGameStatus.joinFailed("Lobby is full"))));
             }else {
                 session.sendMessage(new TextMessage(gson.toJson(JoinGameStatus.joinSuccess())));
                 session.getAttributes().put("gameId", this.getGameId());

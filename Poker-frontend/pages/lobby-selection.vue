@@ -137,10 +137,14 @@ async function submit(tabType: string) {
     gameSocket.sendMessage(JSON.stringify(message));
     try {
       const response = await gameSocket.waitForMessageOnce();
-      if (response === 'success') {
+      if (response.command === 'join-success') {
         navigateTo("/poker-game");
-      } else {
-        console.error("Failed to join game");
+      } else{
+        toast.add({
+          title: 'Joining game failed',
+          description: response.message,
+          color: 'red',
+        });
       }
     } catch (e) {
       console.error("Failed to receive server response", e);

@@ -26,11 +26,11 @@ export const useGameSocket = defineStore('gameSocket', () => {
             const parsed = safeJsonParse(event.data);
 
             if (parsed.command === "server-message") {
-                const toast = useToast(); // <-- MOVE it here!
+                const toast = useToast();
                 toast.add({
                     title: 'Message',
                     description: parsed.message,
-                    color: 'green',
+                    color: 'blue',
                 });
             }
 

@@ -12,24 +12,19 @@ const props = defineProps({
   },
 });
 
+const profilePictureDiameter = computed(() => Math.floor(props.menuWidth * 0.4));
+const profilePictureTextMargin = computed(() => profilePictureDiameter.value * 0.2);
+const profilePictureMenuPadding = computed(() => profilePictureDiameter.value - profilePictureTextMargin.value + profilePictureDiameter.value * 0.05);
+const profileBorderWidth = computed(() => Math.floor(props.menuWidth / 100));
+const profileBorderColor = computed(() => props.profileBorderColor ?? '#000');
+const informationContainerWidth = computed(() => props.menuWidth - profilePictureDiameter.value);
+const userNameContainerHeight = computed(() => Math.ceil(props.menuWidth * 0.135));
+const userNameContainerFontSize = computed(() => Math.floor(userNameContainerHeight.value * 0.5));
+const pokerhandContainerHeight = computed(() => Math.ceil(props.menuWidth * 0.155));
+const pokerhandContainerFontSize = computed(() => Math.floor(pokerhandContainerHeight.value * 0.5));
+const roundEdgeCircleDiameter = computed(() => pokerhandContainerHeight.value + userNameContainerHeight.value);
+const personalCardHeight = computed(() => (userNameContainerHeight.value + pokerhandContainerHeight.value) * 1.25);
 
-// Colors
-const profilePictureDiameter = Math.floor(props.menuWidth * 0.4);
-const profilePictureTextMargin = profilePictureDiameter * 0.2;
-const profilePictureMenuPadding = profilePictureDiameter - profilePictureTextMargin + profilePictureDiameter * 0.05;
-const profileBorderWidth = Math.floor(props.menuWidth / 100);
-const profileBorderColor = props.profileBorderColor !== undefined ? props.profileBorderColor : '#000';
-
-const informationContainerWidth = props.menuWidth - profilePictureDiameter;
-const userNameContainerHeight = Math.ceil(props.menuWidth * 0.135);
-const userNameContainerFontSize = Math.floor(userNameContainerHeight * 0.5);
-
-const pokerhandContainerHeight = Math.ceil(props.menuWidth * 0.155);
-const pokerhandContainerFontSize = Math.floor(pokerhandContainerHeight * 0.5);
-
-const roundEdgeCircleDiameter = pokerhandContainerHeight + userNameContainerHeight;
-
-const personalCardHeight = (userNameContainerHeight + pokerhandContainerHeight) * 1.25;
 
 </script>
 
@@ -101,7 +96,7 @@ const personalCardHeight = (userNameContainerHeight + pokerhandContainerHeight) 
           height: roundEdgeCircleDiameter + 'px',
           clipPath: 'inset(' + userNameContainerHeight + 'px 0 0 0)',
           transform: 'translateX(-50%)',
-          marginBottom: (userNameContainerHeight + 1) + 'px', // Ensure at least 1px extra if needed
+          marginBottom: (userNameContainerHeight + 1) + 'px',
         }"></div>
 
       </div>

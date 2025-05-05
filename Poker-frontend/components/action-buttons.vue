@@ -101,7 +101,6 @@ const raiseAmount = ref<number | null>(null); // State to hold the raised amount
 </template>
 
 <style scoped>
-
 .centered-button {
   color: white;
   background-color: darkcyan;

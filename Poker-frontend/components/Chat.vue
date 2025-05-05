@@ -1,40 +1,85 @@
 <script setup lang="ts">
-import { ref, nextTick } from 'vue';
+import { ref, onMounted, onUnmounted, nextTick } from 'vue';
 import { useUsername } from "~/composables/states";
+import { useGameSocket } from "~/stores/useGameSocket"; // Adjust path if needed
 
-// State for the chat input and messages
+// Chat state
 const messageInput = ref('');
 const messages = ref<{ username: string, message: string }[]>([]);
-
-// Ref for the chat messages container
 const chatMessagesRef = ref<HTMLElement | null>(null);
 
-// Function to check if the scroll is near the bottom
+// Game socket store
+const gameSocket = useGameSocket();
+
+// Scroll helper
 const isNearBottom = () => {
   const container = chatMessagesRef.value;
   if (!container) return false;
-
-  const threshold = 30; // px from bottom
+  const threshold = 30;
   const distanceFromBottom = container.scrollHeight - container.scrollTop - container.clientHeight;
   return distanceFromBottom <= threshold;
 };
 
-// Function to send a message
+// Send message to WebSocket
 const sendMessage = async () => {
-  if (messageInput.value.trim()) {
-    const shouldAutoScroll = isNearBottom(); // Check before DOM updates
+  if (!messageInput.value.trim()) return;
 
-    messages.value.push({ username: useUsername().value, message: messageInput.value });
-    messageInput.value = '';
+  const shouldAutoScroll = isNearBottom();
 
-    await nextTick();
+  const payload = {
+    command: 'chat-message',
+    sender: useUsername().value,
+    message: messageInput.value,
+  };
 
-    if (shouldAutoScroll && chatMessagesRef.value) {
-      chatMessagesRef.value.scrollTop = chatMessagesRef.value.scrollHeight;
-    }
+  console.log('Sending message:', payload);
+  gameSocket.sendMessage(JSON.stringify(payload));
+
+  messageInput.value = '';
+
+  await nextTick();
+
+  if (shouldAutoScroll && chatMessagesRef.value) {
+    chatMessagesRef.value.scrollTop = chatMessagesRef.value.scrollHeight;
   }
 };
+
+// Handle messages received from WebSocket
+const handleIncomingMessage = (data: any) => {
+  console.log('Received WebSocket data:', data);
+
+  if (data.command === 'chat-message') {
+    console.log('New chat message received:', data);
+
+    messages.value.push({
+      username: data.sender,
+      message: data.message,
+    });
+
+    nextTick(() => {
+      if (isNearBottom() && chatMessagesRef.value) {
+        chatMessagesRef.value.scrollTop = chatMessagesRef.value.scrollHeight;
+      }
+    });
+  } else {
+    console.log('Unknown command received:', data.command);
+  }
+};
+
+// Lifecycle hooks
+onMounted(() => {
+  console.log('Chat component mounted. Connecting WebSocket...');
+  gameSocket.connect();
+  gameSocket.onMessage(handleIncomingMessage);
+});
+
+onUnmounted(() => {
+  console.log('Chat component unmounted. Disconnecting WebSocket...');
+  gameSocket.disconnect(); // Optional, based on whether you want to persist the socket
+});
 </script>
+
+
 
 
 <template>

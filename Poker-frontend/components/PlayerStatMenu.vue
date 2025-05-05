@@ -10,102 +10,127 @@ const props = defineProps({
     type: Array as PropType<Array<{ frontImage: string; faceDown: boolean; highlighted: boolean; }>>,
     required: true,
   },
+  playerAction: {
+    type: String,
+    default: '',
+  },
 });
 
+const profilePictureDiameter = computed(() => Math.floor(props.menuWidth * 0.4));
+const profilePictureTextMargin = computed(() => profilePictureDiameter.value * 0.2);
+const profilePictureMenuPadding = computed(() => profilePictureDiameter.value - profilePictureTextMargin.value + profilePictureDiameter.value * 0.05);
+const profileBorderWidth = computed(() => Math.floor(props.menuWidth / 100));
+const profileBorderColor = computed(() => props.profileBorderColor ?? '#000');
+const informationContainerWidth = computed(() => props.menuWidth - profilePictureDiameter.value);
+const userNameContainerHeight = computed(() => Math.ceil(props.menuWidth * 0.135));
+const userNameContainerFontSize = computed(() => Math.floor(userNameContainerHeight.value * 0.5));
+const pokerhandContainerHeight = computed(() => Math.ceil(props.menuWidth * 0.155));
+const pokerhandContainerFontSize = computed(() => Math.floor(pokerhandContainerHeight.value * 0.5));
+const roundEdgeCircleDiameter = computed(() => pokerhandContainerHeight.value + userNameContainerHeight.value);
+const personalCardHeight = computed(() => (userNameContainerHeight.value + pokerhandContainerHeight.value) * 1.25);
 
-// Colors
-const profilePictureDiameter = Math.floor(props.menuWidth * 0.4);
-const profilePictureTextMargin = profilePictureDiameter * 0.2;
-const profilePictureMenuPadding = profilePictureDiameter - profilePictureTextMargin + profilePictureDiameter * 0.05;
-const profileBorderWidth = Math.floor(props.menuWidth / 100);
-const profileBorderColor = props.profileBorderColor !== undefined ? props.profileBorderColor : '#000';
-
-const informationContainerWidth = props.menuWidth - profilePictureDiameter;
-const userNameContainerHeight = Math.ceil(props.menuWidth * 0.135);
-const userNameContainerFontSize = Math.floor(userNameContainerHeight * 0.5);
-
-const pokerhandContainerHeight = Math.ceil(props.menuWidth * 0.155);
-const pokerhandContainerFontSize = Math.floor(pokerhandContainerHeight * 0.5);
-
-const roundEdgeCircleDiameter = pokerhandContainerHeight + userNameContainerHeight;
-
-const personalCardHeight = (userNameContainerHeight + pokerhandContainerHeight) * 1.25;
 
 </script>
 
 <template>
-  <div class="menu-container" :style="{
-    width: menuWidth + 'px',
-  }">
-    <div class="player-profile-picture-container" :style="{
-      position: 'absolute',
-      zIndex: 5,
-    }">
-      <img src="/test_profile.jpg" class="profile-picture" :style="{
-        width: profilePictureDiameter + 'px',
-        height: profilePictureDiameter + 'px',
-        borderRadius: '100%',
-        border: profileBorderWidth + 'px solid ' + profileBorderColor,
-      }" alt="Profile Picture"/>
-    </div>
-    <div class="player-cards-container" :style="{
-      position: 'absolute',
-      width: informationContainerWidth + 'px',
-      zIndex: -5,
-      display: 'inline-flex',
-      marginLeft: profilePictureDiameter + profilePictureTextMargin / 3 + 'px',
-      marginBottom: personalCardHeight + 'px',
-    }">
-      <Card
-          v-for="(card, index) in cards"
-          :key="index"
-          :face-down="card.faceDown"
-          :front-image="card.frontImage"
-          :height="personalCardHeight"
-          :highlighted="card.highlighted"
-      />
-    </div>
-
-    <div class="player-stat-container" :style="{
-      width: informationContainerWidth + 'px',
-      paddingLeft: profilePictureMenuPadding + 'px',
-      zIndex: 1,
-    }">
-      <div class="player-username-container bg-gray-400 dark:bg-gray-700" :style="{
-        width: informationContainerWidth + 'px',
-        height: userNameContainerHeight + 'px',
-        fontSize: userNameContainerFontSize + 'px',
-      }">
-        <span class="username-text" :style="{
-          marginLeft: profilePictureTextMargin + 'px',
-        }">Daniel Rewobourggggggggggggg</span>
-        <div class="round-end bg-gray-400 dark:bg-gray-700" :style="{
-          width: roundEdgeCircleDiameter + 'px',
-          height: roundEdgeCircleDiameter + 'px',
-          clipPath: 'inset(0 0 ' + pokerhandContainerHeight + 'px 0)',
-          transform: 'translateX(-50%)',
-          marginTop: pokerhandContainerHeight + 'px',
-        }"></div>
-
+  <div class="player-info-wrapper flex flex-col items-center" :style="{ width: menuWidth + 'px' }">
+    <!-- Profile & Cards Layout -->
+    <div class="menu-container" :style="{ width: menuWidth + 'px' }">
+      <!-- Profile picture (Adjust position) -->
+      <div class="player-profile-picture-container" :style="{ position: 'absolute', zIndex: 5, top: menuWidth/3 + 'px', left: menuWidth/50 + 'px' }">
+        <img
+            src="/test_profile.jpg"
+            class="profile-picture"
+            :style="{
+            width: profilePictureDiameter + 'px',
+            height: profilePictureDiameter + 'px',
+            borderRadius: '100%',
+            border: profileBorderWidth + 'px solid ' + profileBorderColor,
+          }"
+            alt="Profile Picture"
+        />
       </div>
-      <div class="player-pokerhand-money-container bg-gray-500 dark:bg-gray-600" :style="{
-        width: informationContainerWidth + 'px',
-        height: pokerhandContainerHeight + 'px',
-        fontSize: pokerhandContainerFontSize + 'px',
-      }">
-        <span :style="{
-          marginLeft: profilePictureTextMargin + 'px',
-        }">187 €</span>
-        <div class="round-end bg-gray-500 dark:bg-gray-600" :style="{
-          width: roundEdgeCircleDiameter + 'px',
-          height: roundEdgeCircleDiameter + 'px',
-          clipPath: 'inset(' + userNameContainerHeight + 'px 0 0 0)',
-          transform: 'translateX(-50%)',
-          marginBottom: (userNameContainerHeight + 1) + 'px', // Ensure at least 1px extra if needed
-        }"></div>
 
+      <!-- Cards -->
+      <div class="player-cards-container" :style="{
+        position: 'absolute',
+        width: informationContainerWidth + 'px',
+        zIndex: -5,
+        display: 'inline-flex',
+        marginLeft: profilePictureDiameter + profilePictureTextMargin / 3 + 'px',
+        marginTop: profilePictureDiameter / 1.5, /* Adjust margin to avoid overlap */
+      }">
+        <Card
+            v-for="(card, index) in cards"
+            :key="index"
+            :face-down="card.faceDown"
+            :front-image="card.frontImage"
+            :height="personalCardHeight"
+            :highlighted="card.highlighted"
+        />
       </div>
+
+      <div class="player-stat-container" :style="{
+        width: informationContainerWidth + 'px',
+        paddingLeft: profilePictureMenuPadding + 'px',
+        zIndex: 1,
+        marginTop: profilePictureDiameter + 'px',
+      }">
+        <!-- Username section -->
+        <div class="player-username-container bg-gray-400 dark:bg-gray-700" :style="{
+          width: informationContainerWidth + 'px',
+          height: userNameContainerHeight + 'px',
+          fontSize: userNameContainerFontSize + 'px',
+        }">
+          <span class="username-text" :style="{
+            marginLeft: profilePictureTextMargin + 'px',
+          }">Daniel Rewobourggggggggggggg</span>
+          <div class="round-end bg-gray-400 dark:bg-gray-700" :style="{
+            width: roundEdgeCircleDiameter + 'px',
+            height: roundEdgeCircleDiameter + 'px',
+            clipPath: 'inset(0 0 ' + pokerhandContainerHeight + 'px 0)',
+            transform: 'translateX(-50%)',
+            marginTop: pokerhandContainerHeight + 'px',
+          }"></div>
+        </div>
+
+        <!-- Pokerhand section -->
+        <div class="player-pokerhand-money-container bg-gray-500 dark:bg-gray-600" :style="{
+          width: informationContainerWidth + 'px',
+          height: pokerhandContainerHeight + 'px',
+          fontSize: pokerhandContainerFontSize + 'px',
+        }">
+          <span :style="{
+            marginLeft: profilePictureTextMargin + 'px',
+          }">187 €</span>
+          <div class="round-end bg-gray-500 dark:bg-gray-600" :style="{
+            width: roundEdgeCircleDiameter + 'px',
+            height: roundEdgeCircleDiameter + 'px',
+            clipPath: 'inset(' + userNameContainerHeight + 'px 0 0 0)',
+            transform: 'translateX(-50%)',
+            marginBottom: (userNameContainerHeight) + 'px',
+          }"></div>
+        </div>
+
+        <!-- 🟨 Action Bar goes here -->
+        <div
+            v-if="playerAction && playerAction.trim() !== ''"
+            class="player-action-bar bg-yellow-300 dark:bg-yellow-500 text-black dark:text-black"
+            :style="{
+              width: informationContainerWidth + 'px',
+              fontSize: Math.floor(menuWidth * 0.04) + 'px',
+              padding: '2px 6px',
+              textAlign: 'left',
+              borderRadius: '0 0 6px 6px',
+              marginTop: '-2px',
+            }"
+        >
+          {{ playerAction }}
+        </div>
+      </div>
+
     </div>
+
   </div>
 </template>
 
@@ -144,6 +169,4 @@ const personalCardHeight = (userNameContainerHeight + pokerhandContainerHeight) 
   display: flex;
   align-items: center;
 }
-
-
 </style>

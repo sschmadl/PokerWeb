@@ -1,5 +1,5 @@
 <script setup lang="ts">
-
+import PlayerStats from '~/components/PlayerStatMenu.vue' // or wherever it's located
 import {useRequestURL} from "#app";
 
 function onPlayPressed() {
@@ -21,9 +21,25 @@ let cards = ref([
     <NavBar/>
     <div class="flex flex-col justify-center items-center text-9xl gap-10">
       <h1>∑ - Pσker</h1>
+      <PlayerStats
+          :menu-width="300"
+          :cards="cards"
+          player-action="Raise: 500€"
+      />
+      <PlayerStats
+          :menu-width="500"
+          :cards="cards"
+      />
+      <PlayerStats
+          :menu-width="700"
+          :cards="cards"
+          player-action="Check"
+      />
+
       <UButton class="text-8xl py-4 px-20" variant="solid" @click="onPlayPressed">Play</UButton>
     </div>
   </div>
+
 </template>
 
 <style scoped>

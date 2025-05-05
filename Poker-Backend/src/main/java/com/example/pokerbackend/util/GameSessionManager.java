@@ -81,10 +81,14 @@ public class GameSessionManager {
     }
 
     public void leave(String username, WebSocketSession webSocketSession){
-        String gameId = sessions.get("gameId").toString();
-        GameSession gameSession = sessions.get(gameId);
         Player player = players.get(username).a;
-        gameSession.leave(player);
+        try {
+            String gameId = sessions.get("gameId").toString();
+            GameSession gameSession = sessions.get(gameId);
+            gameSession.leave(player);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
         removePlayer(player);
     }
 }

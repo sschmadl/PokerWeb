@@ -7,6 +7,7 @@ import com.example.pokerbackend.util.Player;
 import com.example.pokerbackend.util.QueryUtils;
 import com.google.gson.Gson;
 import org.springframework.stereotype.Component;
+import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
@@ -14,6 +15,8 @@ import org.springframework.web.socket.handler.TextWebSocketHandler;
 import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
+
+import com.example.pokerbackend.util.commands.*;
 
 @Component
 public class GameSessionWebsocketHandler extends TextWebSocketHandler {
@@ -79,12 +82,18 @@ public class GameSessionWebsocketHandler extends TextWebSocketHandler {
             case "join-game":
                 JoinGameCommand joinGameCommand = gson.fromJson(messageContent, JoinGameCommand.class);
                 joinGame(session, joinGameCommand);
+                break;
+            case "chat-message":
+                ChatMessageCommand chatMessageCommand = gson.fromJson(messageContent, ChatMessageCommand.class);
+                chatMessageCommand.setSender(session.getAttributes().get("username").toString());
+                gameSessionManager.sendMessage(session,chatMessageCommand);
         }
     }
 
     private void createLobby(WebSocketSession session, CreateGameCommand command) {
 
         String lobbyName = command.getGameName();
+        if (lobbyName.isEmpty()) lobbyName = session.getAttributes().get("username").toString()+"'s Game";
         int smallBlind = command.getSmallBlind();
         int bigBlind = command.getBigBlind();
         int maxPlayerCount = command.getMaxPlayerCount();
@@ -96,76 +105,16 @@ public class GameSessionWebsocketHandler extends TextWebSocketHandler {
     }
 
     private void joinGame(WebSocketSession session, JoinGameCommand command) {
-        System.out.println(session.getAttributes().get("username") + "is attempting to join ");
+        System.out.println(session.getAttributes().get("username") + "is attempting to join "+ command.getLobbyId());
+        gameSessionManager.joinGame(session, session.getAttributes().get("username").toString(), command.getLobbyId());
+    }
+
+    @Override
+    public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
+        String username = session.getAttributes().get("username").toString();
+        gameSessionManager.leave(username,session);
     }
 }
 
-class CreateGameCommand {
 
-    String command;
-    String gameName;
-    int smallBlind;
-    int bigBlind;
-    int maxPlayerCount;
 
-    public String getCommand() {
-        return command;
-    }
-
-    public void setCommand(String command) {
-        this.command = command;
-    }
-
-    public String getGameName() {
-        return gameName;
-    }
-
-    public void setGameName(String gameName) {
-        this.gameName = gameName;
-    }
-
-    public int getSmallBlind() {
-        return smallBlind;
-    }
-
-    public void setSmallBlind(int smallBlind) {
-        this.smallBlind = smallBlind;
-    }
-
-    public int getBigBlind() {
-        return bigBlind;
-    }
-
-    public void setBigBlind(int bigBlind) {
-        this.bigBlind = bigBlind;
-    }
-
-    public int getMaxPlayerCount() {
-        return maxPlayerCount;
-    }
-
-    public void setMaxPlayerCount(int maxPlayerCount) {
-        this.maxPlayerCount = maxPlayerCount;
-    }
-}
-
-class JoinGameCommand {
-    String command;
-    String lobbyId;
-
-    public String getCommand() {
-        return command;
-    }
-
-    public void setCommand(String command) {
-        this.command = command;
-    }
-
-    public String getLobbyId() {
-        return lobbyId;
-    }
-
-    public void setLobbyId(String lobbyId) {
-        this.lobbyId = lobbyId;
-    }
-}

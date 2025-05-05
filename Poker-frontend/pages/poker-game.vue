@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { ref, onMounted, onBeforeUnmount } from 'vue';
 import ActionButtons from '~/components/action-buttons.vue'; // Import the action buttons component
-import Chat from '~/components/Chat.vue'; // Import the Chat component
+import Chat from '~/components/Chat.vue';
+import {navigateTo} from "#app"; // Import the Chat component
 
 const gameSocket = useGameSocket();
 
@@ -26,8 +27,10 @@ function updateSizes() {
 }
 
 onMounted(() => {
+  if (!gameSocket.isConnected) {
+    navigateTo('/lobby-selection');
+  }
   window.addEventListener('resize', updateSizes);
-  gameSocket.connect();
 });
 
 onBeforeUnmount(() => {

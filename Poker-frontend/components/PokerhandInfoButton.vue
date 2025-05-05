@@ -21,30 +21,30 @@ const hands = [
     name: 'Straight Flush',
     rank: 2,
     dummyCards: [
-      '/cards_default/AH.svg',
-      '/cards_default/2H.svg',
-      '/cards_default/3H.svg',
-      '/cards_default/4H.svg',
-      '/cards_default/5H.svg',
+      '/cards_default/AS.svg',
+      '/cards_default/2S.svg',
+      '/cards_default/3S.svg',
+      '/cards_default/4S.svg',
+      '/cards_default/5S.svg',
     ],
   },
   {
     name: 'Four of a Kind',
     rank: 3,
     dummyCards: [
-      '/cards_default/7S.svg',
-      '/cards_default/7H.svg',
-      '/cards_default/7C.svg',
-      '/cards_default/7D.svg',
+      '/cards_default/5S.svg',
+      '/cards_default/5H.svg',
+      '/cards_default/5C.svg',
+      '/cards_default/5D.svg',
     ],
   },
   {
     name: 'Full House',
     rank: 4,
     dummyCards: [
-      '/cards_default/4H.svg',
-      '/cards_default/4C.svg',
-      '/cards_default/4D.svg',
+      '/cards_default/5H.svg',
+      '/cards_default/5C.svg',
+      '/cards_default/5D.svg',
       '/cards_default/KS.svg',
       '/cards_default/KH.svg',
     ]
@@ -55,7 +55,7 @@ const hands = [
     dummyCards: [
       '/cards_default/3S.svg',
       '/cards_default/4S.svg',
-      '/cards_default/8S.svg',
+      '/cards_default/5S.svg',
       '/cards_default/KS.svg',
       '/cards_default/AS.svg',
     ]
@@ -66,7 +66,7 @@ const hands = [
     dummyCards: [
       '/cards_default/3H.svg',
       '/cards_default/4S.svg',
-      '/cards_default/5C.svg',
+      '/cards_default/5S.svg',
       '/cards_default/6D.svg',
       '/cards_default/7D.svg',
     ]
@@ -75,34 +75,34 @@ const hands = [
     name: 'Three of a Kind',
     rank: 7,
     dummyCards: [
-      '/cards_default/QH.svg',
-      '/cards_default/QS.svg',
-      '/cards_default/QC.svg',
+      '/cards_default/5H.svg',
+      '/cards_default/5S.svg',
+      '/cards_default/5C.svg',
     ]
   },
   {
     name: 'Two Pair',
     rank: 8,
     dummyCards: [
-      '/cards_default/QH.svg',
-      '/cards_default/QS.svg',
-      '/cards_default/JC.svg',
-      '/cards_default/JS.svg',
+      '/cards_default/KH.svg',
+      '/cards_default/KS.svg',
+      '/cards_default/5C.svg',
+      '/cards_default/5S.svg',
     ]
   },
   {
     name: 'Pair',
     rank: 9,
     dummyCards: [
-      '/cards_default/8H.svg',
-      '/cards_default/8S.svg',
+      '/cards_default/5H.svg',
+      '/cards_default/5S.svg',
     ]
   },
   {
     name: 'High Card',
     rank: 10,
     dummyCards: [
-      '/cards_default/AH.svg',
+      '/cards_default/AS.svg',
     ]
   },
 ]

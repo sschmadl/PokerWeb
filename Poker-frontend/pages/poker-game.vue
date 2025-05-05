@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { ref, onMounted, onBeforeUnmount } from 'vue';
 import ActionButtons from '~/components/action-buttons.vue'; // Import the action buttons component
-import Chat from '~/components/Chat.vue'; // Import the Chat component
+import Chat from '~/components/Chat.vue';
+import {navigateTo} from "#app"; // Import the Chat component
 
 const gameSocket = useGameSocket();
 
@@ -12,8 +13,8 @@ const tableHeight = ref(window.innerHeight / 2);
 const cards = ref([
   { frontImage: '/cards_default/TS.svg', faceDown: false, highlighted: false },
   { frontImage: '/cards_default/TH.svg', faceDown: false, highlighted: false },
-  { frontImage: '/cards_default/TD.svg', faceDown: false, highlighted: false },
   { frontImage: '/cards_default/TC.svg', faceDown: false, highlighted: false },
+  { frontImage: '/cards_default/TD.svg', faceDown: false, highlighted: false },
   { frontImage: '/cards_default/AS.svg', faceDown: false, highlighted: false },
 ]);
 
@@ -26,8 +27,10 @@ function updateSizes() {
 }
 
 onMounted(() => {
+  if (!gameSocket.isConnected) {
+    navigateTo('/lobby-selection');
+  }
   window.addEventListener('resize', updateSizes);
-  gameSocket.connect();
 });
 
 onBeforeUnmount(() => {

@@ -1,6 +1,9 @@
 <script setup lang="ts">
 import {number, object} from "yup";
 import {useGameSocket} from "~/stores/useGameSocket";
+import { useToast } from '#imports';
+
+const toast = useToast();
 
 type LobbyItems = {
   gameId: string;
@@ -111,6 +114,10 @@ function onSelect(row: LobbyItems) {
 await fetchExistingGames();
 
 const gameSocket = useGameSocket();
+
+gameSocket.onMessage((data) => {
+  console.log(data)
+});
 
 onMounted(() => {
   gameSocket.connect();

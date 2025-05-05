@@ -1,4 +1,5 @@
 import { defineStore } from 'pinia';
+import { useToast } from '#imports';
 
 export const useGameSocket = defineStore('gameSocket', () => {
     let socket: WebSocket | null = null;
@@ -6,6 +7,8 @@ export const useGameSocket = defineStore('gameSocket', () => {
 
     const isConnected = ref(false);
     const lastMessage = ref<string | null>(null);
+
+    let messageListeners: Array<(data: any) => void> = [];
 
     function connect() {
         if (socket) return; // prevent re-connecting
@@ -19,7 +22,20 @@ export const useGameSocket = defineStore('gameSocket', () => {
 
         socket.onmessage = (event) => {
             lastMessage.value = event.data;
-            console.log('Received:', event.data);
+
+            const parsed = safeJsonParse(event.data);
+
+            if (parsed.command === "server-message") {
+                const toast = useToast(); // <-- MOVE it here!
+                toast.add({
+                    title: 'Message',
+                    description: parsed.message,
+                    color: 'green',
+                });
+            }
+
+            // Notify all listeners
+            messageListeners.forEach((listener) => listener(parsed));
         };
 
         socket.onclose = () => {
@@ -35,11 +51,11 @@ export const useGameSocket = defineStore('gameSocket', () => {
         }
     }
 
-    function waitForMessageOnce(): Promise<string> {
+    function waitForMessageOnce(): Promise<any> {
         return new Promise((resolve) => {
             const handler = (event: MessageEvent) => {
-                resolve(event.data);
-                socket?.removeEventListener('message', handler); // One-time use
+                socket?.removeEventListener('message', handler);
+                resolve(safeJsonParse(event.data));
             };
             socket?.addEventListener('message', handler);
         });
@@ -50,6 +66,18 @@ export const useGameSocket = defineStore('gameSocket', () => {
         socket = null;
     }
 
+    function onMessage(callback: (data: any) => void) {
+        messageListeners.push(callback);
+    }
+
+    function safeJsonParse(data: any) {
+        try {
+            return JSON.parse(data);
+        } catch {
+            return data;
+        }
+    }
+
     return {
         isConnected,
         lastMessage,
@@ -57,5 +85,6 @@ export const useGameSocket = defineStore('gameSocket', () => {
         disconnect,
         sendMessage,
         waitForMessageOnce,
+        onMessage,
     };
 });

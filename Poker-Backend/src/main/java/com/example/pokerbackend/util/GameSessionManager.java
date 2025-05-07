@@ -100,4 +100,8 @@ public class GameSessionManager {
     public void addWebsocketToGameIdMapping(WebSocketSession webSocketSession, String gameId){
         sessionToIdMap.put(webSocketSession, gameId);
     }
+
+    public GameSession getGameSession(String gameId){
+        return sessions.get(gameId);
+    }
 }

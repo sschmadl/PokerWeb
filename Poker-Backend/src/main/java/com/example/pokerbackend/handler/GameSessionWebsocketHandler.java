@@ -11,6 +11,7 @@ import org.springframework.web.socket.handler.TextWebSocketHandler;
 
 import java.net.URI;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import com.example.pokerbackend.util.commands.*;
@@ -84,6 +85,13 @@ public class GameSessionWebsocketHandler extends TextWebSocketHandler {
                 ChatMessageCommand chatMessageCommand = gson.fromJson(messageContent, ChatMessageCommand.class);
                 chatMessageCommand.setSender(session.getAttributes().get("username").toString());
                 gameSessionManager.sendMessage(session,chatMessageCommand);
+                break;
+            case "current-players-info":
+                String gameId = gameSessionManager.getIdFromWebsocketSession(session);
+                GameSession gameSession = gameSessionManager.getGameSession(gameId);
+                List<Player> playerOrder = gameSession.getPlayerOrder();
+                CurrentPlayersInfoCommand currentPlayersInfoCommand = new CurrentPlayersInfoCommand(playerOrder);
+                session.sendMessage(new TextMessage(gson.toJson(currentPlayersInfoCommand)));
         }
     }
 

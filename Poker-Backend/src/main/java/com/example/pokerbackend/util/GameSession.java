@@ -100,10 +100,6 @@ public class GameSession {
                 // Inform other Players
                 PlayerJoinedGame playerJoinedGame = new PlayerJoinedGame(player);
                 broadCastExceptSender(player.getName(), gson.toJson(playerJoinedGame));
-
-                // Send
-                CurrentPlayersInfoCommand currentPlayersInfoCommand = new CurrentPlayersInfoCommand(playerOrder);
-                session.sendMessage(new TextMessage(gson.toJson(currentPlayersInfoCommand)));
             }
         }catch (Exception e){
             e.printStackTrace();

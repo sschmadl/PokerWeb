@@ -4,14 +4,18 @@ import { computed, ref, watch } from 'vue';
 const props = defineProps({
   faceDown: {
     type: Boolean,
-    required: true,
+    default: true,
   },
   frontImage: String,
   height: {
     type: Number,
-    required: true,
+    default: 0,
   },
-  highlighted: Boolean,
+  highlighted: {
+    Boolean,
+    default: false,
+  },
+
 });
 
 const card_back = '/cards_default/2B.svg';

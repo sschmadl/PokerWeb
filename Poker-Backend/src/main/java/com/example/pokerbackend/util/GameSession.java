@@ -41,7 +41,7 @@ public class GameSession {
 
     public Map<String, Object> getGameInfo() {
         Map<String, Object> gameInfo = new HashMap<>();
-        gameInfo.put(gameId, this.gameId);
+        gameInfo.put("gameId", this.gameId);
         gameInfo.put("name", this.name);
         gameInfo.put("playerCount", players.size()+"/"+MAX_PLAYERS);
         gameInfo.put("bigBlind",this.bigBlind);
@@ -87,8 +87,9 @@ public class GameSession {
             if (players.size() == MAX_PLAYERS) {
                 session.sendMessage(new TextMessage(gson.toJson(JoinGameStatus.joinFailed("Lobby is full"))));
             }else {
+                players.put(player.getName(), new Pair<>(player, session));
                 session.sendMessage(new TextMessage(gson.toJson(JoinGameStatus.joinSuccess())));
-                session.getAttributes().put("gameId", this.getGameId());
+                gameSessionManager.addWebsocketToGameIdMapping(session, gameId);
                 PlayerJoinedGame playerJoinedGame = new PlayerJoinedGame(player);
                 broadCastExceptSender(player.getName(), gson.toJson(playerJoinedGame));
             }

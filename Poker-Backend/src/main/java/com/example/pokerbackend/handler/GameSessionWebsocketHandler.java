@@ -105,8 +105,8 @@ public class GameSessionWebsocketHandler extends TextWebSocketHandler {
     }
 
     private void joinGame(WebSocketSession session, JoinGameCommand command) {
-        System.out.println(session.getAttributes().get("username") + "is attempting to join "+ command.getLobbyId());
-        gameSessionManager.joinGame(session, session.getAttributes().get("username").toString(), command.getLobbyId());
+        System.out.println(session.getAttributes().get("username") + "is attempting to join "+ command.getGameId());
+        gameSessionManager.joinGame(session, session.getAttributes().get("username").toString(), command.getGameId());
     }
 
     @Override

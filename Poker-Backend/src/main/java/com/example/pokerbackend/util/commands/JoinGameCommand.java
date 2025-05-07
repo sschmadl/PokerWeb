@@ -2,7 +2,7 @@ package com.example.pokerbackend.util.commands;
 
 public class JoinGameCommand {
     String command;
-    String lobbyId;
+    String gameId;
 
     public String getCommand() {
         return command;
@@ -12,11 +12,11 @@ public class JoinGameCommand {
         this.command = command;
     }
 
-    public String getLobbyId() {
-        return lobbyId;
+    public String getGameId() {
+        return gameId;
     }
 
-    public void setLobbyId(String lobbyId) {
-        this.lobbyId = lobbyId;
+    public void setGameId(String lobbyId) {
+        this.gameId = lobbyId;
     }
 }

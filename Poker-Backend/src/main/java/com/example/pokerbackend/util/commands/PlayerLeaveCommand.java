@@ -2,9 +2,9 @@ package com.example.pokerbackend.util.commands;
 
 public class PlayerLeaveCommand {
     String command = "player-left";
-    String playerName;
+    String name;
     public PlayerLeaveCommand(String playerName) {
-        this.playerName = playerName;
+        this.name = playerName;
     }
 
     public String getCommand() {
@@ -16,10 +16,10 @@ public class PlayerLeaveCommand {
     }
 
     public String getPlayerName() {
-        return playerName;
+        return name;
     }
 
     public void setPlayerName(String playerName) {
-        this.playerName = playerName;
+        this.name = playerName;
     }
 }

@@ -1,10 +1,7 @@
 package com.example.pokerbackend.handler;
 
 import com.example.pokerbackend.service.PlayerFactoryService;
-import com.example.pokerbackend.util.GameSessionManager;
-import com.example.pokerbackend.util.JwtUtil;
-import com.example.pokerbackend.util.Player;
-import com.example.pokerbackend.util.QueryUtils;
+import com.example.pokerbackend.util.*;
 import com.google.gson.Gson;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.CloseStatus;
@@ -23,6 +20,7 @@ public class GameSessionWebsocketHandler extends TextWebSocketHandler {
     private final PlayerFactoryService playerFactory;
     private final JwtUtil jwtUtil;
     private GameSessionManager gameSessionManager = GameSessionManager.getInstance();
+    private Gson gson = new Gson();
 
     public GameSessionWebsocketHandler(PlayerFactoryService playerFactory, JwtUtil jwtUtil) {
         System.out.println("GameSessionWebsocketHandler created");
@@ -62,7 +60,6 @@ public class GameSessionWebsocketHandler extends TextWebSocketHandler {
         Map<String, String> map = new HashMap<>();
         map.put("command","server-message");
         map.put("message", "test Server message");
-        Gson gson = new Gson();
         session.sendMessage(new TextMessage(gson.toJson(map)));
        //session.sendMessage(new TextMessage("Welcome " + username));
     }
@@ -97,9 +94,11 @@ public class GameSessionWebsocketHandler extends TextWebSocketHandler {
         int smallBlind = command.getSmallBlind();
         int bigBlind = command.getBigBlind();
         int maxPlayerCount = command.getMaxPlayerCount();
-        gameSessionManager.createSession(lobbyName, smallBlind, bigBlind, maxPlayerCount, session);
+        GameSession gameSession = gameSessionManager.createSession(lobbyName, smallBlind, bigBlind, maxPlayerCount, session);
         try {
             session.sendMessage(new TextMessage("success"));
+            CurrentPlayersInfoCommand currentPlayersInfoCommand = new CurrentPlayersInfoCommand(gameSession.getPlayerOrder());
+            session.sendMessage(new TextMessage(gson.toJson(currentPlayersInfoCommand)));
         } catch (Exception e) {
             e.printStackTrace();
         }

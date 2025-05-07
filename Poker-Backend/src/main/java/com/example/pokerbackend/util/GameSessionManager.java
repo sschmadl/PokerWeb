@@ -57,13 +57,12 @@ public class GameSessionManager {
         System.out.println("Player count: " + players.size());
     }
 
-    public void createSession(String name, int smallBlind, int bigBind, int maxPlayer, WebSocketSession creatingPlayer){
+    public GameSession createSession(String name, int smallBlind, int bigBind, int maxPlayer, WebSocketSession creatingPlayer){
         GameSession gameSession = new GameSession(name, smallBlind, bigBind, maxPlayer);
-        String username = creatingPlayer.getAttributes().get("username").toString();
         sessionToIdMap.put(creatingPlayer, gameSession.getGameId());
-        Player player = players.get(username).a;
-        gameSession.joinGame(player, creatingPlayer);
+        gameSession.addPlayer(players.get(creatingPlayer.getAttributes().get("username").toString()).a, creatingPlayer);
         addSession(gameSession);
+        return gameSession;
     }
 
     public void joinGame(WebSocketSession webSocketSession, String username, String gameId){

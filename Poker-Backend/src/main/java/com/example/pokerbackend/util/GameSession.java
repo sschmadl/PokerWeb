@@ -140,4 +140,8 @@ public class GameSession {
             lock.unlock();
         }
     }
+
+    public List<Player> getPlayerOrder() {
+        return playerOrder;
+    }
 }

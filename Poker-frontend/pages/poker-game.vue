@@ -80,7 +80,15 @@ watch(players, () => {
   }));
 }, { deep: true });
 
+async function fetchCurrentPlayers() {
+  const message = {
+    command: 'current-players-info'
+  }
+  gameSocket.sendMessage(JSON.stringify(message));
+}
+
 gameSocket.onMessage((data) => {
+  console.log(data.command);
   switch(data.command) {
     case 'player-joined-game':
       players.value.push({name: data.name, credits: data.credits})
@@ -88,17 +96,17 @@ gameSocket.onMessage((data) => {
     case 'player-left':
       players.value = players.value.filter(player => player.name !== data.name);
       break;
-    case 'current-players-info': {
+    case 'current-players-info':
       const username = useUsername().value;
       const playerData = data.players as Player[];
+      console.log('Player data: ', playerData);
 
       players.value = [
         ...playerData.filter(p => p.name === username),
         ...playerData.filter(p => p.name !== username),
       ];
+      console.log('New Player data: ', players.value);
       break;
-    }
-
   }
 });
 
@@ -121,6 +129,7 @@ function flipCards() {
     card.faceDown = !card.faceDown;
   });
 }
+fetchCurrentPlayers();
 </script>
 
 <template>

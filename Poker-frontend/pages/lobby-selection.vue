@@ -115,10 +115,6 @@ await fetchExistingGames();
 
 const gameSocket = useGameSocket();
 
-gameSocket.onMessage((data) => {
-  console.log(data)
-});
-
 onMounted(() => {
   gameSocket.connect();
 });

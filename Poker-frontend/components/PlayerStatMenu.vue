@@ -1,5 +1,7 @@
 <script setup lang="ts">
 
+import type {Card} from "~/pages/poker-game.vue";
+
 const props = defineProps({
   menuWidth: {
     type: Number,
@@ -7,8 +9,23 @@ const props = defineProps({
   },
   profileBorderColor: String,
   cards: {
-    type: Array as PropType<Array<{ frontImage: string; faceDown: boolean; highlighted: boolean; }>>,
-    required: true,
+    type: Array as PropType<Array<Partial<Card>>>,
+    default: () => [
+      { frontImage: '/cards_default/1J.svg', faceDown: true, highlighted: false },
+      { frontImage: '/cards_default/2J.svg', faceDown: true, highlighted: false },
+    ]
+  },
+  profilePicture: {
+    type: String,
+    default: '/default_profile_picture.jpg'
+  },
+  playerName: {
+    type: String,
+    default: '',
+  },
+  playerMoney: {
+    type: Number,
+    default: 0,
   },
   playerAction: {
     type: String,
@@ -16,6 +33,20 @@ const props = defineProps({
   },
 });
 
+
+const cacheBustedProfilePicture = computed(() => {
+  return props.profilePicture + '?t=' + Date.now();
+});
+
+const playerName = computed(() => props.playerName);
+const playerMoney = computed(() => props.playerMoney);
+const playerAction = computed(() => props.playerAction);
+const cards = computed(() => {
+  return props.cards?.length ? props.cards : [
+    { frontImage: '/cards_default/1J.svg', faceDown: true, highlighted: false },
+    { frontImage: '/cards_default/2J.svg', faceDown: true, highlighted: false },
+  ];
+});
 const profilePictureDiameter = computed(() => Math.floor(props.menuWidth * 0.4));
 const profilePictureTextMargin = computed(() => profilePictureDiameter.value * 0.2);
 const profilePictureMenuPadding = computed(() => profilePictureDiameter.value - profilePictureTextMargin.value + profilePictureDiameter.value * 0.05);
@@ -33,13 +64,13 @@ const personalCardHeight = computed(() => (userNameContainerHeight.value + poker
 </script>
 
 <template>
-  <div class="player-info-wrapper flex flex-col items-center" :style="{ width: menuWidth + 'px' }">
+  <div class="player-info-wrapper flex flex-col items-center w-auto">
     <!-- Profile & Cards Layout -->
     <div class="menu-container" :style="{ width: menuWidth + 'px' }">
       <!-- Profile picture (Adjust position) -->
       <div class="player-profile-picture-container" :style="{ position: 'absolute', zIndex: 5, top: menuWidth/3 + 'px', left: menuWidth/50 + 'px' }">
         <img
-            src="/test_profile.jpg"
+            :src="cacheBustedProfilePicture"
             class="profile-picture"
             :style="{
             width: profilePictureDiameter + 'px',
@@ -84,7 +115,7 @@ const personalCardHeight = computed(() => (userNameContainerHeight.value + poker
         }">
           <span class="username-text" :style="{
             marginLeft: profilePictureTextMargin + 'px',
-          }">Daniel Rewobourggggggggggggg</span>
+          }">{{ playerName }}</span>
           <div class="round-end bg-gray-400 dark:bg-gray-700" :style="{
             width: roundEdgeCircleDiameter + 'px',
             height: roundEdgeCircleDiameter + 'px',
@@ -94,7 +125,7 @@ const personalCardHeight = computed(() => (userNameContainerHeight.value + poker
           }"></div>
         </div>
 
-        <!-- Pokerhand section -->
+        <!-- Money Section -->
         <div class="player-pokerhand-money-container bg-gray-500 dark:bg-gray-600" :style="{
           width: informationContainerWidth + 'px',
           height: pokerhandContainerHeight + 'px',
@@ -102,7 +133,7 @@ const personalCardHeight = computed(() => (userNameContainerHeight.value + poker
         }">
           <span :style="{
             marginLeft: profilePictureTextMargin + 'px',
-          }">187 €</span>
+          }">{{ playerMoney }}</span>
           <div class="round-end bg-gray-500 dark:bg-gray-600" :style="{
             width: roundEdgeCircleDiameter + 'px',
             height: roundEdgeCircleDiameter + 'px',
@@ -112,7 +143,7 @@ const personalCardHeight = computed(() => (userNameContainerHeight.value + poker
           }"></div>
         </div>
 
-        <!-- 🟨 Action Bar goes here -->
+        <!-- Action Section -->
         <div
             v-if="playerAction && playerAction.trim() !== ''"
             class="player-action-bar bg-yellow-300 dark:bg-yellow-500 text-black dark:text-black"

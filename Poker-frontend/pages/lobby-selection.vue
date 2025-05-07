@@ -131,9 +131,8 @@ async function submit(tabType: string) {
   if (tabType === "find-game") {
     const message = {
       command: 'join-game',
-      gameId: selected.value?.gameId,
+      gameId: selected.value?.gameId
     }
-
     gameSocket.sendMessage(JSON.stringify(message));
     try {
       const response = await gameSocket.waitForMessageOnce();

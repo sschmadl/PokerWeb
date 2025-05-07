@@ -24,16 +24,23 @@ let cards = ref([
       <PlayerStats
           :menu-width="300"
           :cards="cards"
-          player-action="Raise: 500€"
+          :player-action="'Raise: 500€'"
+          :player-money="'1250'"
+          :player-name="'Sigmabrand'"
+
       />
       <PlayerStats
           :menu-width="500"
           :cards="cards"
+          :player-money="'2250'"
+          :player-name="'Gazelle'"
       />
       <PlayerStats
           :menu-width="700"
           :cards="cards"
-          player-action="Check"
+          :player-action="'Check'"
+          :player-money="'10'"
+          :player-name="'Weimarer'"
       />
 
       <UButton class="text-8xl py-4 px-20" variant="solid" @click="onPlayPressed">Play</UButton>

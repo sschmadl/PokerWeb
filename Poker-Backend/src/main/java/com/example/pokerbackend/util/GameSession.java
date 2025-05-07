@@ -1,9 +1,6 @@
 package com.example.pokerbackend.util;
 
-import com.example.pokerbackend.util.commands.ChatMessageCommand;
-import com.example.pokerbackend.util.commands.JoinGameStatus;
-import com.example.pokerbackend.util.commands.PlayerJoinedGame;
-import com.example.pokerbackend.util.commands.PlayerLeaveCommand;
+import com.example.pokerbackend.util.commands.*;
 import com.google.gson.Gson;
 import org.antlr.v4.runtime.misc.Pair;
 import org.springframework.web.socket.TextMessage;
@@ -29,6 +26,7 @@ public class GameSession {
 
     private final int MAX_PLAYERS;
     private ConcurrentHashMap<String, Pair<Player, WebSocketSession>> players = new ConcurrentHashMap<>();
+    private List<Player> playerOrder = new ArrayList<>();
     private PokerDeck deck = new PokerDeck();
     private List<PokerCard> communityCards = new ArrayList<>();
 
@@ -56,6 +54,12 @@ public class GameSession {
 
     public void addPlayer(Player player, WebSocketSession session){
         players.put(player.getName(), new Pair<>(player, session));
+        playerOrder.add(player);
+    }
+
+    public void removePlayer(Player player){
+        players.remove(player.getName());
+        playerOrder.remove(player);
     }
 
     public void broadCast(String message){
@@ -87,11 +91,19 @@ public class GameSession {
             if (players.size() == MAX_PLAYERS) {
                 session.sendMessage(new TextMessage(gson.toJson(JoinGameStatus.joinFailed("Lobby is full"))));
             }else {
-                players.put(player.getName(), new Pair<>(player, session));
+                addPlayer(player, session);
+
+                // Inform player if joining is possible
                 session.sendMessage(new TextMessage(gson.toJson(JoinGameStatus.joinSuccess())));
                 gameSessionManager.addWebsocketToGameIdMapping(session, gameId);
+
+                // Inform other Players
                 PlayerJoinedGame playerJoinedGame = new PlayerJoinedGame(player);
                 broadCastExceptSender(player.getName(), gson.toJson(playerJoinedGame));
+
+                // Send
+                CurrentPlayersInfoCommand currentPlayersInfoCommand = new CurrentPlayersInfoCommand(playerOrder);
+                session.sendMessage(new TextMessage(gson.toJson(currentPlayersInfoCommand)));
             }
         }catch (Exception e){
             e.printStackTrace();
@@ -116,7 +128,7 @@ public class GameSession {
         ReentrantLock lock = lobbyLocks.computeIfAbsent(gameId, id -> new ReentrantLock());
         lock.lock();
         try{
-            players.remove(player.getName());
+            removePlayer(player);
             PlayerLeaveCommand  playerLeaveCommand = new PlayerLeaveCommand(player.getName());
             broadCastExceptSender(player.getName(), gson.toJson(playerLeaveCommand));
             if (players.isEmpty()) {

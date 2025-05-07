@@ -59,8 +59,10 @@ public class GameSessionManager {
 
     public void createSession(String name, int smallBlind, int bigBind, int maxPlayer, WebSocketSession creatingPlayer){
         GameSession gameSession = new GameSession(name, smallBlind, bigBind, maxPlayer);
+        String username = creatingPlayer.getAttributes().get("username").toString();
         sessionToIdMap.put(creatingPlayer, gameSession.getGameId());
-        gameSession.addPlayer(players.get(creatingPlayer.getAttributes().get("username").toString()).a, creatingPlayer);
+        Player player = players.get(username).a;
+        gameSession.joinGame(player, creatingPlayer);
         addSession(gameSession);
     }
 

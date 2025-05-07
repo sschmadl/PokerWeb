@@ -101,6 +101,7 @@ public class GameSessionWebsocketHandler extends TextWebSocketHandler {
         try {
             session.sendMessage(new TextMessage("success"));
         } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 

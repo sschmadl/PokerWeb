@@ -2,6 +2,7 @@
 import {number, object} from "yup";
 import {useGameSocket} from "~/stores/useGameSocket";
 import { useToast } from '#imports';
+import {navigateTo} from "#app";
 
 const toast = useToast();
 
@@ -114,6 +115,12 @@ function onSelect(row: LobbyItems) {
 await fetchExistingGames();
 
 const gameSocket = useGameSocket();
+
+gameSocket.onMessage((data) => {
+  if (data.command === 'redirect') {
+    navigateTo(data.route);
+  }
+});
 
 onMounted(() => {
   gameSocket.connect();

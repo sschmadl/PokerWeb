@@ -28,9 +28,9 @@ export const useGameSocket = defineStore('gameSocket', () => {
             if (parsed.command === "server-message") {
                 const toast = useToast();
                 toast.add({
-                    title: 'Message',
+                    title: parsed.title,
                     description: parsed.message,
-                    color: 'blue',
+                    color: parsed.color,
                 });
             }
 

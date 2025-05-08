@@ -54,7 +54,7 @@ public class GameSessionWebsocketHandler extends TextWebSocketHandler {
         String username = jwtUtil.extractUsername(token);
         System.out.println("Session opened: " + username);
         if (gameSessionManager.playerIsAlreadyConnected(username)) {
-            ServerMessageCommand serverMessageCommand = new ServerMessageCommand(":(","Someone is already connected with your account","red");
+            ServerMessageCommand serverMessageCommand = new ServerMessageCommand(":(", "Someone is already connected with your account", "red");
             session.sendMessage(new TextMessage(gson.toJson(serverMessageCommand)));
             RedirectCommand redirectCommand = new RedirectCommand("/");
             session.sendMessage(new TextMessage(gson.toJson(redirectCommand)));
@@ -65,9 +65,9 @@ public class GameSessionWebsocketHandler extends TextWebSocketHandler {
         Player player = playerFactory.createPlayer(username);
         gameSessionManager.addPlayer(player, session);
 
-        ServerMessageCommand serverMessageCommand = new ServerMessageCommand("Test","Test message from the server","pink");
+        ServerMessageCommand serverMessageCommand = new ServerMessageCommand("Test", "Test message from the server", "pink");
         session.sendMessage(new TextMessage(gson.toJson(serverMessageCommand)));
-       //session.sendMessage(new TextMessage("Welcome " + username));
+        //session.sendMessage(new TextMessage("Welcome " + username));
     }
 
     @Override
@@ -89,7 +89,7 @@ public class GameSessionWebsocketHandler extends TextWebSocketHandler {
             case "chat-message":
                 ChatMessageCommand chatMessageCommand = gson.fromJson(messageContent, ChatMessageCommand.class);
                 chatMessageCommand.setSender(session.getAttributes().get("username").toString());
-                gameSessionManager.sendMessage(session,chatMessageCommand);
+                gameSessionManager.sendMessage(session, chatMessageCommand);
                 break;
             case "current-players-info":
                 String gameId = gameSessionManager.getIdFromWebsocketSession(session);
@@ -100,14 +100,14 @@ public class GameSessionWebsocketHandler extends TextWebSocketHandler {
                 break;
             case "leave-game":
                 String username = session.getAttributes().get("username").toString();
-                gameSessionManager.leave(username,session);
+                gameSessionManager.leave(username, session);
         }
     }
 
     private void createLobby(WebSocketSession session, CreateGameCommand command) {
 
         String lobbyName = command.getGameName();
-        if (lobbyName.isEmpty()) lobbyName = session.getAttributes().get("username").toString()+"'s Game";
+        if (lobbyName.isEmpty()) lobbyName = session.getAttributes().get("username").toString() + "'s Game";
         int smallBlind = command.getSmallBlind();
         int bigBlind = command.getBigBlind();
         int maxPlayerCount = command.getMaxPlayerCount();
@@ -122,15 +122,24 @@ public class GameSessionWebsocketHandler extends TextWebSocketHandler {
     }
 
     private void joinGame(WebSocketSession session, JoinGameCommand command) {
-        System.out.println(session.getAttributes().get("username") + "is attempting to join "+ command.getGameId());
-        gameSessionManager.joinGame(session, session.getAttributes().get("username").toString(), command.getGameId());
+        if (command.getGameId() != null) {
+            System.out.println(session.getAttributes().get("username") + "is attempting to join " + command.getGameId());
+            gameSessionManager.joinGame(session, session.getAttributes().get("username").toString(), command.getGameId());
+        } else {
+            try {
+                session.sendMessage(new TextMessage(gson.toJson(new ServerMessageCommand("O_O", "Heast wähl a spü aus", "red"))));
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            System.out.println("Player attempted to join a lobby but sent no Id");
+        }
     }
 
     @Override
     public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
         if (!session.getAttributes().containsKey("username")) return;
         String username = session.getAttributes().get("username").toString();
-        gameSessionManager.leaveDisconnect(username,session);
+        gameSessionManager.leaveDisconnect(username, session);
     }
 }
 

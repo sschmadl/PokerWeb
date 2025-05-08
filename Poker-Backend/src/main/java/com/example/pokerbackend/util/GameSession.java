@@ -89,7 +89,10 @@ public class GameSession {
         lock.lock();
         Gson gson = new Gson();
         try {
-            if (players.size() == MAX_PLAYERS) {
+            if(players.containsKey(player.getName())){
+                //do nothing to prevent
+                System.out.println("Player " + player.getName() + " is already in game");
+            }else if (players.size() == MAX_PLAYERS) {
                 session.sendMessage(new TextMessage(gson.toJson(JoinGameStatus.joinFailed("Lobby is full"))));
             }else {
                 addPlayer(player, session);

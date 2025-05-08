@@ -52,51 +52,55 @@ const raiseAmount = ref<number | null>(null); // State to hold the raised amount
 </script>
 
 <template>
-  <transition name="slide-fade">
-    <div v-show="maximizeWindow" class="min-h-screen flex items-end justify-center px-[20vw]">
+  <div class="min-h-screen flex items-end justify-start px-4">
+    <!-- Card -->
+    <transition name="slide-fade">
+      <UCard v-show="maximizeWindow" class="w-[280px] text-center">
+        <h2 class="text-xl">Current Hand: {{pokerhand}}</h2>
+        <h2 class="text-xl font-semibold mb-2">Choose an Option</h2>
 
-    <UCard class="w-full text-center">
-      <h2 class="text-xl">Current Hand: {{pokerhand}}</h2>
-      <h2 class="text-xl font-semibold mb-4">Choose an Option</h2>
+        <div class="flex flex-col items-center gap-3 mb-2">
+          <UButton @click="Check" size="xl" class="centered-button">Check</UButton>
+          <UButton @click="Fold" size="xl" class="centered-button">Fold</UButton>
+          <UButton @click="Raise" size="xl" class="centered-button">Raise</UButton>
+        </div>
 
-      <div class="flex justify-center gap-4 mb-4">
-        <UButton @click="Check" size="xl" class="centered-button">Check</UButton>
-        <UButton @click="Fold" size="xl" class="centered-button">Fold</UButton>
-        <UButton @click="Raise" size="xl" class="centered-button">Raise</UButton>
-      </div>
+        <div v-if="showInput" class="mt-2">
+          <input
+              v-model.number="raiseAmount"
+              type="number"
+              min="1"
+              step="any"
+              placeholder="Enter raise amount"
+              class="border p-2 rounded-lg"
+          />
+        </div>
 
-      <!-- Conditional rendering for the raise amount input field -->
-      <div v-if="showInput" class="mt-4">
-        <input
-            v-model="raiseAmount"
-            type="number"
-            placeholder="Enter raise amount"
-            class="border p-2 rounded-lg"
-        />
-      </div>
-
-      <!-- Confirm button appears only when input field is visible -->
-      <div v-if="showInput" class="mt-4">
-        <UButton @click="ConfirmRaise" size="xl" class="centered-button">Confirm Raise</UButton>
-      </div>
-    </UCard>
+        <div v-if="showInput" class="mt-2">
+          <UButton @click="ConfirmRaise" size="xl" class="centered-button">Confirm Raise</UButton>
+        </div>
+      </UCard>
+    </transition>
+    <transition name="slide-to-left">
+    <!-- Toggle Button (right of the card) -->
+    <div class="flex items-center ml-2 mb-4">
+      <button @click="toggleWindow" class="bg-black bg-opacity-40 rounded-full p-2 hover:bg-opacity-60 transition-all">
+        <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="h-6 w-6 text-white transition-transform duration-300"
+            :class="{ 'rotate-180': !maximizeWindow }"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+        >
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+          <!-- This arrow points LEFT. Flipped when minimized -->
+        </svg>
+      </button>
+    </div>
+    </transition>
   </div>
-  </transition>
-  <!-- Chevron toggle icon (always visible, fixed at bottom center) -->
-  <div class="flex justify-center w-full mb-4">
-    <button @click="toggleWindow" class="bg-black bg-opacity-40 rounded-full p-2 hover:bg-opacity-60 transition-all">
-      <svg
-          xmlns="http://www.w3.org/2000/svg"
-          class="h-6 w-6 text-white transition-transform duration-300"
-          :class="{ 'rotate-180': maximizeWindow }"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-      >
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7" />
-      </svg>
-    </button>
-  </div>
+
 
 </template>
 
@@ -111,14 +115,16 @@ const raiseAmount = ref<number | null>(null); // State to hold the raised amount
 }
 .slide-fade-enter-active, .slide-fade-leave-active {
   transition: all 0.4s ease;
-  overflow: hidden;
-  max-height: 1000px; /* big enough to show all content */
 }
 
 .slide-fade-enter-from, .slide-fade-leave-to {
   opacity: 0;
-  transform: translateY(20px);
-  max-height: 0;
+  transform: translateX(-20px);
 }
+.slide-to-left{
+  transition: all 0.4s ease;
+  transform: translateX(-20px);
+}
+
 
 </style>

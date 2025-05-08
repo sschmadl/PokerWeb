@@ -47,7 +47,7 @@ const sendMessage = async () => {
 // Handle messages received from WebSocket
 const handleIncomingMessage = (data: any) => {
   console.log('Received WebSocket data:', data);
-
+  console.log(data);
   if (data.command === 'chat-message') {
     console.log('New chat message received:', data);
 

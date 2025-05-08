@@ -158,6 +158,7 @@ fetchCurrentPlayers();
         <UButton @click="flipCards" :style="{ zIndex: 20 }">Flip</UButton>
       </div>
     </div>
+
     <div class="player-wrapper">
       <div
           v-for="(player, index) in playerInfo"
@@ -181,15 +182,14 @@ fetchCurrentPlayers();
       </div>
     </div>
 
-
-    <div class="chat-area">
-      <!-- Chat component imported and displayed on the right -->
-      <Chat/>
-    </div>
-    <div class="bottom-menu">
-      <!-- Use the Action Buttons Component for Bottom Menu -->
-      <ActionButtons :style="{zIndex: 40}" />
-    </div>
+  </div>
+  <div class="chat-area">
+    <!-- Chat component imported and displayed on the right -->
+    <Chat/>
+  </div>
+  <div class="side_menu">
+    <!-- Use the Action Buttons Component for Bottom Menu -->
+    <ActionButtons :style="{zIndex: 40}" />
   </div>
 </template>
 
@@ -204,8 +204,10 @@ fetchCurrentPlayers();
 }
 
 .chat-area {
-  z-index: 15;
-
+  z-index: 50;
+  position: absolute;
+  right: 0;
+  bottom: 0;
 }
 
 .table-wrapper {
@@ -253,9 +255,9 @@ fetchCurrentPlayers();
   z-index: 50; /* higher than everything else */
 }
 
-.bottom-menu {
-  position: fixed;
-  bottom: 0;
+.side_menu {
+  position: absolute;
+  bottom: 30%;
   left: 0;
   width: 100%;
   z-index: 50; /* higher than others */

@@ -84,6 +84,7 @@ public class GameSessionManager {
                 String gameId = getIdFromWebsocketSession(webSocketSession);
                 GameSession gameSession = sessions.get(gameId);
                 gameSession.leave(player);
+                sessionToIdMap.remove(webSocketSession);
             }else {
 
             }

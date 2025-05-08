@@ -73,11 +73,6 @@ onMounted(() => {
   gameSocket.connect();
   gameSocket.onMessage(handleIncomingMessage);
 });
-
-onUnmounted(() => {
-  console.log('Chat component unmounted. Disconnecting WebSocket...');
-  gameSocket.disconnect(); // Optional, based on whether you want to persist the socket
-});
 </script>
 
 

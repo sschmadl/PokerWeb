@@ -122,8 +122,16 @@ gameSocket.onMessage((data) => {
   }
 });
 
+const route = useRoute();
+
 onMounted(() => {
-  gameSocket.connect();
+  gameSocket.connect(); // initial
+});
+
+
+
+onActivated(() => {
+  console.log('Test')
 });
 
 onBeforeUnmount(() => {
@@ -202,26 +210,26 @@ async function submit(tabType: string) {
 
             <div
                 v-for="(row, rowIndex) in gameTableRows.values()"
-            :key="rowIndex"
-            @click="onSelect(row)"
-            class="current-games flex px-4 py-2 rounded cursor-pointer transition-colors duration-200"
-            :class="selected?.name === row.name
+                :key="rowIndex"
+                @click="onSelect(row)"
+                class="current-games flex px-4 py-2 rounded cursor-pointer transition-colors duration-200"
+                :class="selected?.name === row.name
             ? 'bg-gray-200 dark:bg-gray-600'
             : 'hover:bg-gray-100 dark:hover:bg-gray-700'"
             >
             <span class="current-games-text flex-1 text-center text-sm text-gray-800 dark:text-gray-200">
                 {{ row.name }}
               </span>
-            <span class="current-games-text flex-1 text-center text-sm text-gray-800 dark:text-gray-200">
+              <span class="current-games-text flex-1 text-center text-sm text-gray-800 dark:text-gray-200">
                 {{ row.playerCount }}
               </span>
-            <span class="current-games-text flex-1 text-center text-sm text-gray-800 dark:text-gray-200">
+              <span class="current-games-text flex-1 text-center text-sm text-gray-800 dark:text-gray-200">
                 {{ row.smallBlind }}
               </span>
-            <span class="current-games-text flex-1 text-center text-sm text-gray-800 dark:text-gray-200">
+              <span class="current-games-text flex-1 text-center text-sm text-gray-800 dark:text-gray-200">
                 {{ row.bigBlind }}
               </span>
-          </div>
+            </div>
           </div>
 
           <div v-else-if="item.key === 'create-game'" class="space-y-3">

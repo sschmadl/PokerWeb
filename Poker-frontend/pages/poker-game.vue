@@ -3,6 +3,8 @@ import {onBeforeUnmount, onMounted, ref} from 'vue';
 import ActionButtons from '~/components/action-buttons.vue';
 import Chat from '~/components/Chat.vue';
 import {useUsername} from "~/composables/states";
+import {bool} from "yup";
+import {navigateTo} from "#app";
 
 const gameSocket = useGameSocket();
 
@@ -25,6 +27,7 @@ export type Player = {
 export type PlayerInfo = Player & {
   action: string;
   cards: [Card, Card];
+  highlighted: boolean;
 }
 
 
@@ -76,6 +79,7 @@ watch(players, () => {
     credits: player.credits,
     action: '',
     cards: [{}, {}],
+    highlighted: false,
   }));
 }, { deep: true });
 
@@ -86,11 +90,23 @@ async function fetchCurrentPlayers() {
   gameSocket.sendMessage(JSON.stringify(message));
 }
 
+function highlightPlayer(name: string): void {
+  console.log('Highlight');
+  playerInfo.value = playerInfo.value.map(player => ({
+    ...player,
+    highlighted: player.name === name,
+  }));
+}
+
+
 gameSocket.onMessage((data) => {
   console.log(data.command);
   switch(data.command) {
     case 'player-joined-game':
       players.value.push({name: data.name, credits: data.credits})
+      nextTick(() => {
+        highlightPlayer(data.name);
+      });
       break;
     case 'player-left':
       players.value = players.value.filter(player => player.name !== data.name);
@@ -106,6 +122,24 @@ gameSocket.onMessage((data) => {
       ];
       console.log('New Player data: ', players.value);
       break;
+    case 'player-next-turn':
+      highlightPlayer(data.name);
+      break;
+    case 'player-move-check':
+
+      break;
+    case 'player-move-fold':
+
+      break;
+    case 'player-move-call':
+
+      break;
+    case 'player-move-raise': // Raise / Bet
+
+      break;
+
+
+
   }
 });
 
@@ -120,7 +154,11 @@ onMounted(() => {
 
 onBeforeUnmount(() => {
   window.removeEventListener('resize', updateSizes);
-  gameSocket.disconnect();
+  const message = {
+    command: 'leave-game',
+  }
+  gameSocket.sendMessage(JSON.stringify(message));
+  navigateTo('/lobby-selection');
 });
 
 function flipCards() {
@@ -178,6 +216,7 @@ fetchCurrentPlayers();
             :player-money="player.credits"
             :player-action="player.action"
             :profile-picture="fetchProfilePictureUrl(player.name)"
+            :highlighted="player.highlighted"
         />
       </div>
     </div>

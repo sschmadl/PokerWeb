@@ -91,6 +91,11 @@ public class GameSessionManager {
         }catch (Exception e){
             e.printStackTrace();
         }
+    }
+
+    public void leaveDisconnect(String username, WebSocketSession webSocketSession){
+        leave(username, webSocketSession);
+        Player player = players.get(username).a;
         removePlayer(player);
     }
 

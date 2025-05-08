@@ -130,7 +130,7 @@ public class GameSessionWebsocketHandler extends TextWebSocketHandler {
     public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
         if (!session.getAttributes().containsKey("username")) return;
         String username = session.getAttributes().get("username").toString();
-        gameSessionManager.leave(username,session);
+        gameSessionManager.leaveDisconnect(username,session);
     }
 }
 

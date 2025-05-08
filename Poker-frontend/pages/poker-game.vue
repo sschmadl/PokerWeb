@@ -41,7 +41,6 @@ const cards = ref([
 ]);
 
 function fetchProfilePictureUrl(name: string): string {
-  console.log(`/user-info/${name}/profile-picture`);
   return `/user-info/${name}/profile-picture`;
 }
 

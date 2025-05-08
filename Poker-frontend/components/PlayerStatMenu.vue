@@ -11,8 +11,8 @@ const props = defineProps({
   cards: {
     type: Array as PropType<Array<Partial<Card>>>,
     default: () => [
-      { frontImage: '/cards_default/1J.svg', faceDown: true, highlighted: false },
-      { frontImage: '/cards_default/2J.svg', faceDown: true, highlighted: false },
+      {frontImage: '/cards_default/1J.svg', faceDown: true, highlighted: false},
+      {frontImage: '/cards_default/2J.svg', faceDown: true, highlighted: false},
     ]
   },
   profilePicture: {
@@ -31,6 +31,11 @@ const props = defineProps({
     type: String,
     default: '',
   },
+  highlighted: {
+    type: Boolean,
+    default: false
+  },
+
 });
 
 
@@ -43,10 +48,11 @@ const playerMoney = computed(() => props.playerMoney);
 const playerAction = computed(() => props.playerAction);
 const cards = computed(() => {
   return props.cards?.length ? props.cards : [
-    { frontImage: '/cards_default/1J.svg', faceDown: true, highlighted: false },
-    { frontImage: '/cards_default/2J.svg', faceDown: true, highlighted: false },
+    {frontImage: '/cards_default/1J.svg', faceDown: true, highlighted: false},
+    {frontImage: '/cards_default/2J.svg', faceDown: true, highlighted: false},
   ];
 });
+const highlighted = computed(() => props.highlighted);
 const profilePictureDiameter = computed(() => Math.floor(props.menuWidth * 0.4));
 const profilePictureTextMargin = computed(() => profilePictureDiameter.value * 0.2);
 const profilePictureMenuPadding = computed(() => profilePictureDiameter.value - profilePictureTextMargin.value + profilePictureDiameter.value * 0.05);
@@ -66,9 +72,14 @@ const personalCardHeight = computed(() => (userNameContainerHeight.value + poker
 <template>
   <div class="player-info-wrapper flex flex-col items-center w-auto">
     <!-- Profile & Cards Layout -->
-    <div class="menu-container" :style="{ width: menuWidth + 'px' }">
+    <div
+        class="menu-container"
+        :class="{ 'highlighted-menu': highlighted }"
+        :style="{ width: menuWidth + 'px' }"
+    >
       <!-- Profile picture (Adjust position) -->
-      <div class="player-profile-picture-container" :style="{ position: 'absolute', zIndex: 5, top: menuWidth/3 + 'px', left: menuWidth/50 + 'px' }">
+      <div class="player-profile-picture-container"
+           :style="{ position: 'absolute', zIndex: 5, top: menuWidth/3 + 'px', left: menuWidth/50 + 'px' }">
         <img
             :src="cacheBustedProfilePicture"
             class="profile-picture"
@@ -179,7 +190,9 @@ const personalCardHeight = computed(() => (userNameContainerHeight.value + poker
   white-space: nowrap;
   overflow: hidden;
   width: 100%;
+  line-height: 1.4;
 }
+
 
 .player-pokerhand-money-container {
   position: relative;
@@ -200,4 +213,11 @@ const personalCardHeight = computed(() => (userNameContainerHeight.value + poker
   display: flex;
   align-items: center;
 }
+
+.highlighted-menu {
+  box-shadow: 0 0 1000px 4px rgba(255, 215, 0, 0.7); /* Gold glow effect */
+  border-radius: 12px;
+  transition: box-shadow 0.3s ease;
+}
+
 </style>

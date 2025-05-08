@@ -21,27 +21,19 @@ let cards = ref([
     <NavBar/>
     <div class="flex flex-col justify-center items-center text-9xl gap-10">
       <h1>∑ - Pσker</h1>
-      <PlayerStats
-          :menu-width="300"
-          :cards="cards"
-          :player-action="'Raise: 500€'"
-          :player-money="'1250'"
-          :player-name="'Sigmabrand'"
 
-      />
-      <PlayerStats
-          :menu-width="500"
-          :cards="cards"
-          :player-money="'2250'"
-          :player-name="'Gazelle'"
-      />
-      <PlayerStats
-          :menu-width="700"
-          :cards="cards"
-          :player-action="'Check'"
-          :player-money="'10'"
-          :player-name="'Weimarer'"
-      />
+      <PlayerStatMenu
+      :highlighted="false"
+      :profile-picture="'/default_profile_picture.jpg'"
+      :player-action="'Check'"
+      :player-money="500"
+      :player-name="'Bing Bong'"
+      :cards="[]"
+      :menu-width="400"
+      :profile-border-color="'#fff'"
+      >
+
+      </PlayerStatMenu>
 
       <UButton class="text-8xl py-4 px-20" variant="solid" @click="onPlayPressed">Play</UButton>
     </div>

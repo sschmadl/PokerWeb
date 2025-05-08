@@ -97,6 +97,10 @@ public class GameSessionWebsocketHandler extends TextWebSocketHandler {
                 List<Player> playerOrder = gameSession.getPlayerOrder();
                 CurrentPlayersInfoCommand currentPlayersInfoCommand = new CurrentPlayersInfoCommand(playerOrder);
                 session.sendMessage(new TextMessage(gson.toJson(currentPlayersInfoCommand)));
+                break;
+            case "leave-game":
+                String username = session.getAttributes().get("username").toString();
+                gameSessionManager.leave(username,session);
         }
     }
 

@@ -155,7 +155,7 @@ fetchCurrentPlayers();
           />
         </div>
 
-        <UButton @click="flipCards" :style="{ zIndex: 20 }">Flip</UButton>
+        <UButton @click="flipCards" :style="{ zIndex: 30 }">Flip</UButton>
       </div>
     </div>
 
@@ -204,7 +204,7 @@ fetchCurrentPlayers();
 }
 
 .chat-area {
-  z-index: 50;
+  z-index: 20;
   position: absolute;
   right: 0;
   bottom: 0;
@@ -243,23 +243,16 @@ fetchCurrentPlayers();
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 10;
+  z-index: 30;
   user-select: none;
   pointer-events: none;
-}
-
-.chat-area {
-  position: fixed; /* important */
-  right: 1rem;
-  top: 1rem;
-  z-index: 50; /* higher than everything else */
 }
 
 .side_menu {
   position: absolute;
   bottom: 30%;
   left: 0;
-  width: 100%;
+  width: 15%;
   z-index: 50; /* higher than others */
   padding: 1rem 0;
 }

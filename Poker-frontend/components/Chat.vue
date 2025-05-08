@@ -45,7 +45,7 @@ const sendMessage = async () => {
 };
 
 // Handle messages received from WebSocket
-const handleIncomingMessage = (data: any) => {
+const handleIncomingMessage = async (data: any) => {
   console.log('Received WebSocket data:', data);
   console.log(data);
   if (data.command === 'chat-message') {
@@ -56,11 +56,12 @@ const handleIncomingMessage = (data: any) => {
       message: data.message,
     });
 
-    nextTick(() => {
-      if (isNearBottom() && chatMessagesRef.value) {
-        chatMessagesRef.value.scrollTop = chatMessagesRef.value.scrollHeight;
-      }
-    });
+    await nextTick();
+    if (chatMessagesRef.value) {
+      chatMessagesRef.value.scrollTop = chatMessagesRef.value.scrollHeight;
+    }
+
+
   } else {
     console.log('Unknown command received:', data.command);
   }
@@ -114,7 +115,7 @@ onUnmounted(() => {
   justify-content: flex-start;
   align-items: center;
   width: 300px;
-  max-height: 80vh;
+  max-height: 500px;
   background-color: rgba(0, 0, 0, 0.6);
   padding: 10px;
   position: absolute;
@@ -126,7 +127,7 @@ onUnmounted(() => {
 
 .chat-messages {
   width: 100%;
-  max-height: 200px;
+  max-height: 90%;
   overflow-y: auto;
   margin-bottom: 10px;
 }

@@ -3,12 +3,12 @@ import { ref } from 'vue';
 
 const Check = () => {
   console.log("Check");
-  showInput.value=false;
+  showInput.value = false;
 };
 
 const Fold = () => {
   console.log("Fold");
-  showInput.value=false;
+  showInput.value = false;
 };
 
 const Raise = () => {
@@ -18,13 +18,13 @@ const Raise = () => {
 
 const MinimizeWindow = () => {
   console.log("MinimizeWindow");
-  maximizeWindow.value=false;
-}
+  maximizeWindow.value = false;
+};
 
 const MaximizeWindow = () => {
   console.log("MaximizeWindow");
-  maximizeWindow.value=true;
-}
+  maximizeWindow.value = true;
+};
 
 const ConfirmRaise = () => {
   // Check if the input is a valid number and greater than 0
@@ -44,11 +44,10 @@ const toggleWindow = () => {
   console.log(maximizeWindow.value ? "Maximized" : "Minimized");
 };
 
-
 let showInput = ref(false); // State to show/hide the input field
 let maximizeWindow = ref(true);
-let pokerhand = ref("Four of a Kind")
-const raiseAmount = ref<number | null>(null); // State to hold the raised amount
+let pokerhand = ref("Four of a Kind");
+let raiseAmount = ref<number | null>(null); // State to hold the raised amount
 </script>
 
 <template>
@@ -81,9 +80,9 @@ const raiseAmount = ref<number | null>(null); // State to hold the raised amount
         </div>
       </UCard>
     </transition>
-    <transition name="slide-to-left">
-    <!-- Toggle Button (right of the card) -->
-    <div class="flex items-center ml-2 mb-4">
+
+    <!-- The toggle button (Always visible, separate from the card) -->
+    <div class="fixed top-1/2 left-4 transform -translate-y-1/2 z-10">
       <button @click="toggleWindow" class="bg-black bg-opacity-40 rounded-full p-2 hover:bg-opacity-60 transition-all">
         <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -94,14 +93,10 @@ const raiseAmount = ref<number | null>(null); // State to hold the raised amount
             stroke="currentColor"
         >
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-          <!-- This arrow points LEFT. Flipped when minimized -->
         </svg>
       </button>
     </div>
-    </transition>
   </div>
-
-
 </template>
 
 <style scoped>
@@ -109,10 +104,10 @@ const raiseAmount = ref<number | null>(null); // State to hold the raised amount
   color: white;
   background-color: darkcyan;
   width: 150px;
-
   justify-content: center;
   align-items: center;
 }
+
 .slide-fade-enter-active, .slide-fade-leave-active {
   transition: all 0.4s ease;
 }
@@ -121,10 +116,16 @@ const raiseAmount = ref<number | null>(null); // State to hold the raised amount
   opacity: 0;
   transform: translateX(-20px);
 }
-.slide-to-left{
-  transition: all 0.4s ease;
-  transform: translateX(-20px);
+
+.fixed {
+  position: fixed;
 }
 
+.transform {
+  transform: translateY(-50%);
+}
 
+.z-10 {
+  z-index: 10;
+}
 </style>

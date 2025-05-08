@@ -112,7 +112,7 @@ public class GameSession {
         ReentrantLock lock = lobbyLocks.computeIfAbsent(gameId, id -> new ReentrantLock());
         lock.lock();
         try {
-            broadCastExceptSender(chatMessageCommand.getSender(), gson.toJson(chatMessageCommand.getMessage()));
+            broadCastExceptSender(chatMessageCommand.getSender(), gson.toJson(chatMessageCommand));
         }catch (Exception e){
             e.printStackTrace();
         }finally {

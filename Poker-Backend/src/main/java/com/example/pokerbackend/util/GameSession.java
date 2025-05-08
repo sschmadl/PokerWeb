@@ -73,6 +73,7 @@ public class GameSession {
     }
 
     public void broadCastExceptSender(String sendingPlayer, String message){
+        System.out.println("broadcast: " + message);
         for (Pair<Player, WebSocketSession> pair : players.values()) {
             if (sendingPlayer.equals(pair.a.getName())) continue;
             try {
@@ -112,7 +113,7 @@ public class GameSession {
         ReentrantLock lock = lobbyLocks.computeIfAbsent(gameId, id -> new ReentrantLock());
         lock.lock();
         try {
-            broadCastExceptSender(chatMessageCommand.getSender(), gson.toJson(chatMessageCommand));
+            broadCast(gson.toJson(chatMessageCommand));
         }catch (Exception e){
             e.printStackTrace();
         }finally {

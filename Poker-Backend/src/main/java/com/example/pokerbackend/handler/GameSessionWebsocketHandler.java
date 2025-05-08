@@ -53,7 +53,14 @@ public class GameSessionWebsocketHandler extends TextWebSocketHandler {
 
         String username = jwtUtil.extractUsername(token);
         System.out.println("Session opened: " + username);
-
+        if (gameSessionManager.playerIsAlreadyConnected(username)) {
+            ServerMessageCommand serverMessageCommand = new ServerMessageCommand(":(","Someone is already connected with your account","red");
+            session.sendMessage(new TextMessage(gson.toJson(serverMessageCommand)));
+            RedirectCommand redirectCommand = new RedirectCommand("/");
+            session.sendMessage(new TextMessage(gson.toJson(redirectCommand)));
+            session.close();
+            return;
+        }
         session.getAttributes().put("username", username);
         Player player = playerFactory.createPlayer(username);
         gameSessionManager.addPlayer(player, session);
@@ -117,6 +124,7 @@ public class GameSessionWebsocketHandler extends TextWebSocketHandler {
 
     @Override
     public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
+        if (!session.getAttributes().containsKey("username")) return;
         String username = session.getAttributes().get("username").toString();
         gameSessionManager.leave(username,session);
     }

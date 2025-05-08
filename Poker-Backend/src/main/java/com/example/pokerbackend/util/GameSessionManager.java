@@ -104,4 +104,8 @@ public class GameSessionManager {
     public GameSession getGameSession(String gameId){
         return sessions.get(gameId);
     }
+
+    public boolean playerIsAlreadyConnected(String username){
+        return players.containsKey(username);
+    }
 }

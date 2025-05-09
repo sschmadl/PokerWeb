@@ -33,9 +33,12 @@ const props = defineProps({
   },
   highlighted: {
     type: Boolean,
-    default: false
+    default: false,
   },
-
+  isAdmin: {
+    type: Boolean,
+    default: false,
+  }
 });
 
 
@@ -53,6 +56,7 @@ const cards = computed(() => {
   ];
 });
 const highlighted = computed(() => props.highlighted);
+const isAdmin = computed(() => props.isAdmin);
 const profilePictureDiameter = computed(() => Math.floor(props.menuWidth * 0.4));
 const profilePictureTextMargin = computed(() => profilePictureDiameter.value * 0.2);
 const profilePictureMenuPadding = computed(() => profilePictureDiameter.value - profilePictureTextMargin.value + profilePictureDiameter.value * 0.05);
@@ -74,7 +78,6 @@ const personalCardHeight = computed(() => (userNameContainerHeight.value + poker
     <!-- Profile & Cards Layout -->
     <div
         class="menu-container"
-        :class="{ 'highlighted-menu': highlighted }"
         :style="{ width: menuWidth + 'px' }"
     >
       <!-- Profile picture (Adjust position) -->
@@ -154,20 +157,58 @@ const personalCardHeight = computed(() => (userNameContainerHeight.value + poker
           }"></div>
         </div>
 
-        <!-- Action Section -->
+        <!-- Action + Turn Section Side-by-Side -->
+        <div class="flex justify-between w-full" :style="{ width: informationContainerWidth + 'px' }">
+          <!-- Action Section (Left aligned) -->
+          <div
+              v-if="playerAction && playerAction.trim() !== ''"
+              class="player-action-bar bg-yellow-300 dark:bg-yellow-600 text-black dark:text-white"
+              :style="{
+        width: '69%',
+        fontSize: Math.floor(menuWidth * 0.04) + 'px',
+        padding: '2px 6px',
+        textAlign: 'center',
+        borderRadius: '0 0 6px 6px',
+        marginTop: '-2px',
+      }"
+          >
+            {{ playerAction }}
+          </div>
+
+          <!-- Turn Section (Right aligned) -->
+          <div
+              v-if="highlighted"
+              class="player-action-bar bg-purple-300 dark:bg-purple-600 text-black dark:text-white"
+              :style="{
+        width: '29%',
+        fontSize: Math.floor(menuWidth * 0.04) + 'px',
+        padding: '2px 6px',
+        textAlign: 'center',
+        borderRadius: '0 0 6px 6px',
+        marginTop: '-2px',
+      }"
+          >
+            Turn
+          </div>
+        </div>
+
         <div
-            v-if="playerAction && playerAction.trim() !== ''"
-            class="player-action-bar bg-yellow-300 dark:bg-yellow-500 text-black dark:text-black"
+            class="player-crown-container"
+            v-if="isAdmin"
             :style="{
-              width: informationContainerWidth + 'px',
-              fontSize: Math.floor(menuWidth * 0.04) + 'px',
-              padding: '2px 6px',
-              textAlign: 'left',
-              borderRadius: '0 0 6px 6px',
-              marginTop: '-2px',
-            }"
+    position: 'absolute',
+    top: (menuWidth / 3 - profilePictureDiameter * 0.4) + 'px',
+    left: menuWidth / 50 + profilePictureDiameter * 0.25 + 'px',
+    zIndex: 6,
+    width: profilePictureDiameter * 0.5 + 'px',
+    height: profilePictureDiameter * 0.5 + 'px',
+  }"
         >
-          {{ playerAction }}
+          <img
+              src="/Crown.svg"
+              alt="Crown"
+              style="width: 100%; height: 100%; object-fit: contain"
+          />
         </div>
       </div>
 
@@ -212,12 +253,6 @@ const personalCardHeight = computed(() => (userNameContainerHeight.value + poker
   position: relative;
   display: flex;
   align-items: center;
-}
-
-.highlighted-menu {
-  box-shadow: 0 0 1000px 4px rgba(255, 215, 0, 0.7); /* Gold glow effect */
-  border-radius: 12px;
-  transition: box-shadow 0.3s ease;
 }
 
 </style>

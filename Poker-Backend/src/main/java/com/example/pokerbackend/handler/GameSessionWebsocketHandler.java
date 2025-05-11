@@ -101,6 +101,10 @@ public class GameSessionWebsocketHandler extends TextWebSocketHandler {
             case "leave-game":
                 String username = session.getAttributes().get("username").toString();
                 gameSessionManager.leave(username, session);
+                break;
+            case "game-start":
+                gameSessionManager.startGame(session);
+                break;
         }
     }
 

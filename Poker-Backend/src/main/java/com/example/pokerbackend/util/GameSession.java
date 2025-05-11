@@ -24,6 +24,7 @@ public class GameSession {
     private Gson gson = new Gson();
     private String admin;
     private boolean isJoinable = true;
+    private int smallBlindIndex = 0;
 
 
     private final int MAX_PLAYERS;
@@ -136,6 +137,20 @@ public class GameSession {
             if (players.isEmpty()) {
                 gameSessionManager.removeSession(this.gameId);
             }
+        }catch (Exception e){
+            e.printStackTrace();
+        }finally {
+            lock.unlock();
+        }
+    }
+
+    public void startGame(){
+        ReentrantLock lock = lobbyLocks.computeIfAbsent(gameId, id -> new ReentrantLock());
+        lock.lock();
+        try {
+            isJoinable = false;
+            UpdateGameState updateGameState = new UpdateGameState(true);
+            broadCast(gson.toJson(updateGameState));
         }catch (Exception e){
             e.printStackTrace();
         }finally {

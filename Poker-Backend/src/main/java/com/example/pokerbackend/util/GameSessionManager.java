@@ -116,4 +116,10 @@ public class GameSessionManager {
     public boolean playerIsAlreadyConnected(String username){
         return players.containsKey(username);
     }
+
+    public void startGame(WebSocketSession webSocketSession){
+        String gameId = sessionToIdMap.get(webSocketSession);
+        GameSession gameSession = sessions.get(gameId);
+        gameSession.startGame();
+    }
 }

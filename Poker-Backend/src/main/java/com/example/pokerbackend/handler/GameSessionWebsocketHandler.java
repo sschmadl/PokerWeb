@@ -95,7 +95,7 @@ public class GameSessionWebsocketHandler extends TextWebSocketHandler {
                 String gameId = gameSessionManager.getIdFromWebsocketSession(session);
                 GameSession gameSession = gameSessionManager.getGameSession(gameId);
                 List<Player> playerOrder = gameSession.getPlayerOrder();
-                CurrentPlayersInfoCommand currentPlayersInfoCommand = new CurrentPlayersInfoCommand(playerOrder);
+                CurrentPlayersInfoCommand currentPlayersInfoCommand = new CurrentPlayersInfoCommand(playerOrder, gameSession.getAdmin());
                 session.sendMessage(new TextMessage(gson.toJson(currentPlayersInfoCommand)));
                 break;
             case "leave-game":
@@ -114,7 +114,7 @@ public class GameSessionWebsocketHandler extends TextWebSocketHandler {
         GameSession gameSession = gameSessionManager.createSession(lobbyName, smallBlind, bigBlind, maxPlayerCount, session);
         try {
             session.sendMessage(new TextMessage("success"));
-            CurrentPlayersInfoCommand currentPlayersInfoCommand = new CurrentPlayersInfoCommand(gameSession.getPlayerOrder());
+            CurrentPlayersInfoCommand currentPlayersInfoCommand = new CurrentPlayersInfoCommand(gameSession.getPlayerOrder(), gameSession.getAdmin());
             session.sendMessage(new TextMessage(gson.toJson(currentPlayersInfoCommand)));
         } catch (Exception e) {
             e.printStackTrace();

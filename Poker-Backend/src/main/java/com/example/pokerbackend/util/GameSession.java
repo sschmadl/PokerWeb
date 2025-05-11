@@ -22,6 +22,8 @@ public class GameSession {
     private static final Map<String, ReentrantLock> lobbyLocks = new ConcurrentHashMap<>();
     private static final GameSessionManager gameSessionManager = GameSessionManager.getInstance();
     private Gson gson = new Gson();
+    private String admin;
+    private boolean isJoinable = true;
 
 
     private final int MAX_PLAYERS;
@@ -53,6 +55,7 @@ public class GameSession {
     }
 
     public void addPlayer(Player player, WebSocketSession session){
+        if (playerOrder.isEmpty()) admin = player.getName();
         players.put(player.getName(), new Pair<>(player, session));
         playerOrder.add(player);
     }
@@ -89,10 +92,9 @@ public class GameSession {
         lock.lock();
         Gson gson = new Gson();
         try {
-            if(players.containsKey(player.getName())){
-                //do nothing to prevent
-                System.out.println("Player " + player.getName() + " is already in game");
-            }else if (players.size() == MAX_PLAYERS) {
+            if(!isJoinable){
+                session.sendMessage(new TextMessage(gson.toJson(new ServerMessageCommand("Failed to joing","Table is already playing","red"))));
+            } else if (players.size() == MAX_PLAYERS) {
                 session.sendMessage(new TextMessage(gson.toJson(JoinGameStatus.joinFailed("Lobby is full"))));
             }else {
                 addPlayer(player, session);
@@ -143,5 +145,13 @@ public class GameSession {
 
     public List<Player> getPlayerOrder() {
         return playerOrder;
+    }
+
+    public String getAdmin() {
+        return admin;
+    }
+
+    public void setAdmin(String admin) {
+        this.admin = admin;
     }
 }

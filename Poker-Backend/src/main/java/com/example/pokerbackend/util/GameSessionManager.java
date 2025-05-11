@@ -68,7 +68,9 @@ public class GameSessionManager {
     public void joinGame(WebSocketSession webSocketSession, String username, String gameId){
         Player player = players.get(username).a;
         GameSession session = sessions.get(gameId);
-        session.joinGame(player, webSocketSession);
+        if (!sessionToIdMap.containsKey(webSocketSession)) {
+            session.joinGame(player, webSocketSession);
+        }
     }
 
     public void sendMessage(WebSocketSession webSocketSession, ChatMessageCommand chatMessageCommand){

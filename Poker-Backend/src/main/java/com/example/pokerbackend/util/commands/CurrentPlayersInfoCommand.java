@@ -10,8 +10,9 @@ import java.util.Map;
 public class CurrentPlayersInfoCommand {
     String command = "current-players-info";
     List<Map<Object,Object>> players = new ArrayList();
+    String admin;
 
-    public CurrentPlayersInfoCommand(List<Player> players) {
+    public CurrentPlayersInfoCommand(List<Player> players, String admin) {
         for (Player player : players) {
             Map<Object,Object> map = new HashMap<>();
             map.put("name", player.getName());

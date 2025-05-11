@@ -169,4 +169,12 @@ public class GameSession {
     public void setAdmin(String admin) {
         this.admin = admin;
     }
+
+    public boolean isJoinable() {
+        return isJoinable;
+    }
+
+    public void setJoinable(boolean joinable) {
+        isJoinable = joinable;
+    }
 }

@@ -40,7 +40,9 @@ public class GameSessionManager {
     public List<Map<String, Object>> getGameSessionInfos() {
         List<Map<String, Object>> sessionInfo = new ArrayList<>();
         for (GameSession session : sessions.values()) {
-            sessionInfo.add(session.getGameInfo());
+            if (session.isJoinable()) {
+                sessionInfo.add(session.getGameInfo());
+            }
         }
         return sessionInfo;
     }

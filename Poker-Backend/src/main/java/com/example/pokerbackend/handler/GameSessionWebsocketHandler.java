@@ -74,37 +74,43 @@ public class GameSessionWebsocketHandler extends TextWebSocketHandler {
     protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
         String messageContent = message.getPayload();
         Gson gson = new Gson();
-        Map<String, Object> map = gson.fromJson(messageContent, Map.class);
-        System.out.println(messageContent);
-        switch (map.get("command").toString()) {
-            case "create-game":
-                System.out.println("Creating game");
-                CreateGameCommand createGameCommand = gson.fromJson(messageContent, CreateGameCommand.class);
-                createLobby(session, createGameCommand);
-                break;
-            case "join-game":
-                JoinGameCommand joinGameCommand = gson.fromJson(messageContent, JoinGameCommand.class);
-                joinGame(session, joinGameCommand);
-                break;
-            case "chat-message":
-                ChatMessageCommand chatMessageCommand = gson.fromJson(messageContent, ChatMessageCommand.class);
-                chatMessageCommand.setSender(session.getAttributes().get("username").toString());
-                gameSessionManager.sendMessage(session, chatMessageCommand);
-                break;
-            case "current-players-info":
-                String gameId = gameSessionManager.getIdFromWebsocketSession(session);
-                GameSession gameSession = gameSessionManager.getGameSession(gameId);
-                List<Player> playerOrder = gameSession.getPlayerOrder();
-                CurrentPlayersInfoCommand currentPlayersInfoCommand = new CurrentPlayersInfoCommand(playerOrder, gameSession.getAdmin());
-                session.sendMessage(new TextMessage(gson.toJson(currentPlayersInfoCommand)));
-                break;
-            case "leave-game":
-                String username = session.getAttributes().get("username").toString();
-                gameSessionManager.leave(username, session);
-                break;
-            case "game-start":
-                gameSessionManager.startGame(session);
-                break;
+        System.out.println("received Command: " + messageContent);
+        try {
+            Map<String, Object> map = gson.fromJson(messageContent, Map.class);
+            System.out.println(messageContent);
+            switch (map.get("command").toString()) {
+                case "create-game":
+                    System.out.println("Creating game");
+                    CreateGameCommand createGameCommand = gson.fromJson(messageContent, CreateGameCommand.class);
+                    createLobby(session, createGameCommand);
+                    break;
+                case "join-game":
+                    JoinGameCommand joinGameCommand = gson.fromJson(messageContent, JoinGameCommand.class);
+                    joinGame(session, joinGameCommand);
+                    break;
+                case "chat-message":
+                    ChatMessageCommand chatMessageCommand = gson.fromJson(messageContent, ChatMessageCommand.class);
+                    chatMessageCommand.setSender(session.getAttributes().get("username").toString());
+                    gameSessionManager.sendMessage(session, chatMessageCommand);
+                    break;
+                case "current-players-info":
+                    String gameId = gameSessionManager.getIdFromWebsocketSession(session);
+                    GameSession gameSession = gameSessionManager.getGameSession(gameId);
+                    List<Player> playerOrder = gameSession.getPlayerOrder();
+                    CurrentPlayersInfoCommand currentPlayersInfoCommand = new CurrentPlayersInfoCommand(playerOrder, gameSession.getAdmin());
+                    session.sendMessage(new TextMessage(gson.toJson(currentPlayersInfoCommand)));
+                    break;
+                case "leave-game":
+                    String username = session.getAttributes().get("username").toString();
+                    gameSessionManager.leave(username, session);
+                    break;
+                case "game-start":
+                    gameSessionManager.startGame(session);
+                    break;
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+            session.sendMessage(new TextMessage(gson.toJson(new ServerMessageCommand("Error","Illegal command","red"))));
         }
     }
 

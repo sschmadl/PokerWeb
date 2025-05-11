@@ -7,6 +7,8 @@ import {bool} from "yup";
 import {navigateTo} from "#app";
 
 const gameSocket = useGameSocket();
+const selfUsername = useUsername().value;
+let gameRunning = ref(false);
 
 const tableDiameter = ref(window.innerWidth / 2.5);
 const playerWidth = ref(tableDiameter.value / 3.5);
@@ -28,19 +30,18 @@ export type PlayerInfo = Player & {
   action: string;
   cards: [Card, Card];
   highlighted: boolean;
+  admin: boolean;
 }
 
-
-const players = ref<Player[]>([]);
 const playerInfo = ref<PlayerInfo[]>([]);
 
 
-const cards = ref([
-  {frontImage: '/cards_default/TS.svg', faceDown: false, highlighted: false},
-  {frontImage: '/cards_default/TH.svg', faceDown: false, highlighted: false},
-  {frontImage: '/cards_default/TC.svg', faceDown: false, highlighted: false},
-  {frontImage: '/cards_default/TD.svg', faceDown: false, highlighted: false},
-  {frontImage: '/cards_default/AS.svg', faceDown: false, highlighted: false},
+const cards = ref<Card[]>([
+  {faceDown: true, highlighted: false},
+  {faceDown: true, highlighted: false},
+  {faceDown: true, highlighted: false},
+  {faceDown: true, highlighted: false},
+  {faceDown: true, highlighted: false},
 ]);
 
 function fetchProfilePictureUrl(name: string): string {
@@ -52,14 +53,14 @@ const cardHeight = ref(tableDiameter.value / 7);
 
 function calculatePlayerPositions() {
   const radius = tableDiameter.value / 2;
-  const numPlayers = players.value.length;
+  const numPlayers = playerInfo.value.length;
 
   const positions = [];
   for (let i = 0; i < numPlayers; i++) {
     const angle = (2 * Math.PI * i) / numPlayers - Math.PI / 2; // start at top center
     const x = radius * Math.cos(angle);
     const y = radius * Math.sin(angle);
-    positions.push({ x, y });
+    positions.push({x, y});
   }
 
   playerPositions.value = positions;
@@ -72,16 +73,9 @@ function updateSizes() {
   calculatePlayerPositions();
 }
 
-watch(players, () => {
+watch(playerInfo, () => {
   calculatePlayerPositions();
-  playerInfo.value = players.value.map(player => ({
-    name: player.name,
-    credits: player.credits,
-    action: '',
-    cards: [{}, {}],
-    highlighted: false,
-  }));
-}, { deep: true });
+}, {deep: true});
 
 async function fetchCurrentPlayers() {
   const message = {
@@ -101,26 +95,47 @@ function highlightPlayer(name: string): void {
 
 gameSocket.onMessage((data) => {
   console.log(data.command);
-  switch(data.command) {
+  switch (data.command) {
     case 'player-joined-game':
-      players.value.push({name: data.name, credits: data.credits})
-      nextTick(() => {
-        highlightPlayer(data.name);
-      });
+      playerInfo.value.push({
+        name: data.name,
+        credits: data.credits,
+        action: '',
+        cards: [{}, {}],
+        highlighted: false,
+        admin: false,
+      })
       break;
     case 'player-left':
-      players.value = players.value.filter(player => player.name !== data.name);
+      playerInfo.value = playerInfo.value.filter(player => player.name !== data.name);
       break;
     case 'current-players-info':
-      const username = useUsername().value;
-      const playerData = data.players as Player[];
+      const adminUser = data.admin;
+      console.log(adminUser);
+      let playerData = data.players as Player[];
       console.log('Player data: ', playerData);
 
-      players.value = [
-        ...playerData.filter(p => p.name === username),
-        ...playerData.filter(p => p.name !== username),
+      playerData = [
+        ...playerData.filter(p => p.name === selfUsername),
+        ...playerData.filter(p => p.name !== selfUsername),
       ];
-      console.log('New Player data: ', players.value);
+
+      playerInfo.value = playerData.map(player => ({
+        name: player.name,
+        credits: player.credits,
+        action: '',
+        cards: [{}, {}],
+        highlighted: false,
+        admin: false,
+      }));
+
+
+
+      const adminPlayer = playerInfo.value.find(p => p.name === adminUser);
+      if (adminPlayer) {
+        adminPlayer.admin = true
+      }
+      console.log('Admin player: ', adminPlayer);
       break;
     case 'player-next-turn':
       highlightPlayer(data.name);
@@ -137,7 +152,9 @@ gameSocket.onMessage((data) => {
     case 'player-move-raise': // Raise / Bet
 
       break;
-
+    case 'update-game-state':
+      gameRunning.value = data.gameRunning;
+      break;
 
 
   }
@@ -166,6 +183,7 @@ function flipCards() {
     card.faceDown = !card.faceDown;
   });
 }
+
 fetchCurrentPlayers();
 </script>
 
@@ -181,8 +199,11 @@ fetchCurrentPlayers();
           height: tableDiameter + 'px',
         }"></div>
 
+        <div class="start-button-container z-50" v-if="playerInfo.find(p => p.name === selfUsername)?.admin && !gameRunning">
+          <GameStartButton />
+        </div>
 
-        <div class="community-cards">
+        <div class="community-cards" v-if="gameRunning">
           <Card
               v-for="(card, index) in cards"
               :key="index"
@@ -217,6 +238,7 @@ fetchCurrentPlayers();
             :player-action="player.action"
             :profile-picture="fetchProfilePictureUrl(player.name)"
             :highlighted="player.highlighted"
+            :is-admin="player.admin"
         />
       </div>
     </div>
@@ -228,7 +250,7 @@ fetchCurrentPlayers();
   </div>
   <div class="side_menu">
     <!-- Use the Action Buttons Component for Bottom Menu -->
-    <ActionButtons :style="{zIndex: 40}" />
+    <ActionButtons :style="{zIndex: 40}"/>
   </div>
 </template>
 
@@ -255,6 +277,7 @@ fetchCurrentPlayers();
   justify-content: center;
   align-items: center;
 }
+
 .player-wrapper {
   position: absolute;
   top: 50%;

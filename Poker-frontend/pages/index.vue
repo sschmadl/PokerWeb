@@ -23,7 +23,7 @@ let cards = ref([
       <h1>∑ - Pσker</h1>
 
       <PlayerStatMenu
-      :highlighted="false"
+      :highlighted="true"
       :profile-picture="'/default_profile_picture.jpg'"
       :player-action="'Check'"
       :player-money="500"
@@ -31,6 +31,7 @@ let cards = ref([
       :cards="[]"
       :menu-width="400"
       :profile-border-color="'#fff'"
+      :is-admin="true"
       >
 
       </PlayerStatMenu>

@@ -19,6 +19,7 @@ public class CurrentPlayersInfoCommand {
             map.put("credits", player.getCredits());
             this.players.add(map);
         }
+        this.admin = admin;
     }
 
     public String getCommand() {

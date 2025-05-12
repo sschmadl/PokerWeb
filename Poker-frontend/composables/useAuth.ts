@@ -2,16 +2,17 @@ export const useAuth = () => {
     const username = useUsername();
     const jwt = useJWT();
 
-    const login = (newUsername: string, token: string) => {
+    const login = async (newUsername: string, token: string) => {
         username.value = newUsername;
         jwt.value = token;
-        navigateTo('/')
+        console.log(token);
+        await navigateTo('/');
     };
 
-    const logout = () => {
+    const logout = async () => {
         username.value = '';
         jwt.value = '';
-        navigateTo('/login');
+        await navigateTo('/login');
     };
 
     return { login, logout };

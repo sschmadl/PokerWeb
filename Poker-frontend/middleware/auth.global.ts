@@ -1,5 +1,4 @@
 import { isLoggedIn } from "~/composables/states";
-import {fetchExistingGames} from "~/pages/lobby-selection.vue";
 
 export default defineNuxtRouteMiddleware(async (to) => {
     const publicPages = ['/login', '/', '/register'];

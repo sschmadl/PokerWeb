@@ -3,7 +3,6 @@ import {onBeforeUnmount, onMounted, ref} from 'vue';
 import ActionButtons from '~/components/action-buttons.vue';
 import Chat from '~/components/Chat.vue';
 import {useUsername} from "~/composables/states";
-import {bool} from "yup";
 import {navigateTo} from "#app";
 
 const gameSocket = useGameSocket();

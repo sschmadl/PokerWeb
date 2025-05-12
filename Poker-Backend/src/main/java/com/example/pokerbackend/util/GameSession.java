@@ -156,6 +156,16 @@ public class GameSession {
             }
             communityCards.addAll(deck.dealCommunityCards());
             dealCardsToPlayers();
+
+            // Test Flop, Turn, River
+            Thread.sleep(1000);
+            broadCast(gson.toJson(new FlopCommand(communityCards.subList(0,3))));
+            Thread.sleep(1000);
+            broadCast(gson.toJson(new TurnCommand(communityCards.get(3))));
+            Thread.sleep(1000);
+            broadCast(gson.toJson(new TurnCommand(communityCards.get(4))));
+
+
         }catch (Exception e){
             e.printStackTrace();
         }finally {

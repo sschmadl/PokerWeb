@@ -5,7 +5,6 @@ export const useAuth = () => {
     const login = async (newUsername: string, token: string) => {
         username.value = newUsername;
         jwt.value = token;
-        console.log(token);
         await navigateTo('/');
     };
 

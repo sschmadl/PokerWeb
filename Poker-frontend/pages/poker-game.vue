@@ -4,6 +4,7 @@ import ActionButtons from '~/components/action-buttons.vue';
 import Chat from '~/components/Chat.vue';
 import {useUsername} from "~/composables/states";
 import {navigateTo} from "#app";
+import {getCardByString} from "~/utils/getCardByString";
 
 const gameSocket = useGameSocket();
 const selfUsername = useUsername().value;
@@ -34,6 +35,10 @@ export type PlayerInfo = Player & {
 
 const playerInfo = ref<PlayerInfo[]>([]);
 
+const playerCards = ref<Card[]>([
+  {faceDown: true, highlighted: false,},
+  {faceDown: true, highlighted: false,},
+]);
 
 const cards = ref<Card[]>([
   {faceDown: true, highlighted: false},
@@ -151,6 +156,20 @@ gameSocket.onMessage((data) => {
     case 'player-move-raise': // Raise / Bet
 
       break;
+    case 'player-cards':
+      const cardStrings = data.cards as Array<string>;
+      const selfUser = playerInfo.value.find(p => p.name === selfUsername);
+      if (selfUser) {
+        cardStrings.forEach((cardStr, i) => {
+          selfUser.cards[i] = {
+            ...selfUser.cards[i],
+            frontImage: getCardByString(cardStr),
+            faceDown: false,
+          };
+        });
+      }
+      break;
+
     case 'update-game-state':
       gameRunning.value = data.gameRunning;
       break;

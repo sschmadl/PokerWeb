@@ -44,14 +44,21 @@ public class GameSessionWebsocketHandler extends TextWebSocketHandler {
         }
         String token = queryParams.get("token");
         System.out.println("Session opened: " + session.getRemoteAddress().getAddress().getHostAddress());
-
+        String username;
         if (!jwtUtil.validateToken(token)) {
+            System.out.println("received token: "+token);
+            try{
+                username = jwtUtil.extractUsername(token);
+                System.out.println("expected token: "+ jwtUtil.generateToken(username));
+            }catch(Exception e){
+                System.out.println("Could not extract username");
+            }
             System.out.println("Session closed: Invalid token passed from " + session.getRemoteAddress().getAddress().getHostAddress());
             session.close();
             return;
         }
 
-        String username = jwtUtil.extractUsername(token);
+        username = jwtUtil.extractUsername(token);
         System.out.println("Session opened: " + username);
         if (gameSessionManager.playerIsAlreadyConnected(username)) {
             ServerMessageCommand serverMessageCommand = new ServerMessageCommand(":(", "Someone is already connected with your account", "red");

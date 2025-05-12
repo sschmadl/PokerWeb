@@ -27,7 +27,7 @@ public class AuthService {
     public String authenticate(String username, String password) throws InvalidUsernameOrPassword {
         Optional<User> userOptional = userRepository.findByUsername(username);
         if (userOptional.isPresent() && passwordEncoder.matches(password, userOptional.get().getPassword())) {
-            return jwtUtil.generateToken(username, userOptional.get().getPasswordChangedDate());
+            return jwtUtil.generateToken(username);
         }
         throw new InvalidUsernameOrPassword("Invalid username or password");
     }

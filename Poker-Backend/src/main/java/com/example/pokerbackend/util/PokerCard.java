@@ -34,7 +34,7 @@ public class PokerCard {
 
     public String getFormattedCard(){
         if (getRankValue() < 10){
-            return 9+suit.charAt(0)+"";
+            return rank+suit.charAt(0);
         }else if (getRankValue() == 10){
             return "T"+suit.charAt(0);
         }else if (getRankValue() > 10){

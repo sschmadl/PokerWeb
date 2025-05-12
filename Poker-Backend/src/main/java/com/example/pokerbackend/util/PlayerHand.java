@@ -27,6 +27,10 @@ public class PlayerHand {
         playerCards.add(card);
     }
 
+    public void addCards(List<PokerCard> cards){
+        playerCards.addAll(cards);
+    }
+
     public void setCommunityCards(List<PokerCard> communityCards) {
         this.communityCards = communityCards;
     }

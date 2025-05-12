@@ -151,6 +151,8 @@ public class GameSession {
             isJoinable = false;
             UpdateGameState updateGameState = new UpdateGameState(true);
             broadCast(gson.toJson(updateGameState));
+            communityCards.addAll(deck.dealCommunityCards());
+            dealCardsToPlayers();
         }catch (Exception e){
             e.printStackTrace();
         }finally {
@@ -176,5 +178,20 @@ public class GameSession {
 
     public void setJoinable(boolean joinable) {
         isJoinable = joinable;
+    }
+
+    private void dealCardsToPlayers(){
+        for(Player player : playerOrder){
+            player.getHand().setCommunityCards(communityCards);
+            player.getHand().addCard(deck.dealCard());
+            player.getHand().addCard(deck.dealCard());
+
+            WebSocketSession webSocketSession = players.get(player.getName()).b;
+            try {
+                webSocketSession.sendMessage(new TextMessage(gson.toJson(new PlayerCardsCommand(player.getHand().getPlayerCards()))));
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
     }
 }

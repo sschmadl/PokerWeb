@@ -151,6 +151,9 @@ public class GameSession {
             isJoinable = false;
             UpdateGameState updateGameState = new UpdateGameState(true);
             broadCast(gson.toJson(updateGameState));
+            for (Player player : playerOrder){
+                player.getHand().reset();
+            }
             communityCards.addAll(deck.dealCommunityCards());
             dealCardsToPlayers();
         }catch (Exception e){

@@ -11,6 +11,7 @@ public class Player {
     public Player(String name, int credits) {
         this.name = name;
         this.credits = credits;
+        this.hand = new PlayerHand();
     }
 
     public String getName() {

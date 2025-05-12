@@ -163,7 +163,7 @@ public class GameSession {
             Thread.sleep(1000);
             broadCast(gson.toJson(new TurnCommand(communityCards.get(3))));
             Thread.sleep(1000);
-            broadCast(gson.toJson(new TurnCommand(communityCards.get(4))));
+            broadCast(gson.toJson(new RiverCommand(communityCards.get(4))));
 
 
         }catch (Exception e){

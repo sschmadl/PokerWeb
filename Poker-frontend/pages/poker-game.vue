@@ -89,11 +89,19 @@ async function fetchCurrentPlayers() {
 }
 
 function highlightPlayer(name: string): void {
-  console.log('Highlight');
   playerInfo.value = playerInfo.value.map(player => ({
     ...player,
     highlighted: player.name === name,
   }));
+}
+
+function setActionText(name: string, action: string, amount?: number): void {
+  let actionStr = action;
+  if (amount) actionStr += ': ' + amount;
+  
+  const player = playerInfo.value.find(p => p.name === name);
+  if (player) player.action = actionStr;
+  else console.log('Cannot set action to player: ' + name + ', player doesnt exist.');
 }
 
 
@@ -144,18 +152,26 @@ gameSocket.onMessage((data) => {
     case 'player-next-turn':
       highlightPlayer(data.name);
       break;
-    case 'player-move-check':
-
+    case 'player-action': {
+      const name = data.name;
+      const action = data.action;
+      const raiseAmount = data.amount;
+      
+      setActionText(name, action, raiseAmount);
+      
       break;
-    case 'player-move-fold':
-
+    }
+    case 'new-credits': {
+      const name = data.name;
+      const credits = data.credits;
+      
+      const player = playerInfo.value.find(p => p.name === name);
+      if (player) {
+        player.credits = credits;
+      }
+      
       break;
-    case 'player-move-call':
-
-      break;
-    case 'player-move-raise': // Raise / Bet
-
-      break;
+    }
     case 'player-cards':
       const cardStrings = data.cards as Array<string>;
       const selfUser = playerInfo.value.find(p => p.name === selfUsername);

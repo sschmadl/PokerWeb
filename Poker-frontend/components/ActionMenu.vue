@@ -6,7 +6,7 @@ import { useUsername } from "~/composables/states";
 const gameSocket = useGameSocket();
 const selfUsername = useUsername().value;
 
-let isTurn = ref<boolean>(true);
+let isTurn = ref<boolean>(false);
 
 let currentPokerHand = 'Three of a Kind';
 

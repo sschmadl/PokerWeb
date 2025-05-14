@@ -312,7 +312,7 @@ fetchCurrentPlayers();
   </div>
   <div class="side_menu">
     <!-- Use the Action Buttons Component for Bottom Menu -->
-    <ActionButtons :style="{zIndex: 40}"/>
+    <ActionMenu class="z-40"/>
   </div>
 </template>
 

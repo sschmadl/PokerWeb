@@ -17,7 +17,6 @@ const props = defineProps({
   },
   profilePicture: {
     type: String,
-    default: '/default_profile_picture.jpg'
   },
   playerName: {
     type: String,
@@ -68,7 +67,7 @@ const userNameContainerFontSize = computed(() => Math.floor(userNameContainerHei
 const pokerhandContainerHeight = computed(() => Math.ceil(props.menuWidth * 0.155));
 const pokerhandContainerFontSize = computed(() => Math.floor(pokerhandContainerHeight.value * 0.5));
 const roundEdgeCircleDiameter = computed(() => pokerhandContainerHeight.value + userNameContainerHeight.value);
-const personalCardHeight = computed(() => (userNameContainerHeight.value + pokerhandContainerHeight.value) * 1.25);
+const personalCardHeight = computed(() => (userNameContainerHeight.value + pokerhandContainerHeight.value) * 1.5);
 
 
 </script>
@@ -95,14 +94,14 @@ const personalCardHeight = computed(() => (userNameContainerHeight.value + poker
             alt="Profile Picture"
         />
       </div>
-
+      
       <!-- Cards -->
       <div class="player-cards-container" :style="{
         position: 'absolute',
         width: informationContainerWidth + 'px',
         zIndex: -5,
         display: 'inline-flex',
-        marginLeft: profilePictureDiameter + profilePictureTextMargin / 3 + 'px',
+        marginLeft: profilePictureDiameter * 0.85 + 'px',
         marginTop: profilePictureDiameter / 1.5, /* Adjust margin to avoid overlap */
       }">
         <Card
@@ -114,7 +113,7 @@ const personalCardHeight = computed(() => (userNameContainerHeight.value + poker
             :highlighted="card.highlighted"
         />
       </div>
-
+      
       <div class="player-stat-container" :style="{
         width: informationContainerWidth + 'px',
         paddingLeft: profilePictureMenuPadding + 'px',
@@ -138,7 +137,7 @@ const personalCardHeight = computed(() => (userNameContainerHeight.value + poker
             marginTop: pokerhandContainerHeight + 'px',
           }"></div>
         </div>
-
+        
         <!-- Money Section -->
         <div class="player-pokerhand-money-container bg-gray-500 dark:bg-gray-600" :style="{
           width: informationContainerWidth + 'px',
@@ -156,42 +155,45 @@ const personalCardHeight = computed(() => (userNameContainerHeight.value + poker
             marginBottom: (userNameContainerHeight) + 'px',
           }"></div>
         </div>
-
+        
         <!-- Action + Turn Section Side-by-Side -->
         <div class="flex justify-between w-full" :style="{ width: informationContainerWidth + 'px' }">
           <!-- Action Section (Left aligned) -->
           <div
-              v-if="playerAction && playerAction.trim() !== ''"
+              v-show="playerAction && playerAction.trim() !== ''"
               class="player-action-bar bg-yellow-300 dark:bg-yellow-600 text-black dark:text-white"
               :style="{
-        width: '69%',
-        fontSize: Math.floor(menuWidth * 0.04) + 'px',
-        padding: '2px 6px',
-        textAlign: 'center',
-        borderRadius: '0 0 6px 6px',
-        marginTop: '-2px',
-      }"
+                width: '69%',
+                fontSize: Math.floor(menuWidth * 0.04) + 'px',
+                padding: '2px 6px',
+                textAlign: 'center',
+                borderRadius: '0 0 6px 6px',
+                marginTop: '-2px',
+                visibility: playerAction && playerAction.trim() !== '' ? 'visible' : 'hidden'
+              }"
           >
             {{ playerAction }}
           </div>
-
+          
           <!-- Turn Section (Right aligned) -->
           <div
-              v-if="highlighted"
+              v-show="true"
               class="player-action-bar bg-purple-300 dark:bg-purple-600 text-black dark:text-white"
               :style="{
-        width: '29%',
-        fontSize: Math.floor(menuWidth * 0.04) + 'px',
-        padding: '2px 6px',
-        textAlign: 'center',
-        borderRadius: '0 0 6px 6px',
-        marginTop: '-2px',
-      }"
+    width: '29%',
+    fontSize: Math.floor(menuWidth * 0.04) + 'px',
+    padding: '2px 6px',
+    textAlign: 'center',
+    borderRadius: '0 0 6px 6px',
+    marginTop: '-2px',
+    visibility: highlighted ? 'visible' : 'hidden'
+  }"
           >
             Turn
           </div>
+        
         </div>
-
+        
         <div
             class="player-crown-container"
             v-if="isAdmin"
@@ -211,9 +213,9 @@ const personalCardHeight = computed(() => (userNameContainerHeight.value + poker
           />
         </div>
       </div>
-
+    
     </div>
-
+  
   </div>
 </template>
 

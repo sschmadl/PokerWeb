@@ -40,7 +40,7 @@ const playerCards = ref<Card[]>([
   {faceDown: true, highlighted: false,},
 ]);
 
-const cards = ref<Card[]>([
+const communityCards = ref<Card[]>([
   {faceDown: true, highlighted: false},
   {faceDown: true, highlighted: false},
   {faceDown: true, highlighted: false},
@@ -72,7 +72,7 @@ function calculatePlayerPositions() {
 
 function updateSizes() {
   tableDiameter.value = window.innerWidth / 2.5;
-  playerWidth.value = tableDiameter.value / 3.5;
+  playerWidth.value = tableDiameter.value / 3;
   cardHeight.value = tableDiameter.value / 7;
   calculatePlayerPositions();
 }
@@ -89,11 +89,19 @@ async function fetchCurrentPlayers() {
 }
 
 function highlightPlayer(name: string): void {
-  console.log('Highlight');
   playerInfo.value = playerInfo.value.map(player => ({
     ...player,
     highlighted: player.name === name,
   }));
+}
+
+function setActionText(name: string, action: string, amount?: number): void {
+  let actionStr = action;
+  if (amount) actionStr += ': ' + amount;
+  
+  const player = playerInfo.value.find(p => p.name === name);
+  if (player) player.action = actionStr;
+  else console.log('Cannot set action to player: ' + name + ', player doesnt exist.');
 }
 
 
@@ -144,18 +152,26 @@ gameSocket.onMessage((data) => {
     case 'player-next-turn':
       highlightPlayer(data.name);
       break;
-    case 'player-move-check':
-
+    case 'player-action': {
+      const name = data.name;
+      const action = data.action;
+      const raiseAmount = data.amount;
+      
+      setActionText(name, action, raiseAmount);
+      
       break;
-    case 'player-move-fold':
-
+    }
+    case 'new-credits': {
+      const name = data.name;
+      const credits = data.amount;
+      
+      const player = playerInfo.value.find(p => p.name === name);
+      if (player) {
+        player.credits = credits;
+      }
+      
       break;
-    case 'player-move-call':
-
-      break;
-    case 'player-move-raise': // Raise / Bet
-
-      break;
+    }
     case 'player-cards':
       const cardStrings = data.cards as Array<string>;
       const selfUser = playerInfo.value.find(p => p.name === selfUsername);
@@ -172,6 +188,34 @@ gameSocket.onMessage((data) => {
 
     case 'update-game-state':
       gameRunning.value = data.gameRunning;
+      break;
+    case 'flop':
+      const flopCards = data.cards as Array<string>;
+      flopCards.forEach((cardStr, i) => {
+        communityCards.value[i] = {
+          ...communityCards.value[i],
+          frontImage: getCardByString(cardStr),
+          faceDown: false,
+        }
+      });
+      break;
+    case 'turn':
+      const turnCard = data.card as string;
+      const turnIndex = 3;
+      communityCards.value[turnIndex] = {
+        ...communityCards.value[turnIndex],
+        frontImage: getCardByString(turnCard),
+        faceDown: false,
+      }
+      break;
+    case 'river':
+      const riverCard = data.card as string;
+      const riverIndex = 4;
+      communityCards.value[riverIndex] = {
+        ...communityCards.value[riverIndex],
+        frontImage: getCardByString(riverCard),
+        faceDown: false,
+      }
       break;
 
 
@@ -197,7 +241,7 @@ onBeforeUnmount(() => {
 });
 
 function flipCards() {
-  cards.value.forEach((card) => {
+  communityCards.value.forEach((card) => {
     card.faceDown = !card.faceDown;
   });
 }
@@ -223,7 +267,7 @@ fetchCurrentPlayers();
 
         <div class="community-cards" v-if="gameRunning">
           <Card
-              v-for="(card, index) in cards"
+              v-for="(card, index) in communityCards"
               :key="index"
               :face-down="card.faceDown"
               :front-image="card.frontImage"
@@ -267,8 +311,7 @@ fetchCurrentPlayers();
     <Chat/>
   </div>
   <div class="side_menu">
-    <!-- Use the Action Buttons Component for Bottom Menu -->
-    <ActionButtons :style="{zIndex: 40}"/>
+    <ActionMenu class="z-40"/>
   </div>
 </template>
 
@@ -330,11 +373,13 @@ fetchCurrentPlayers();
 
 .side_menu {
   position: absolute;
-  bottom: 30%;
-  left: 0;
+  top: 50%;
+  left: 2%;
   width: 15%;
-  z-index: 50; /* higher than others */
+  z-index: 50;
   padding: 1rem 0;
+  transform: translateY(-50%);
 }
+
 
 </style>

@@ -46,10 +46,10 @@ const sendMessage = async () => {
 
 // Handle messages received from WebSocket
 const handleIncomingMessage = async (data: any) => {
-  console.log('Received WebSocket data:', data);
+  // console.log('Received WebSocket data:', data);
   console.log(data);
   if (data.command === 'chat-message') {
-    console.log('New chat message received:', data);
+    // console.log('New chat message received:', data);
 
     messages.value.push({
       username: data.sender,
@@ -63,7 +63,7 @@ const handleIncomingMessage = async (data: any) => {
 
 
   } else {
-    console.log('Unknown command received:', data.command);
+    // console.log('Unknown command received:', data.command);
   }
 };
 

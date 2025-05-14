@@ -163,7 +163,7 @@ gameSocket.onMessage((data) => {
     }
     case 'new-credits': {
       const name = data.name;
-      const credits = data.credits;
+      const credits = data.amount;
       
       const player = playerInfo.value.find(p => p.name === name);
       if (player) {
@@ -311,7 +311,6 @@ fetchCurrentPlayers();
     <Chat/>
   </div>
   <div class="side_menu">
-    <!-- Use the Action Buttons Component for Bottom Menu -->
     <ActionMenu class="z-40"/>
   </div>
 </template>
@@ -374,11 +373,13 @@ fetchCurrentPlayers();
 
 .side_menu {
   position: absolute;
-  bottom: 30%;
-  left: 0;
+  top: 50%;
+  left: 2%;
   width: 15%;
-  z-index: 50; /* higher than others */
+  z-index: 50;
   padding: 1rem 0;
+  transform: translateY(-50%);
 }
+
 
 </style>

@@ -62,7 +62,7 @@ function handleActionSend(action: string, amount?: number | null): void {
   <Transition name="slide-left">
     <div
         v-if="isTurn"
-        class="action-container p-10 bg-customPrimary-300 dark:bg-customPrimary-500 rounded-2xl max-w-xs mx-auto relative overflow-visible"
+        class="action-container p-10 bg-customPrimary-300 dark:bg-customPrimary-600 rounded-2xl max-w-xs mx-auto relative overflow-visible"
     >
       <div class="poker-hand-container text-2xl text-center mb-4">
         <strong>{{ currentPokerHand }}</strong>

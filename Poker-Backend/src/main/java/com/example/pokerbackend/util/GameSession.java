@@ -12,9 +12,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class GameSession {
+    private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
     private String gameId = PokerGameIDGenerator.generateID();
     private String name;
     private int bigBlind;
@@ -23,8 +26,19 @@ public class GameSession {
     private static final GameSessionManager gameSessionManager = GameSessionManager.getInstance();
     private Gson gson = new Gson();
     private String admin;
-    private boolean isJoinable = true;
+
     private int smallBlindIndex = 0;
+    private int currentBet = 0;
+    private int currentPot = 0;
+    private int playerToMakeAMoveIndex = 2;
+
+    private GameState gameState = GameState.WAITING;
+    public enum Action {
+        BET,CHECK,FOLD,RAISE,CALL
+    }
+    private enum GameState {
+        WAITING, PREFLOP, FLOP, TURN, RIVER, SHOWDOWN
+    }
 
 
     private final int MAX_PLAYERS;
@@ -93,7 +107,7 @@ public class GameSession {
         lock.lock();
         Gson gson = new Gson();
         try {
-            if(!isJoinable){
+            if(gameState != GameState.WAITING){
                 session.sendMessage(new TextMessage(gson.toJson(new ServerMessageCommand("Failed to joing","Table is already playing","red"))));
             } else if (players.size() == MAX_PLAYERS) {
                 session.sendMessage(new TextMessage(gson.toJson(JoinGameStatus.joinFailed("Lobby is full"))));
@@ -148,7 +162,7 @@ public class GameSession {
         ReentrantLock lock = lobbyLocks.computeIfAbsent(gameId, id -> new ReentrantLock());
         lock.lock();
         try {
-            isJoinable = false;
+            gameState = GameState.PREFLOP;
             UpdateGameState updateGameState = new UpdateGameState(true);
             broadCast(gson.toJson(updateGameState));
             for (Player player : playerOrder){
@@ -157,13 +171,6 @@ public class GameSession {
             communityCards.addAll(deck.dealCommunityCards());
             dealCardsToPlayers();
 
-            // Test Flop, Turn, River
-            Thread.sleep(1000);
-            broadCast(gson.toJson(new FlopCommand(communityCards.subList(0,3))));
-            Thread.sleep(1000);
-            broadCast(gson.toJson(new TurnCommand(communityCards.get(3))));
-            Thread.sleep(1000);
-            broadCast(gson.toJson(new RiverCommand(communityCards.get(4))));
 
 
         }catch (Exception e){
@@ -186,11 +193,7 @@ public class GameSession {
     }
 
     public boolean isJoinable() {
-        return isJoinable;
-    }
-
-    public void setJoinable(boolean joinable) {
-        isJoinable = joinable;
+        return gameState == GameState.WAITING;
     }
 
     private void dealCardsToPlayers(){
@@ -206,5 +209,35 @@ public class GameSession {
                 throw new RuntimeException(e);
             }
         }
+    }
+
+    public void handleAction(Player player, PlayerActionCommand playerActionCommand){
+        switch (playerActionCommand.getAction()){
+            case CHECK -> handleCheck(player, playerActionCommand);
+            case BET -> handleBet(player, playerActionCommand);
+            case CALL -> handleCall(player, playerActionCommand);
+            case FOLD -> handleFold(player, playerActionCommand);
+            case RAISE -> handleRaise(player, playerActionCommand);
+        }
+    }
+
+    public void handleCheck(Player player, PlayerActionCommand playerActionCommand){
+
+    }
+
+    public void handleFold(Player player, PlayerActionCommand playerActionCommand){
+
+    }
+
+    public void handleRaise(Player player, PlayerActionCommand playerActionCommand){
+
+    }
+
+    public void handleBet(Player player, PlayerActionCommand playerActionCommand){
+
+    }
+
+    public void handleCall(Player player, PlayerActionCommand playerActionCommand){
+
     }
 }

@@ -8,6 +8,7 @@ public class Player {
     private String name;
     private int credits;
     private PlayerHand hand;
+    private boolean isAllin = false;
     public Player(String name, int credits) {
         this.name = name;
         this.credits = credits;

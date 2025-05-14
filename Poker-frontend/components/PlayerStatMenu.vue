@@ -68,7 +68,7 @@ const userNameContainerFontSize = computed(() => Math.floor(userNameContainerHei
 const pokerhandContainerHeight = computed(() => Math.ceil(props.menuWidth * 0.155));
 const pokerhandContainerFontSize = computed(() => Math.floor(pokerhandContainerHeight.value * 0.5));
 const roundEdgeCircleDiameter = computed(() => pokerhandContainerHeight.value + userNameContainerHeight.value);
-const personalCardHeight = computed(() => (userNameContainerHeight.value + pokerhandContainerHeight.value) * 1.25);
+const personalCardHeight = computed(() => (userNameContainerHeight.value + pokerhandContainerHeight.value) * 1.5);
 
 
 </script>
@@ -102,7 +102,7 @@ const personalCardHeight = computed(() => (userNameContainerHeight.value + poker
         width: informationContainerWidth + 'px',
         zIndex: -5,
         display: 'inline-flex',
-        marginLeft: profilePictureDiameter + profilePictureTextMargin / 3 + 'px',
+        marginLeft: profilePictureDiameter * 0.85 + 'px',
         marginTop: profilePictureDiameter / 1.5, /* Adjust margin to avoid overlap */
       }">
         <Card

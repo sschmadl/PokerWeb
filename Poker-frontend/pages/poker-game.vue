@@ -40,7 +40,7 @@ const playerCards = ref<Card[]>([
   {faceDown: true, highlighted: false,},
 ]);
 
-const cards = ref<Card[]>([
+const communityCards = ref<Card[]>([
   {faceDown: true, highlighted: false},
   {faceDown: true, highlighted: false},
   {faceDown: true, highlighted: false},
@@ -72,7 +72,7 @@ function calculatePlayerPositions() {
 
 function updateSizes() {
   tableDiameter.value = window.innerWidth / 2.5;
-  playerWidth.value = tableDiameter.value / 3.5;
+  playerWidth.value = tableDiameter.value / 3;
   cardHeight.value = tableDiameter.value / 7;
   calculatePlayerPositions();
 }
@@ -173,6 +173,34 @@ gameSocket.onMessage((data) => {
     case 'update-game-state':
       gameRunning.value = data.gameRunning;
       break;
+    case 'flop':
+      const flopCards = data.cards as Array<string>;
+      flopCards.forEach((cardStr, i) => {
+        communityCards.value[i] = {
+          ...communityCards.value[i],
+          frontImage: getCardByString(cardStr),
+          faceDown: false,
+        }
+      });
+      break;
+    case 'turn':
+      const turnCard = data.card as string;
+      const turnIndex = 3;
+      communityCards.value[turnIndex] = {
+        ...communityCards.value[turnIndex],
+        frontImage: getCardByString(turnCard),
+        faceDown: false,
+      }
+      break;
+    case 'river':
+      const riverCard = data.card as string;
+      const riverIndex = 4;
+      communityCards.value[riverIndex] = {
+        ...communityCards.value[riverIndex],
+        frontImage: getCardByString(riverCard),
+        faceDown: false,
+      }
+      break;
 
 
   }
@@ -197,7 +225,7 @@ onBeforeUnmount(() => {
 });
 
 function flipCards() {
-  cards.value.forEach((card) => {
+  communityCards.value.forEach((card) => {
     card.faceDown = !card.faceDown;
   });
 }
@@ -223,7 +251,7 @@ fetchCurrentPlayers();
 
         <div class="community-cards" v-if="gameRunning">
           <Card
-              v-for="(card, index) in cards"
+              v-for="(card, index) in communityCards"
               :key="index"
               :face-down="card.faceDown"
               :front-image="card.frontImage"

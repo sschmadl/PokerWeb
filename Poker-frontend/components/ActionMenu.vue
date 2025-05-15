@@ -11,9 +11,9 @@ let isTurn = ref<boolean>(false);
 let currentPokerHand = 'Three of a Kind';
 
 const relevantActions = [
-  'bet', 'raise',
+  'BET', 'RAISE',
 ];
-const actionHistory = [];
+let actionHistory = [];
 
 let checkCallAction = 'Check';
 let betRaiseAction = 'Bet';
@@ -36,6 +36,11 @@ gameSocket.onMessage((data) => {
         checkCallAction = 'Call';
         betRaiseAction = 'Raise';
       }
+      break;
+    }
+    case 'new-betting-round': {
+      revertValuesToDefault();
+      break;
     }
   }
 });
@@ -44,6 +49,7 @@ function revertValuesToDefault() {
   isTurn.value = false;
   checkCallAction = 'Check';
   betRaiseAction = 'Bet';
+  actionHistory = [];
   showRaiseInput.value = false;
   raiseAmount.value = null;
 }

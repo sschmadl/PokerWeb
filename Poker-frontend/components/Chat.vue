@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, nextTick } from 'vue';
-import { useUsername } from "~/composables/states";
-import { useGameSocket } from "~/stores/useGameSocket"; // Adjust path if needed
+import {nextTick, onMounted, ref} from 'vue';
+import {useUsername} from "~/composables/states";
+import {useGameSocket} from "~/stores/useGameSocket";
+
 
 // Chat state
 const messageInput = ref('');
@@ -74,8 +75,6 @@ onMounted(() => {
   gameSocket.onMessage(handleIncomingMessage);
 });
 </script>
-
-
 
 
 <template>

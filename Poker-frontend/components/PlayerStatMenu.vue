@@ -180,14 +180,14 @@ const personalCardHeight = computed(() => (userNameContainerHeight.value + poker
               v-show="true"
               class="player-action-bar bg-purple-300 dark:bg-purple-600 text-black dark:text-white"
               :style="{
-    width: '29%',
-    fontSize: Math.floor(menuWidth * 0.04) + 'px',
-    padding: '2px 6px',
-    textAlign: 'center',
-    borderRadius: '0 0 6px 6px',
-    marginTop: '-2px',
-    visibility: highlighted ? 'visible' : 'hidden'
-  }"
+                width: '29%',
+                fontSize: Math.floor(menuWidth * 0.04) + 'px',
+                padding: '2px 6px',
+                textAlign: 'center',
+                borderRadius: '0 0 6px 6px',
+                marginTop: '-2px',
+                visibility: highlighted ? 'visible' : 'hidden'
+              }"
           >
             Turn
           </div>

@@ -248,7 +248,7 @@ fetchCurrentPlayers();
         <div class="start-button-container z-50" v-if="playerInfo.find(p => p.name === selfUsername)?.admin && !gameRunning">
           <GameStartButton />
         </div>
-
+        <br>
         <div class="community-cards" v-if="gameRunning">
           <Card
               v-for="(card, index) in communityCards"
@@ -361,6 +361,7 @@ fetchCurrentPlayers();
   padding: 1rem 0;
   transform: translateY(-50%);
 }
+
 
 
 </style>

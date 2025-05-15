@@ -35,11 +35,6 @@ export type PlayerInfo = Player & {
 
 const playerInfo = ref<PlayerInfo[]>([]);
 
-const playerCards = ref<Card[]>([
-  {faceDown: true, highlighted: false,},
-  {faceDown: true, highlighted: false,},
-]);
-
 const communityCards = ref<Card[]>([
   {faceDown: true, highlighted: false},
   {faceDown: true, highlighted: false},
@@ -123,9 +118,7 @@ gameSocket.onMessage((data) => {
       break;
     case 'current-players-info':
       const adminUser = data.admin;
-      console.log(adminUser);
       let playerData = data.players as Player[];
-      console.log('Player data: ', playerData);
 
       playerData = [
         ...playerData.filter(p => p.name === selfUsername),
@@ -141,13 +134,10 @@ gameSocket.onMessage((data) => {
         admin: false,
       }));
 
-
-
       const adminPlayer = playerInfo.value.find(p => p.name === adminUser);
       if (adminPlayer) {
         adminPlayer.admin = true
       }
-      console.log('Admin player: ', adminPlayer);
       break;
     case 'player-next-turn':
       highlightPlayer(data.name);
@@ -240,12 +230,6 @@ onBeforeUnmount(() => {
   navigateTo('/lobby-selection');
 });
 
-function flipCards() {
-  communityCards.value.forEach((card) => {
-    card.faceDown = !card.faceDown;
-  });
-}
-
 fetchCurrentPlayers();
 </script>
 
@@ -275,8 +259,6 @@ fetchCurrentPlayers();
               :highlighted="card.highlighted"
           />
         </div>
-
-        <UButton @click="flipCards" :style="{ zIndex: 30 }">Flip</UButton>
       </div>
     </div>
 
@@ -286,11 +268,11 @@ fetchCurrentPlayers();
           :key="index"
           class="players"
           :style="{
-      position: 'absolute',
-      left: playerPositions[index]?.x + 'px',
-      top: playerPositions[index]?.y + 'px',
-      transform: 'translate(-50%, -50%)',
-    }"
+            position: 'absolute',
+            left: playerPositions[index]?.x + 'px',
+            top: playerPositions[index]?.y + 'px',
+            transform: 'translate(-50%, -50%)',
+          }"
       >
         <PlayerStatMenu
             :menu-width="playerWidth"
@@ -307,7 +289,6 @@ fetchCurrentPlayers();
 
   </div>
   <div class="chat-area">
-    <!-- Chat component imported and displayed on the right -->
     <Chat/>
   </div>
   <div class="side_menu">

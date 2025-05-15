@@ -29,4 +29,12 @@ public class PlayerActionCommand {
         this.action = action;
         this.name = name;
     }
+
+    public int getAmount() {
+        return amount;
+    }
+
+    public void setAmount(int amount) {
+        this.amount = amount;
+    }
 }

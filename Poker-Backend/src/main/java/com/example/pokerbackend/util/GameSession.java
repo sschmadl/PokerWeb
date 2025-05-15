@@ -243,11 +243,36 @@ public class GameSession {
     }
 
     public void handleRaise(Player player, PlayerActionCommand playerActionCommand) {
+        if (player == nextPlayer){
+            System.out.println("Current highest Bet: " + highestBet);
+            System.out.println("Raise amount: "+ playerActionCommand.getAmount());
+            System.out.println("Playerbet: "+player.getCurrentBet());
+            highestBet += playerActionCommand.getAmount();
+            lastRaised = player;
+            player.subtractCredits(highestBet-player.getCurrentBet());
+            player.setCurrentBet(highestBet);
 
+            System.out.println("New highest Bet: " + highestBet);
+            System.out.println("new Playerbet: " + player.getCurrentBet());
+
+            broadCast(gson.toJson(new NewCreditsCommand(player.getName(), player.getCredits())));
+            broadCast(gson.toJson(new PlayerActionCommand(player.getName(),Action.RAISE, player.getCurrentBet())));
+
+            announceNextPlayer();
+        }
     }
 
     public void handleBet(Player player, PlayerActionCommand playerActionCommand) {
-
+        if (player == nextPlayer){
+            highestBet = playerActionCommand.getAmount();
+            lastRaised = player;
+            player.setCurrentBet(playerActionCommand.getAmount());
+            player.subtractCredits(playerActionCommand.getAmount());
+            currentPot += playerActionCommand.getAmount();
+            broadCast(gson.toJson(new NewCreditsCommand(player.getName(),player.getCredits())));
+            broadCast(gson.toJson(new PlayerActionCommand(player.getName(),Action.BET,playerActionCommand.getAmount())));
+            announceNextPlayer();
+        }
     }
 
     public void handleCall(Player player, PlayerActionCommand playerActionCommand) {

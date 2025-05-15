@@ -213,10 +213,9 @@ gameSocket.onMessage((data) => {
 });
 
 onMounted(() => {
-  // @ToDo Uncomment this in final version!!!
-  // if (!gameSocket.isConnected) {
-  //   navigateTo('/lobby-selection');
-  // }
+  if (!gameSocket.isConnected) {
+    navigateTo('/lobby-selection');
+  }
   updateSizes();
   window.addEventListener('resize', updateSizes);
 });

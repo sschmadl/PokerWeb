@@ -8,7 +8,7 @@ public class Player {
     private String name;
     private int credits;
     private PlayerHand hand;
-    private boolean isAllin = false;
+    private int currentBet=0;
     public Player(String name, int credits) {
         this.name = name;
         this.credits = credits;
@@ -37,5 +37,17 @@ public class Player {
 
     public void setHand(PlayerHand hand) {
         this.hand = hand;
+    }
+
+    public void subtractCredits(int credits) {
+        this.credits -= credits;
+    }
+
+    public int getCurrentBet() {
+        return currentBet;
+    }
+
+    public void setCurrentBet(int currentBet) {
+        this.currentBet = currentBet;
     }
 }

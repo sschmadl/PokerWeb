@@ -19,4 +19,14 @@ public class PlayerActionCommand {
     public GameSession.Action getAction() {
         return action;
     }
+
+    public PlayerActionCommand(String name, GameSession.Action action, int amount) {
+        this(name,action);
+        this.amount = amount;
+    }
+
+    public PlayerActionCommand(String name, GameSession.Action action) {
+        this.action = action;
+        this.name = name;
+    }
 }

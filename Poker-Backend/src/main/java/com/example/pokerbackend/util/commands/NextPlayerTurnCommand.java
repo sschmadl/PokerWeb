@@ -1,10 +1,10 @@
 package com.example.pokerbackend.util.commands;
 
-public class NexPlayerTurnCommand {
+public class NextPlayerTurnCommand {
     private String command = "player-next-turn";
     private String name;
 
-    public NexPlayerTurnCommand(String name) {
+    public NextPlayerTurnCommand(String name) {
         this.name = name;
     }
 }

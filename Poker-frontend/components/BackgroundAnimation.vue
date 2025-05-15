@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, watch, computed } from 'vue'
+import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useColorMode } from '@vueuse/core'
+import { useSettingsStore } from '@/stores/settings'
 
 const props = defineProps({
   primaryColor: {
@@ -13,6 +14,7 @@ const props = defineProps({
   },
 })
 
+const settings = useSettingsStore()
 const colorMode = useColorMode()
 
 const primaryColor = computed(() => {
@@ -43,16 +45,28 @@ function calculateGridSize() {
   rows = Math.ceil(window.innerHeight / rectSize) + 2
 }
 
-function createCheckerboard() {
+async function createCheckerboard() {
+  await nextTick()
+
   rectangles.value = []
+
+  const currentPrimary = colorMode.value === 'dark'
+      ? props.primaryColor?.[1] ?? '#0b3b28'
+      : props.primaryColor?.[0] ?? '#228760'
+
+  const currentSecondary = colorMode.value === 'dark'
+      ? props.secondaryColor?.[1] ?? '#07261a'
+      : props.secondaryColor?.[0] ?? '#15543c'
+
   for (let row = 0; row < rows; row++) {
     for (let col = 0; col < columns; col++) {
-      const isPrimary = (row + col) % 2 === 0
+      const isPrimary = (Math.floor(col) + Math.floor(row)) % 2 === 0;
+
       rectangles.value.push({
         x: col * rectSize,
         y: row * rectSize,
-        color: isPrimary ? primaryColor.value : secondaryColor.value,
-        textColor: isPrimary ? secondaryColor.value : primaryColor.value,
+        color: isPrimary ? currentPrimary : currentSecondary,
+        textColor: isPrimary ? currentSecondary : currentPrimary,
       })
     }
   }
@@ -73,10 +87,11 @@ function animateCheckerboard() {
   animationFrameId = requestAnimationFrame(animateCheckerboard)
 }
 
-function handleResize() {
+async function handleResize() {
   if (animationFrameId) cancelAnimationFrame(animationFrameId)
   calculateGridSize()
-  createCheckerboard()
+  await createCheckerboard()
+  await nextTick()
   animateCheckerboard()
 }
 
@@ -110,7 +125,7 @@ const sigmas = ref<
 
 const mouseX = ref(window.innerWidth / 2)
 const mouseY = ref(window.innerHeight / 2)
-const attract = ref(true)
+const attract = ref(false)
 
 function onMouseMove(event: MouseEvent) {
   mouseX.value = event.clientX
@@ -147,6 +162,10 @@ function createSigma() {
   }
 }
 
+function createSigmasArray(count: number) {
+  return Array.from({ length: count }, () => createSigma())
+}
+
 function animateSigmas() {
   for (const sigma of sigmas.value) {
     if (attract.value) {
@@ -177,12 +196,19 @@ function animateSigmas() {
   requestAnimationFrame(animateSigmas)
 }
 
+watch(
+    () => settings.sigmaCount,
+    (newCount) => {
+      sigmas.value = createSigmasArray(newCount)
+    }
+)
+
 onMounted(() => {
   calculateGridSize()
   createCheckerboard()
   animateCheckerboard()
 
-  sigmas.value = Array.from({length: 100}, () => createSigma())
+  sigmas.value = createSigmasArray(settings.sigmaCount)
   animateSigmas()
 
   window.addEventListener('resize', handleResize)

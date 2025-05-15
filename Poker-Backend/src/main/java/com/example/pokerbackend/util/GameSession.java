@@ -28,8 +28,8 @@ public class GameSession {
     private boolean bigBlindHasActed = false;
     private int highestBet = 0;
     private int currentPot = 0;
-    private int playerToMakeAMoveIndex = smallBlindIndex+2;
-    private int lastRaisedIndex = smallBlindIndex+2;
+    private Player nextPlayer;
+    private Player lastRaised;
 
     private GameState gameState = GameState.WAITING;
 
@@ -221,6 +221,7 @@ public class GameSession {
     }
 
     public void handleAction(Player player, PlayerActionCommand playerActionCommand) {
+        System.out.println("Playeraction: " + playerActionCommand.getAction());
         switch (playerActionCommand.getAction()) {
             case CHECK -> handleCheck(player, playerActionCommand);
             case BET -> handleBet(player, playerActionCommand);
@@ -231,7 +232,10 @@ public class GameSession {
     }
 
     public void handleCheck(Player player, PlayerActionCommand playerActionCommand) {
-
+        if (player == nextPlayer){
+            broadCast(gson.toJson(new PlayerActionCommand(player.getName(),Action.CHECK)));
+            announceNextPlayer();
+        }
     }
 
     public void handleFold(Player player, PlayerActionCommand playerActionCommand) {
@@ -247,7 +251,18 @@ public class GameSession {
     }
 
     public void handleCall(Player player, PlayerActionCommand playerActionCommand) {
-
+        System.out.println("call received");
+        System.out.println("player: " + player.getName());
+        System.out.println("next Player: "+ nextPlayer.getName());
+        if (player == nextPlayer){
+            int difference = highestBet-player.getCurrentBet();
+            currentPot+=difference;
+            player.subtractCredits(difference);
+            player.setCurrentBet(highestBet);
+            broadCast(gson.toJson(new PlayerActionCommand(player.getName(), playerActionCommand.getAction(), player.getCurrentBet())));
+            broadCast(gson.toJson(new NewCreditsCommand(player.getName(), player.getCredits())));
+            announceNextPlayer();
+        }
     }
 
     public void postBlinds() {
@@ -263,7 +278,8 @@ public class GameSession {
 
         currentPot += SMALLBLIND + BIGBLIND;
         highestBet = BIGBLIND;
-        lastRaisedIndex = 2;
+        lastRaised = notFoldedPlayers.get((smallBlindIndex+1)%notFoldedPlayers.size());
+        nextPlayer = notFoldedPlayers.get((smallBlindIndex+1)%notFoldedPlayers.size());
 
         broadCast(gson.toJson(new NewCreditsCommand(smallBlind.getName(), smallBlind.getCredits())));
         broadCast(gson.toJson(new NewCreditsCommand(bigBlind.getName(), bigBlind.getCredits())));
@@ -273,14 +289,18 @@ public class GameSession {
 
 
     public void announceNextPlayer() {
-
+        nextPlayer = notFoldedPlayers.get((notFoldedPlayers.indexOf(nextPlayer)+1)%notFoldedPlayers.size());
+        if (nextPlayer == lastRaised){
+            startNextBettingRound();
+        }else {
+            broadCast(gson.toJson(new NextPlayerTurnCommand(nextPlayer.getName())));
+        }
     }
 
-
     public void startNextBettingRound() {
-        lastRaisedIndex = 0;
-        playerToMakeAMoveIndex = 0;
         highestBet = 0;
+        nextPlayer = notFoldedPlayers.get(smallBlindIndex%notFoldedPlayers.size());
+        lastRaised = nextPlayer;
         for (Player player : playerOrder){
             player.setCurrentBet(0);
         }
@@ -288,17 +308,29 @@ public class GameSession {
             case PREFLOP:
                 gameState = GameState.FLOP;
                 broadCast(gson.toJson(new NewBettingRoundCommand(currentPot)));
+                broadCast(gson.toJson(new FlopCommand(communityCards.subList(0,3))));
                 broadCast(gson.toJson(new ServerMessageCommand("New betting round", "Entering "+gameState, "blue")));
+
+                broadCast(gson.toJson(new NextPlayerTurnCommand(nextPlayer.getName())));
                 break;
             case FLOP:
                 gameState = GameState.TURN;
+
                 broadCast(gson.toJson(new NewBettingRoundCommand(currentPot)));
+
+
+                broadCast(gson.toJson(new TurnCommand(communityCards.get(3))));
                 broadCast(gson.toJson(new ServerMessageCommand("New betting round", "Entering "+gameState, "blue")));
+                broadCast(gson.toJson(new NextPlayerTurnCommand(nextPlayer.getName())));
                 break;
             case TURN:
                 gameState = GameState.RIVER;
+
+
                 broadCast(gson.toJson(new NewBettingRoundCommand(currentPot)));
+                broadCast(gson.toJson(new RiverCommand(communityCards.get(4))));
                 broadCast(gson.toJson(new ServerMessageCommand("New betting round", "Entering "+gameState, "blue")));
+                broadCast(gson.toJson(new NextPlayerTurnCommand(nextPlayer.getName())));
                 break;
             case RIVER:
                 break;

@@ -114,7 +114,7 @@ public class GameSessionWebsocketHandler extends TextWebSocketHandler {
                 case "game-start":
                     gameSessionManager.startGame(session);
                     break;
-                case "player-Action":
+                case "player-action":
                     PlayerActionCommand playerActionCommand = gson.fromJson(messageContent,PlayerActionCommand.class);
                     playerActionCommand.setName(session.getAttributes().get("username").toString());
                     gameSessionManager.handlePlayerAction(session,playerActionCommand);

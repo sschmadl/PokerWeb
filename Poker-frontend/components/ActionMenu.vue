@@ -6,14 +6,14 @@ import { useUsername } from "~/composables/states";
 const gameSocket = useGameSocket();
 const selfUsername = useUsername().value;
 
-let isTurn = ref<boolean>(true);
+let isTurn = ref<boolean>(false);
 
 let currentPokerHand = 'Three of a Kind';
 
 const relevantActions = [
-  'bet', 'raise',
+  'BET', 'RAISE',
 ];
-const actionHistory = [];
+let actionHistory: string[] = [];
 
 let checkCallAction = 'Check';
 let betRaiseAction = 'Bet';
@@ -36,6 +36,11 @@ gameSocket.onMessage((data) => {
         checkCallAction = 'Call';
         betRaiseAction = 'Raise';
       }
+      break;
+    }
+    case 'new-betting-round': {
+      revertValuesToDefault();
+      break;
     }
   }
 });
@@ -44,6 +49,7 @@ function revertValuesToDefault() {
   isTurn.value = false;
   checkCallAction = 'Check';
   betRaiseAction = 'Bet';
+  actionHistory = [];
   showRaiseInput.value = false;
   raiseAmount.value = null;
 }
@@ -68,7 +74,7 @@ function handleActionSend(action: string, amount?: number | null): void {
         <strong>{{ currentPokerHand }}</strong>
       </div>
       <div class="button-container flex flex-col space-y-4">
-        <UButton class="check-call-button text-black dark:text-white w-full" @click="handleActionSend('CHECK')">
+        <UButton class="check-call-button text-black dark:text-white w-full" @click="handleActionSend(actionHistory.length > 0 ? 'CALL' : 'CHECK')">
           {{ checkCallAction }}
         </UButton>
         <UButton
@@ -97,7 +103,7 @@ function handleActionSend(action: string, amount?: number | null): void {
           <div class="flex justify-between mt-2">
             <UButton
                 class="confirm-raise-button text-black dark:text-white"
-                @click="showRaiseInput = false; handleActionSend('RAISE', raiseAmount)"
+                @click="showRaiseInput = false; handleActionSend(actionHistory.length > 0 ? 'RAISE' : 'BET', raiseAmount)"
             >
               Confirm
             </UButton>

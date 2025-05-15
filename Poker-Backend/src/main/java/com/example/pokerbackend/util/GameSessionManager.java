@@ -1,6 +1,7 @@
 package com.example.pokerbackend.util;
 
 import com.example.pokerbackend.util.commands.ChatMessageCommand;
+import com.example.pokerbackend.util.commands.PlayerActionCommand;
 import org.antlr.v4.runtime.misc.Pair;
 import org.springframework.web.socket.WebSocketSession;
 
@@ -123,5 +124,11 @@ public class GameSessionManager {
         String gameId = sessionToIdMap.get(webSocketSession);
         GameSession gameSession = sessions.get(gameId);
         gameSession.startGame();
+    }
+
+    public void handlePlayerAction(WebSocketSession webSocketSession, PlayerActionCommand playerActionCommand){
+        String gameId = sessionToIdMap.get(webSocketSession);
+        GameSession gameSession = sessions.get(gameId);
+        gameSession.handleAction(players.get(webSocketSession.getAttributes().get("username").toString()).a,playerActionCommand);
     }
 }

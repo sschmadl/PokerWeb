@@ -25,16 +25,17 @@ public class GameSession {
     private String admin;
 
     private int smallBlindIndex = 0;
-    private boolean bigBlindHasActed = false;
     private int highestBet = 0;
     private int currentPot = 0;
     private Player nextPlayer;
     private Player lastRaised;
+    private List<Player> allInsThisRound = new ArrayList<>();
+    private List<SidePot> sidePots = new ArrayList<>();
 
     private GameState gameState = GameState.WAITING;
 
     public enum Action {
-        BET, CHECK, FOLD, RAISE, CALL
+        BET, CHECK, FOLD, RAISE, CALL, ALLIN
     }
 
     private enum GameState {
@@ -45,7 +46,7 @@ public class GameSession {
     private final int MAX_PLAYERS;
     private ConcurrentHashMap<String, Pair<Player, WebSocketSession>> players = new ConcurrentHashMap<>();
     private List<Player> playerOrder = new ArrayList<>();
-    private List<Player> notFoldedPlayers;
+    private List<Player> allPlayers;
 
     private PokerDeck deck = new PokerDeck();
     private List<PokerCard> communityCards = new ArrayList<>();
@@ -165,18 +166,20 @@ public class GameSession {
         ReentrantLock lock = lobbyLocks.computeIfAbsent(gameId, id -> new ReentrantLock());
         lock.lock();
         try {
-            notFoldedPlayers = new ArrayList<>(playerOrder);
+            allPlayers = new ArrayList<>(playerOrder);
             gameState = GameState.PREFLOP;
             UpdateGameState updateGameState = new UpdateGameState(true);
-            bigBlindHasActed = false;
-            int highestBet = 0;
-            int currentPot = 0;
-            int playerToMakeAMoveIndex = smallBlindIndex+1;
-            int lastRaisedIndex = smallBlindIndex+2;
+            highestBet = 0;
+            currentPot = 0;
+            allInsThisRound.clear();
+            sidePots.clear();
             broadCast(gson.toJson(updateGameState));
             postBlinds();
             for (Player player : playerOrder) {
                 player.getHand().reset();
+                player.setCurrentBet(0);
+                player.setFolded(false);
+                player.resetTotalContributionsToPot();
             }
             communityCards.addAll(deck.dealCommunityCards());
             dealCardsToPlayers();
@@ -221,80 +224,137 @@ public class GameSession {
     }
 
     public void handleAction(Player player, PlayerActionCommand playerActionCommand) {
+        ReentrantLock lock = lobbyLocks.computeIfAbsent(gameId, id -> new ReentrantLock());
+        lock.lock();
         System.out.println("Playeraction: " + playerActionCommand.getAction());
-        switch (playerActionCommand.getAction()) {
-            case CHECK -> handleCheck(player, playerActionCommand);
-            case BET -> handleBet(player, playerActionCommand);
-            case CALL -> handleCall(player, playerActionCommand);
-            case FOLD -> handleFold(player, playerActionCommand);
-            case RAISE -> handleRaise(player, playerActionCommand);
+        try {
+            if (gameState != GameState.WAITING && gameState != GameState.SHOWDOWN) {
+                switch (playerActionCommand.getAction()) {
+                    case CHECK -> handleCheck(player, playerActionCommand);
+                    case BET -> handleBet(player, playerActionCommand);
+                    case CALL -> handleCall(player, playerActionCommand);
+                    case FOLD -> handleFold(player, playerActionCommand);
+                    case RAISE -> handleRaise(player, playerActionCommand);
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            lock.unlock();
         }
     }
 
     public void handleCheck(Player player, PlayerActionCommand playerActionCommand) {
-        if (player == nextPlayer){
-            broadCast(gson.toJson(new PlayerActionCommand(player.getName(),Action.CHECK)));
+        if (player == nextPlayer) {
+            broadCast(gson.toJson(new PlayerActionCommand(player.getName(), Action.CHECK)));
             announceNextPlayer();
         }
     }
 
     public void handleFold(Player player, PlayerActionCommand playerActionCommand) {
-
+        if (player == nextPlayer){
+            broadCast(gson.toJson(new PlayerActionCommand(player.getName(), Action.FOLD)));
+            player.setFolded(true);
+            announceNextPlayer();
+        }
     }
 
     public void handleRaise(Player player, PlayerActionCommand playerActionCommand) {
-        if (player == nextPlayer){
-            System.out.println("Current highest Bet: " + highestBet);
-            System.out.println("Raise amount: "+ playerActionCommand.getAmount());
-            System.out.println("Playerbet: "+player.getCurrentBet());
-            highestBet += playerActionCommand.getAmount();
-            lastRaised = player;
-            player.subtractCredits(highestBet-player.getCurrentBet());
-            player.setCurrentBet(highestBet);
+        if (player == nextPlayer) {
+            int difference = highestBet - player.getCurrentBet();
+            if (difference >= player.getCredits()) {
+                player.addTotalContributionToPot(player.getCredits());
+                player.setCurrentBet(player.getCurrentBet() + player.getCredits());
+                currentPot += player.getCurrentBet();
+                player.setCredits(0);
 
-            System.out.println("New highest Bet: " + highestBet);
-            System.out.println("new Playerbet: " + player.getCurrentBet());
+                highestBet = Math.max(highestBet, player.getCurrentBet());
 
-            broadCast(gson.toJson(new NewCreditsCommand(player.getName(), player.getCredits())));
-            broadCast(gson.toJson(new PlayerActionCommand(player.getName(),Action.RAISE, player.getCurrentBet())));
+                allInsThisRound.add(player);
+                broadCast(gson.toJson(new NewCreditsCommand(player.getName(), player.getCredits())));
+                broadCast(gson.toJson(new PlayerActionCommand(player.getName(), Action.ALLIN, highestBet)));
+                announceNextPlayer();
+            } else {
+                System.out.println("Current highest Bet: " + highestBet);
+                System.out.println("Raise amount: " + playerActionCommand.getAmount());
+                System.out.println("Playerbet: " + player.getCurrentBet());
+                highestBet += playerActionCommand.getAmount();
+                lastRaised = player;
 
-            announceNextPlayer();
+                player.addTotalContributionToPot(difference);
+                player.subtractCredits(difference);
+                player.setCurrentBet(highestBet);
+
+                System.out.println("New highest Bet: " + highestBet);
+                System.out.println("new Playerbet: " + player.getCurrentBet());
+
+                broadCast(gson.toJson(new NewCreditsCommand(player.getName(), player.getCredits())));
+                broadCast(gson.toJson(new PlayerActionCommand(player.getName(), Action.RAISE, player.getCurrentBet())));
+
+                announceNextPlayer();
+            }
         }
     }
 
     public void handleBet(Player player, PlayerActionCommand playerActionCommand) {
-        if (player == nextPlayer){
-            highestBet = playerActionCommand.getAmount();
-            lastRaised = player;
-            player.setCurrentBet(playerActionCommand.getAmount());
-            player.subtractCredits(playerActionCommand.getAmount());
-            currentPot += playerActionCommand.getAmount();
-            broadCast(gson.toJson(new NewCreditsCommand(player.getName(),player.getCredits())));
-            broadCast(gson.toJson(new PlayerActionCommand(player.getName(),Action.BET,playerActionCommand.getAmount())));
-            announceNextPlayer();
+        if (player == nextPlayer) {
+            if (playerActionCommand.getAmount() >= player.getCredits()) {
+                player.addTotalContributionToPot(player.getCredits());
+                player.setCurrentBet(player.getCurrentBet() + player.getCredits());
+                currentPot += player.getCredits();
+                player.setCredits(0);
+                highestBet = player.getCurrentBet();
+
+                allInsThisRound.add(player);
+                broadCast(gson.toJson(new NewCreditsCommand(player.getName(), player.getCredits())));
+                broadCast(gson.toJson(new PlayerActionCommand(player.getName(), Action.ALLIN, highestBet)));
+                announceNextPlayer();
+            } else {
+                highestBet = playerActionCommand.getAmount();
+                lastRaised = player;
+                player.setCurrentBet(playerActionCommand.getAmount());
+                player.subtractCredits(playerActionCommand.getAmount());
+                player.addTotalContributionToPot(playerActionCommand.getAmount());
+                currentPot += playerActionCommand.getAmount();
+                broadCast(gson.toJson(new NewCreditsCommand(player.getName(), player.getCredits())));
+                broadCast(gson.toJson(new PlayerActionCommand(player.getName(), Action.BET, playerActionCommand.getAmount())));
+                announceNextPlayer();
+            }
         }
     }
 
     public void handleCall(Player player, PlayerActionCommand playerActionCommand) {
-        System.out.println("call received");
-        System.out.println("player: " + player.getName());
-        System.out.println("next Player: "+ nextPlayer.getName());
-        if (player == nextPlayer){
-            int difference = highestBet-player.getCurrentBet();
-            currentPot+=difference;
-            player.subtractCredits(difference);
-            player.setCurrentBet(highestBet);
-            broadCast(gson.toJson(new PlayerActionCommand(player.getName(), playerActionCommand.getAction(), player.getCurrentBet())));
-            broadCast(gson.toJson(new NewCreditsCommand(player.getName(), player.getCredits())));
-            announceNextPlayer();
+        if (player == nextPlayer) {
+            int difference = highestBet - player.getCurrentBet();
+            if (difference >= player.getCredits()) {
+                player.addTotalContributionToPot(player.getCredits());
+                player.setCurrentBet(player.getCurrentBet() + player.getCredits());
+                currentPot += player.getCurrentBet();
+                player.setCredits(0);
+
+                highestBet = Math.max(highestBet, player.getCurrentBet());
+
+                allInsThisRound.add(player);
+                broadCast(gson.toJson(new NewCreditsCommand(player.getName(), player.getCredits())));
+                broadCast(gson.toJson(new PlayerActionCommand(player.getName(), Action.ALLIN, highestBet)));
+                announceNextPlayer();
+            } else {
+                currentPot += difference;
+                player.addTotalContributionToPot(difference);
+                player.subtractCredits(difference);
+                player.setCurrentBet(highestBet);
+                broadCast(gson.toJson(new PlayerActionCommand(player.getName(), playerActionCommand.getAction(), player.getCurrentBet())));
+                broadCast(gson.toJson(new NewCreditsCommand(player.getName(), player.getCredits())));
+                announceNextPlayer();
+            }
         }
     }
 
     public void postBlinds() {
-        Player smallBlind = notFoldedPlayers.get(smallBlindIndex % notFoldedPlayers.size());
+        Player smallBlind = allPlayers.get(smallBlindIndex % allPlayers.size());
         smallBlind.subtractCredits(SMALLBLIND);
         smallBlind.setCurrentBet(SMALLBLIND);
-        Player bigBlind = notFoldedPlayers.get((smallBlindIndex + 1) % notFoldedPlayers.size());
+        Player bigBlind = allPlayers.get((smallBlindIndex + 1) % allPlayers.size());
         bigBlind.subtractCredits(BIGBLIND);
         bigBlind.setCurrentBet(BIGBLIND);
 
@@ -303,8 +363,8 @@ public class GameSession {
 
         currentPot += SMALLBLIND + BIGBLIND;
         highestBet = BIGBLIND;
-        lastRaised = notFoldedPlayers.get((smallBlindIndex+1)%notFoldedPlayers.size());
-        nextPlayer = notFoldedPlayers.get((smallBlindIndex+1)%notFoldedPlayers.size());
+        lastRaised = allPlayers.get((smallBlindIndex + 1) % allPlayers.size());
+        nextPlayer = allPlayers.get((smallBlindIndex + 1) % allPlayers.size());
 
         broadCast(gson.toJson(new NewCreditsCommand(smallBlind.getName(), smallBlind.getCredits())));
         broadCast(gson.toJson(new NewCreditsCommand(bigBlind.getName(), bigBlind.getCredits())));
@@ -314,39 +374,50 @@ public class GameSession {
 
 
     public void announceNextPlayer() {
-        nextPlayer = notFoldedPlayers.get((notFoldedPlayers.indexOf(nextPlayer)+1)%notFoldedPlayers.size());
-        if (nextPlayer == lastRaised){
+        nextPlayer = allPlayers.get((allPlayers.indexOf(nextPlayer) + 1) % allPlayers.size());
+        if (nextPlayer == lastRaised) {
             startNextBettingRound();
-        }else {
-            broadCast(gson.toJson(new NextPlayerTurnCommand(nextPlayer.getName())));
+        } else {
+            if (nextPlayer.getCredits() == 0 || nextPlayer.isFolded()) {
+                announceNextPlayer();
+            } else {
+                broadCast(gson.toJson(new NextPlayerTurnCommand(nextPlayer.getName())));
+            }
         }
     }
 
     public void startNextBettingRound() {
         highestBet = 0;
-        nextPlayer = notFoldedPlayers.get(smallBlindIndex%notFoldedPlayers.size());
+        nextPlayer = allPlayers.get(smallBlindIndex % allPlayers.size());
         lastRaised = nextPlayer;
-        for (Player player : playerOrder){
+        for (Player player : playerOrder) {
             player.setCurrentBet(0);
         }
         switch (gameState) {
             case PREFLOP:
                 gameState = GameState.FLOP;
                 broadCast(gson.toJson(new NewBettingRoundCommand(currentPot)));
-                broadCast(gson.toJson(new FlopCommand(communityCards.subList(0,3))));
-                broadCast(gson.toJson(new ServerMessageCommand("New betting round", "Entering "+gameState, "blue")));
+                broadCast(gson.toJson(new FlopCommand(communityCards.subList(0, 3))));
+                broadCast(gson.toJson(new ServerMessageCommand("New betting round", "Entering " + gameState, "blue")));
 
-                broadCast(gson.toJson(new NextPlayerTurnCommand(nextPlayer.getName())));
+                if (nextPlayer.getCredits() == 0) {
+                    announceNextPlayer();
+                } else {
+                    broadCast(gson.toJson(new NextPlayerTurnCommand(nextPlayer.getName())));
+                }
                 break;
             case FLOP:
                 gameState = GameState.TURN;
 
                 broadCast(gson.toJson(new NewBettingRoundCommand(currentPot)));
-
-
                 broadCast(gson.toJson(new TurnCommand(communityCards.get(3))));
-                broadCast(gson.toJson(new ServerMessageCommand("New betting round", "Entering "+gameState, "blue")));
-                broadCast(gson.toJson(new NextPlayerTurnCommand(nextPlayer.getName())));
+                broadCast(gson.toJson(new ServerMessageCommand("New betting round", "Entering " + gameState, "blue")));
+
+                if (nextPlayer.getCredits() == 0) {
+                    announceNextPlayer();
+                } else {
+                    broadCast(gson.toJson(new NextPlayerTurnCommand(nextPlayer.getName())));
+                }
                 break;
             case TURN:
                 gameState = GameState.RIVER;
@@ -354,11 +425,53 @@ public class GameSession {
 
                 broadCast(gson.toJson(new NewBettingRoundCommand(currentPot)));
                 broadCast(gson.toJson(new RiverCommand(communityCards.get(4))));
-                broadCast(gson.toJson(new ServerMessageCommand("New betting round", "Entering "+gameState, "blue")));
-                broadCast(gson.toJson(new NextPlayerTurnCommand(nextPlayer.getName())));
+                broadCast(gson.toJson(new ServerMessageCommand("New betting round", "Entering " + gameState, "blue")));
+
+                if (nextPlayer.getCredits() == 0) {
+                    announceNextPlayer();
+                } else {
+                    broadCast(gson.toJson(new NextPlayerTurnCommand(nextPlayer.getName())));
+                }
                 break;
             case RIVER:
+                gameState = GameState.SHOWDOWN;
+                revealWinners();
                 break;
         }
+    }
+
+    public void revealWinners() {
+        broadCast(gson.toJson(new ServerMessageCommand("Showdown", "Revealing WInners " + gameState, "blue")));
+
+    }
+
+    public void buildSidePots(){
+        Collections.sort(allInsThisRound, Comparator.comparingInt(p -> p.getCurrentBet()));
+        Iterator<Player> iterator = allInsThisRound.iterator();
+        while (iterator.hasNext()) {
+            Player p = iterator.next();
+            SidePot sidePot = new SidePot(0);
+            for (Player player : allPlayers){
+                sidePot.addAmount(p.getCurrentBet());
+                sidePot.addEligiblePlayer(player);
+            }
+            allPlayers.removeIf(player -> p.getCredits()==0);
+            allInsThisRound.removeIf(player -> p.getCredits()==0);
+        }
+    }
+
+    public class SidePot {
+        private int amount;
+        private Set<Player> eligiblePlayers;
+
+        public SidePot(int amount) {
+            this.amount = amount;
+            this.eligiblePlayers = new HashSet<>();
+        }
+
+        public int getAmount() { return amount; }
+        public void addAmount(int amount){this.amount += amount;}
+        public Set<Player> getEligiblePlayers() { return eligiblePlayers; }
+        public void addEligiblePlayer(Player player) { eligiblePlayers.add(player); }
     }
 }

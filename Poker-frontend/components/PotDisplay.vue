@@ -1,65 +1,62 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 
-defineProps<{
-  tableDiameter: number;
-}>();
-
 const sidePotVisible = ref(true);
-const potCredits = ref(123456789);   // example value for testing
-const sidePotCredits = ref(98765432); // example value for testing
+const potCredits = ref(0);
+const sidePotCredits = ref(0);
 </script>
 
-
 <template>
-  <div
-      class="flex flex-nowrap justify-center items-center gap-4"
-      :style="{ fontSize: tableDiameter * 0.05 + 'px' }"
-  >
+  <div class="main-wrapper">
     <div
-        class="pot-box bg-customPrimary-100 dark:bg-customPrimary-500"
-        :style="{
-        width: '40%',
-        maxWidth: '280px',
-        minHeight: `${tableDiameter * 0.07}px`,
-        padding: '0.5rem 1rem',
-      }"
+        class="pot-container item-container bg-customPrimary-300 dark:bg-customPrimary-600"
+        :class="{ 'rounded-bottom': !sidePotVisible }"
     >
-      <strong class="truncate block w-full text-center">Pot</strong>
-      <div class="credits text-black dark:text-white truncate w-full text-center">
-        <span>{{ potCredits }}</span>
-      </div>
+      <strong>Pot</strong>
+      <span>{{ potCredits }}</span>
     </div>
-
     <div
-        class="pot-box bg-customPrimary-100 dark:bg-customPrimary-500"
-        v-if="sidePotVisible"
-        :style="{
-        width: '40%',
-        maxWidth: '280px',
-        minHeight: `${tableDiameter * 0.07}px`,
-        padding: '0.5rem 1rem',
-      }"
+        class="side-pot-container item-container bg-customPrimary-200 dark:bg-customPrimary-500"
+        :class="{ invisible: !sidePotVisible }"
     >
-      <strong class="truncate block w-full text-center">Side Pot</strong>
-      <div class="credits text-black dark:text-white truncate w-full text-center">
-        <span>{{ sidePotCredits }}</span>
-      </div>
+      <strong>Side Pot</strong>
+      <span>{{ sidePotCredits }}</span>
     </div>
   </div>
 </template>
 
 <style scoped>
-.pot-box {
-  @apply inline-flex flex-col items-center justify-center rounded-xl shadow-md;
-  box-sizing: border-box;
+.item-container {
   text-align: center;
-  transition: all 0.3s ease;
+  display: flex;
+  font-size: 30px;
+  line-height: 0.95;
+  flex-direction: column;
+  padding: 0.5em;
 }
 
-.credits {
-  margin-top: 0.3rem;
-  font-family: "Cambria Math", sans-serif;
-  white-space: nowrap;
+.main-wrapper {
+  display: flex;
+  flex-direction: column;
+}
+
+.side-pot-container {
+  border-bottom-left-radius: 0.2em;
+  border-bottom-right-radius: 0.2em;
+}
+
+.pot-container {
+  border-top-left-radius: 0.2em;
+  border-top-right-radius: 0.2em;
+}
+
+/* Dynamically added when side pot is hidden */
+.rounded-bottom {
+  border-bottom-left-radius: 0.2em;
+  border-bottom-right-radius: 0.2em;
+}
+
+.invisible {
+  visibility: hidden;
 }
 </style>

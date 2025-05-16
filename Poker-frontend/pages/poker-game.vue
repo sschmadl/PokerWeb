@@ -293,6 +293,9 @@ fetchCurrentPlayers();
   <div class="side_menu">
     <ActionMenu class="z-40"/>
   </div>
+  <div class="pot-area">
+    <PotDisplay />
+  </div>
 </template>
 
 <style scoped>
@@ -361,6 +364,11 @@ fetchCurrentPlayers();
   transform: translateY(-50%);
 }
 
-
+.pot-area {
+  position: absolute;
+  top: 5%;
+  right: 2%;
+  transform: translateY(50%);
+}
 
 </style>

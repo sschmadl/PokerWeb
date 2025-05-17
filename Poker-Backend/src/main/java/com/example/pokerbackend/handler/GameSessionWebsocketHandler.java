@@ -46,11 +46,11 @@ public class GameSessionWebsocketHandler extends TextWebSocketHandler {
         System.out.println("Session opened: " + session.getRemoteAddress().getAddress().getHostAddress());
         String username;
         if (!jwtUtil.validateToken(token)) {
-            System.out.println("received token: "+token);
-            try{
+            System.out.println("received token: " + token);
+            try {
                 username = jwtUtil.extractUsername(token);
-                System.out.println("expected token: "+ jwtUtil.generateToken(username));
-            }catch(Exception e){
+                System.out.println("expected token: " + jwtUtil.generateToken(username));
+            } catch (Exception e) {
                 System.out.println("Could not extract username");
             }
             System.out.println("Session closed: Invalid token passed from " + session.getRemoteAddress().getAddress().getHostAddress());
@@ -115,30 +115,38 @@ public class GameSessionWebsocketHandler extends TextWebSocketHandler {
                     gameSessionManager.startGame(session);
                     break;
                 case "player-action":
-                    PlayerActionCommand playerActionCommand = gson.fromJson(messageContent,PlayerActionCommand.class);
+                    PlayerActionCommand playerActionCommand = gson.fromJson(messageContent, PlayerActionCommand.class);
                     playerActionCommand.setName(session.getAttributes().get("username").toString());
-                    gameSessionManager.handlePlayerAction(session,playerActionCommand);
+                    gameSessionManager.handlePlayerAction(session, playerActionCommand);
             }
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
-            session.sendMessage(new TextMessage(gson.toJson(new ServerMessageCommand("Error","Illegal command","red"))));
+            session.sendMessage(new TextMessage(gson.toJson(new ServerMessageCommand("Error", "Illegal command", "red"))));
         }
     }
 
     private void createLobby(WebSocketSession session, CreateGameCommand command) {
-
-        String lobbyName = command.getGameName();
-        if (lobbyName.isEmpty()) lobbyName = session.getAttributes().get("username").toString() + "'s Game";
-        int smallBlind = command.getSmallBlind();
-        int bigBlind = command.getBigBlind();
-        int maxPlayerCount = command.getMaxPlayerCount();
-        GameSession gameSession = gameSessionManager.createSession(lobbyName, smallBlind, bigBlind, maxPlayerCount, session);
-        try {
-            session.sendMessage(new TextMessage("success"));
-            CurrentPlayersInfoCommand currentPlayersInfoCommand = new CurrentPlayersInfoCommand(gameSession.getPlayerOrder(), gameSession.getAdmin());
-            session.sendMessage(new TextMessage(gson.toJson(currentPlayersInfoCommand)));
-        } catch (Exception e) {
-            e.printStackTrace();
+        Player player = gameSessionManager.getPlayers().get(session.getAttributes().get("username").toString()).a;
+        if (player.getCredits() == 0) {
+            if (session.isOpen()) {
+                try {
+                    session.sendMessage(new TextMessage(gson.toJson(new ServerMessageCommand("Couldn't create a Lobby", "You can't create a lobby with 0 credits(loser)", "red"))));
+                }catch (Exception e){}
+            }
+        } else {
+            String lobbyName = command.getGameName();
+            if (lobbyName.isEmpty()) lobbyName = session.getAttributes().get("username").toString() + "'s Game";
+            int smallBlind = command.getSmallBlind();
+            int bigBlind = command.getBigBlind();
+            int maxPlayerCount = command.getMaxPlayerCount();
+            GameSession gameSession = gameSessionManager.createSession(lobbyName, smallBlind, bigBlind, maxPlayerCount, session);
+            try {
+                session.sendMessage(new TextMessage("success"));
+                CurrentPlayersInfoCommand currentPlayersInfoCommand = new CurrentPlayersInfoCommand(gameSession.getPlayerOrder(), gameSession.getAdmin());
+                session.sendMessage(new TextMessage(gson.toJson(currentPlayersInfoCommand)));
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
     }
 

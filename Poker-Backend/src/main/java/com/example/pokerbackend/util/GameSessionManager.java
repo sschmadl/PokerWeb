@@ -131,4 +131,8 @@ public class GameSessionManager {
         GameSession gameSession = sessions.get(gameId);
         gameSession.handleAction(players.get(webSocketSession.getAttributes().get("username").toString()).a,playerActionCommand);
     }
+
+    public ConcurrentHashMap<String, Pair<Player, WebSocketSession>> getPlayers() {
+        return players;
+    }
 }

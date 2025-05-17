@@ -1,5 +1,11 @@
 package com.example.pokerbackend.util;
 
+import com.example.pokerbackend.model.User;
+import com.example.pokerbackend.repository.UserRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
+import org.springframework.stereotype.Component;
+
 public class Player {
     private String name;
     private int credits;
@@ -8,10 +14,15 @@ public class Player {
     private int totalContributionsToPot = 0;
     private boolean folded = false;
 
-    public Player(String name, int credits) {
+    private final UserRepository userRepository;
+    private final User user;
+
+    public Player(String name, int credits, UserRepository userRepository) {
         this.name = name;
         this.credits = credits;
         this.hand = new PlayerHand();
+        this.userRepository = userRepository;
+        user = userRepository.findUserByUsername(name);
     }
 
     public String getName() {
@@ -28,6 +39,8 @@ public class Player {
 
     public void setCredits(int credits) {
         this.credits = credits;
+        user.setCredits(credits);
+        userRepository.save(user);
     }
 
     public PlayerHand getHand() {
@@ -40,7 +53,8 @@ public class Player {
 
     public void subtractCredits(int credits) {
         this.credits -= credits;
-        this.totalContributionsToPot += credits;
+        user.setCredits(this.credits);
+        userRepository.save(user);
     }
 
     public int getCurrentBet() {
@@ -57,13 +71,14 @@ public class Player {
 
     public void addTotalContributionToPot(int amount){
         this.totalContributionsToPot += amount;
+        System.out.println(name+" added "+amount);
     }
 
     public void subtractTotalContributionToPot(int amount){
         this.totalContributionsToPot -= amount;
     }
 
-    public int getTotalContributions(){
+    public int getTotalContributionsToPot(){
         return totalContributionsToPot;
     }
 
@@ -73,5 +88,13 @@ public class Player {
 
     public void setFolded(boolean folded) {
         this.folded = folded;
+    }
+
+    @Override
+    public String toString() {
+        return "Player{" +
+                "name='" + name + '\'' +
+                ", totalContributionsToPot=" + totalContributionsToPot +
+                '}';
     }
 }

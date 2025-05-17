@@ -161,6 +161,7 @@ public class GameSession {
                 removeFromGame(player);
             }else if (nextPlayer == player) {
                 handleFold(player);
+                removeFromGame(player);
             }else{
                 leftDuringRound.add(player);
             }
@@ -425,6 +426,7 @@ public class GameSession {
         if (leftDuringRound.contains(nextPlayer)) {
             handleFold(nextPlayer);
             removeFromGame(nextPlayer);
+            leftDuringRound.remove(nextPlayer);
             announceNextPlayer();
         }
     }

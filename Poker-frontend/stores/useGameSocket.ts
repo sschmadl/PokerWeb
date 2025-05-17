@@ -12,7 +12,6 @@ export const useGameSocket = defineStore('gameSocket', () => {
 
     function connect() {
         if (socket) return; // prevent re-connecting
-
         socket = new WebSocket(`ws://${useRequestURL().host}/ws/game-info-socket?token=${token}`);
 
         socket.onopen = () => {

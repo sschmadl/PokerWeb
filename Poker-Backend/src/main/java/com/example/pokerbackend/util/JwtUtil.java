@@ -19,7 +19,9 @@ public class JwtUtil {
         this.userRepository = userRepository;
     }
 
-    public String generateToken(String username, Date passwordChangedDate) {
+    public String generateToken(String username) {
+        User user = userRepository.findUserByUsername(username);
+        Date passwordChangedDate = user.getPasswordChangedDate();
         return Jwts.builder()
                 .setSubject(username)
                 .claim("passwordChangedDate", String.valueOf(passwordChangedDate.getTime()))

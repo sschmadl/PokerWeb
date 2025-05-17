@@ -31,4 +31,15 @@ public class PokerCard {
             default: return Integer.parseInt(rank);
         }
     }
+
+    public String getFormattedCard(){
+        if (getRankValue() < 10){
+            return rank+suit.charAt(0);
+        }else if (getRankValue() == 10){
+            return "T"+suit.charAt(0);
+        }else if (getRankValue() > 10){
+            return getRank()+suit.charAt(0);
+        }
+        return null;
+    }
 }

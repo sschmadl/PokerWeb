@@ -4,7 +4,7 @@ import java.util.*;
 
 public class test {
     public static void main(String[] args) {
-        test4();
+        test5();
     }
 
     public static void test2() {
@@ -105,5 +105,104 @@ public class test {
             }
             msg = sc.nextLine();
         }while (!msg.equals("q"));
+    }
+
+    static ArrayList<Player> allPlayers = new ArrayList();
+
+    static ArrayList<SidePot> sidePots = new ArrayList();
+
+    public static void test5(){
+//        Player player1 = new Player("Hans",6969);
+//        Player player2 = new Player("Franz",6969);
+//        Player player3 = new Player("Leon",6969);
+//
+//        player1.addTotalContributionToPot(500);
+//        player2.addTotalContributionToPot(1000);
+//        player2.setFolded(true);
+//        player3.addTotalContributionToPot(1500);
+//        allPlayers.add(player1);
+//        allPlayers.add(player2);
+//        allPlayers.add(player3);
+//        buildSidePots();
+//        for (SidePot pot : sidePots){
+//            System.out.println(pot);
+//            System.out.println("----------------------------------------------------------");
+//        }
+    }
+
+    public static void buildSidePots() {
+        List<Player> playersToEvaluate = new ArrayList<>(allPlayers);
+
+        // Get unique contribution levels only from non-folded players
+        Set<Integer> uniqueContributionLevels = new HashSet<>();
+        for (Player player : playersToEvaluate) {
+            if (!player.isFolded()) {
+                int contrib = player.getTotalContributionsToPot();
+                if (contrib > 0) {
+                    uniqueContributionLevels.add(contrib);
+                }
+            }
+        }
+
+        List<Integer> sortedLevels = new ArrayList<>(uniqueContributionLevels);
+        Collections.sort(sortedLevels);
+
+        int previousLevel = 0;
+        sidePots.clear();
+
+        for (int level : sortedLevels) {
+            int sidePotAmount = 0;
+            Set<Player> eligiblePlayers = new HashSet<>();
+
+            for (Player player : playersToEvaluate) {
+                int contribution = player.getTotalContributionsToPot();
+                int contributionForThisPot = Math.min(contribution, level - previousLevel);
+                if (contributionForThisPot > 0) {
+                    sidePotAmount += contributionForThisPot;
+                    player.subtractTotalContributionToPot(contributionForThisPot);
+
+                    // Eligible players are non-folded players who contributed here
+                    if (!player.isFolded()) {
+                        eligiblePlayers.add(player);
+                    }
+                }
+            }
+
+            if (sidePotAmount > 0 && !eligiblePlayers.isEmpty()) {
+                SidePot sidePot = new SidePot(sidePotAmount);
+                for (Player p : eligiblePlayers) {
+                    sidePot.addEligiblePlayer(p);
+                }
+                sidePots.add(sidePot);
+            } else {
+                // If all contributors folded at this level, pot amount still adds to next pot,
+                // so do NOT create a pot here.
+                // The contributions remain subtracted, so no carry-over needed.
+            }
+
+            previousLevel = level;
+        }
+
+        // Add any remaining chips as final pot
+        int finalPotAmount = 0;
+        Set<Player> remainingEligible = new HashSet<>();
+        for (Player player : playersToEvaluate) {
+            int remaining = player.getTotalContributionsToPot();
+            if (remaining > 0) {
+                finalPotAmount += remaining;
+                player.subtractTotalContributionToPot(remaining);
+                if (!player.isFolded()) {
+                    remainingEligible.add(player);
+                }
+            }
+        }
+
+        if (finalPotAmount > 0 && !remainingEligible.isEmpty()) {
+            SidePot finalPot = new SidePot(finalPotAmount);
+            for (Player p : remainingEligible) {
+                finalPot.addEligiblePlayer(p);
+            }
+            sidePots.add(finalPot);
+        }
     }
 }

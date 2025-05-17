@@ -11,13 +11,12 @@ const props = defineProps({
   cards: {
     type: Array as PropType<Array<Partial<Card>>>,
     default: () => [
-      { frontImage: '/cards_default/1J.svg', faceDown: true, highlighted: false },
-      { frontImage: '/cards_default/2J.svg', faceDown: true, highlighted: false },
+      {frontImage: '/cards_default/1J.svg', faceDown: true, highlighted: false},
+      {frontImage: '/cards_default/2J.svg', faceDown: true, highlighted: false},
     ]
   },
   profilePicture: {
     type: String,
-    default: '/default_profile_picture.jpg'
   },
   playerName: {
     type: String,
@@ -31,6 +30,14 @@ const props = defineProps({
     type: String,
     default: '',
   },
+  highlighted: {
+    type: Boolean,
+    default: false,
+  },
+  isAdmin: {
+    type: Boolean,
+    default: false,
+  }
 });
 
 
@@ -43,10 +50,12 @@ const playerMoney = computed(() => props.playerMoney);
 const playerAction = computed(() => props.playerAction);
 const cards = computed(() => {
   return props.cards?.length ? props.cards : [
-    { frontImage: '/cards_default/1J.svg', faceDown: true, highlighted: false },
-    { frontImage: '/cards_default/2J.svg', faceDown: true, highlighted: false },
+    {frontImage: '/cards_default/1J.svg', faceDown: true, highlighted: false},
+    {frontImage: '/cards_default/2J.svg', faceDown: true, highlighted: false},
   ];
 });
+const highlighted = computed(() => props.highlighted);
+const isAdmin = computed(() => props.isAdmin);
 const profilePictureDiameter = computed(() => Math.floor(props.menuWidth * 0.4));
 const profilePictureTextMargin = computed(() => profilePictureDiameter.value * 0.2);
 const profilePictureMenuPadding = computed(() => profilePictureDiameter.value - profilePictureTextMargin.value + profilePictureDiameter.value * 0.05);
@@ -58,7 +67,7 @@ const userNameContainerFontSize = computed(() => Math.floor(userNameContainerHei
 const pokerhandContainerHeight = computed(() => Math.ceil(props.menuWidth * 0.155));
 const pokerhandContainerFontSize = computed(() => Math.floor(pokerhandContainerHeight.value * 0.5));
 const roundEdgeCircleDiameter = computed(() => pokerhandContainerHeight.value + userNameContainerHeight.value);
-const personalCardHeight = computed(() => (userNameContainerHeight.value + pokerhandContainerHeight.value) * 1.25);
+const personalCardHeight = computed(() => (userNameContainerHeight.value + pokerhandContainerHeight.value) * 1.5);
 
 
 </script>
@@ -66,9 +75,13 @@ const personalCardHeight = computed(() => (userNameContainerHeight.value + poker
 <template>
   <div class="player-info-wrapper flex flex-col items-center w-auto">
     <!-- Profile & Cards Layout -->
-    <div class="menu-container" :style="{ width: menuWidth + 'px' }">
+    <div
+        class="menu-container"
+        :style="{ width: menuWidth + 'px' }"
+    >
       <!-- Profile picture (Adjust position) -->
-      <div class="player-profile-picture-container" :style="{ position: 'absolute', zIndex: 5, top: menuWidth/3 + 'px', left: menuWidth/50 + 'px' }">
+      <div class="player-profile-picture-container"
+           :style="{ position: 'absolute', zIndex: 5, top: menuWidth/3 + 'px', left: menuWidth/50 + 'px' }">
         <img
             :src="cacheBustedProfilePicture"
             class="profile-picture"
@@ -81,14 +94,14 @@ const personalCardHeight = computed(() => (userNameContainerHeight.value + poker
             alt="Profile Picture"
         />
       </div>
-
+      
       <!-- Cards -->
       <div class="player-cards-container" :style="{
         position: 'absolute',
         width: informationContainerWidth + 'px',
         zIndex: -5,
         display: 'inline-flex',
-        marginLeft: profilePictureDiameter + profilePictureTextMargin / 3 + 'px',
+        marginLeft: profilePictureDiameter * 0.85 + 'px',
         marginTop: profilePictureDiameter / 1.5, /* Adjust margin to avoid overlap */
       }">
         <Card
@@ -100,7 +113,7 @@ const personalCardHeight = computed(() => (userNameContainerHeight.value + poker
             :highlighted="card.highlighted"
         />
       </div>
-
+      
       <div class="player-stat-container" :style="{
         width: informationContainerWidth + 'px',
         paddingLeft: profilePictureMenuPadding + 'px',
@@ -124,7 +137,7 @@ const personalCardHeight = computed(() => (userNameContainerHeight.value + poker
             marginTop: pokerhandContainerHeight + 'px',
           }"></div>
         </div>
-
+        
         <!-- Money Section -->
         <div class="player-pokerhand-money-container bg-gray-500 dark:bg-gray-600" :style="{
           width: informationContainerWidth + 'px',
@@ -142,26 +155,67 @@ const personalCardHeight = computed(() => (userNameContainerHeight.value + poker
             marginBottom: (userNameContainerHeight) + 'px',
           }"></div>
         </div>
-
-        <!-- Action Section -->
+        
+        <!-- Action + Turn Section Side-by-Side -->
+        <div class="flex justify-between w-full" :style="{ width: informationContainerWidth + 'px' }">
+          <!-- Action Section (Left aligned) -->
+          <div
+              v-show="playerAction && playerAction.trim() !== ''"
+              class="player-action-bar bg-yellow-300 dark:bg-yellow-600 text-black dark:text-white"
+              :style="{
+                width: '69%',
+                fontSize: Math.floor(menuWidth * 0.04) + 'px',
+                padding: '2px 6px',
+                textAlign: 'center',
+                borderRadius: '0 0 6px 6px',
+                marginTop: '-2px',
+                visibility: playerAction && playerAction.trim() !== '' ? 'visible' : 'hidden'
+              }"
+          >
+            {{ playerAction }}
+          </div>
+          
+          <!-- Turn Section (Right aligned) -->
+          <div
+              v-show="true"
+              class="player-action-bar bg-purple-300 dark:bg-purple-600 text-black dark:text-white"
+              :style="{
+                width: '29%',
+                fontSize: Math.floor(menuWidth * 0.04) + 'px',
+                padding: '2px 6px',
+                textAlign: 'center',
+                borderRadius: '0 0 6px 6px',
+                marginTop: '-2px',
+                visibility: highlighted ? 'visible' : 'hidden'
+              }"
+          >
+            Turn
+          </div>
+        
+        </div>
+        
         <div
-            v-if="playerAction && playerAction.trim() !== ''"
-            class="player-action-bar bg-yellow-300 dark:bg-yellow-500 text-black dark:text-black"
+            class="player-crown-container"
+            v-if="isAdmin"
             :style="{
-              width: informationContainerWidth + 'px',
-              fontSize: Math.floor(menuWidth * 0.04) + 'px',
-              padding: '2px 6px',
-              textAlign: 'left',
-              borderRadius: '0 0 6px 6px',
-              marginTop: '-2px',
-            }"
+    position: 'absolute',
+    top: (menuWidth / 3 - profilePictureDiameter * 0.4) + 'px',
+    left: menuWidth / 50 + profilePictureDiameter * 0.25 + 'px',
+    zIndex: 6,
+    width: profilePictureDiameter * 0.5 + 'px',
+    height: profilePictureDiameter * 0.5 + 'px',
+  }"
         >
-          {{ playerAction }}
+          <img
+              src="/Crown.svg"
+              alt="Crown"
+              style="width: 100%; height: 100%; object-fit: contain"
+          />
         </div>
       </div>
-
+    
     </div>
-
+  
   </div>
 </template>
 
@@ -179,7 +233,9 @@ const personalCardHeight = computed(() => (userNameContainerHeight.value + poker
   white-space: nowrap;
   overflow: hidden;
   width: 100%;
+  line-height: 1.4;
 }
+
 
 .player-pokerhand-money-container {
   position: relative;
@@ -200,4 +256,5 @@ const personalCardHeight = computed(() => (userNameContainerHeight.value + poker
   display: flex;
   align-items: center;
 }
+
 </style>

@@ -21,6 +21,6 @@ public class PlayerFactoryService {
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         // Create a Player with the credits from DB
-        return new Player(name, user.getCredits());
+        return new Player(name, user.getCredits(), userRepository);
     }
 }

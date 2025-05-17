@@ -1,6 +1,7 @@
 package com.example.pokerbackend.util;
 
 import com.example.pokerbackend.util.commands.ChatMessageCommand;
+import com.example.pokerbackend.util.commands.PlayerActionCommand;
 import org.antlr.v4.runtime.misc.Pair;
 import org.springframework.web.socket.WebSocketSession;
 
@@ -40,7 +41,9 @@ public class GameSessionManager {
     public List<Map<String, Object>> getGameSessionInfos() {
         List<Map<String, Object>> sessionInfo = new ArrayList<>();
         for (GameSession session : sessions.values()) {
-            sessionInfo.add(session.getGameInfo());
+            if (session.isJoinable()) {
+                sessionInfo.add(session.getGameInfo());
+            }
         }
         return sessionInfo;
     }
@@ -68,7 +71,9 @@ public class GameSessionManager {
     public void joinGame(WebSocketSession webSocketSession, String username, String gameId){
         Player player = players.get(username).a;
         GameSession session = sessions.get(gameId);
-        session.joinGame(player, webSocketSession);
+        if (!sessionToIdMap.containsKey(webSocketSession)) {
+            session.joinGame(player, webSocketSession);
+        }
     }
 
     public void sendMessage(WebSocketSession webSocketSession, ChatMessageCommand chatMessageCommand){
@@ -113,5 +118,21 @@ public class GameSessionManager {
 
     public boolean playerIsAlreadyConnected(String username){
         return players.containsKey(username);
+    }
+
+    public void startGame(WebSocketSession webSocketSession){
+        String gameId = sessionToIdMap.get(webSocketSession);
+        GameSession gameSession = sessions.get(gameId);
+        gameSession.startGame();
+    }
+
+    public void handlePlayerAction(WebSocketSession webSocketSession, PlayerActionCommand playerActionCommand){
+        String gameId = sessionToIdMap.get(webSocketSession);
+        GameSession gameSession = sessions.get(gameId);
+        gameSession.handleAction(players.get(webSocketSession.getAttributes().get("username").toString()).a,playerActionCommand);
+    }
+
+    public ConcurrentHashMap<String, Pair<Player, WebSocketSession>> getPlayers() {
+        return players;
     }
 }

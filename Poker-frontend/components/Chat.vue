@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, nextTick } from 'vue';
-import { useUsername } from "~/composables/states";
-import { useGameSocket } from "~/stores/useGameSocket"; // Adjust path if needed
+import {nextTick, onMounted, ref} from 'vue';
+import {useUsername} from "~/composables/states";
+import {useGameSocket} from "~/stores/useGameSocket";
+
 
 // Chat state
 const messageInput = ref('');
@@ -46,10 +47,10 @@ const sendMessage = async () => {
 
 // Handle messages received from WebSocket
 const handleIncomingMessage = async (data: any) => {
-  console.log('Received WebSocket data:', data);
+  // console.log('Received WebSocket data:', data);
   console.log(data);
   if (data.command === 'chat-message') {
-    console.log('New chat message received:', data);
+    // console.log('New chat message received:', data);
 
     messages.value.push({
       username: data.sender,
@@ -63,7 +64,7 @@ const handleIncomingMessage = async (data: any) => {
 
 
   } else {
-    console.log('Unknown command received:', data.command);
+    // console.log('Unknown command received:', data.command);
   }
 };
 
@@ -73,14 +74,7 @@ onMounted(() => {
   gameSocket.connect();
   gameSocket.onMessage(handleIncomingMessage);
 });
-
-onUnmounted(() => {
-  console.log('Chat component unmounted. Disconnecting WebSocket...');
-  gameSocket.disconnect(); // Optional, based on whether you want to persist the socket
-});
 </script>
-
-
 
 
 <template>

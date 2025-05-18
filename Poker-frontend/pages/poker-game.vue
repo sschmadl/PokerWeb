@@ -67,6 +67,11 @@ function calculatePlayerPositions() {
   playerPositions.value = positions;
 }
 
+function rotateArray<T>(array: T[], pivotIndex: number): T[] {
+  return [...array.slice(pivotIndex), ...array.slice(0, pivotIndex)];
+}
+
+
 function updateSizes() {
   tableDiameter.value = window.innerWidth / 2.5;
   playerWidth.value = tableDiameter.value / 3;
@@ -114,39 +119,33 @@ gameSocket.onMessage((data) => {
   console.log(data.command);
   switch (data.command) {
     case 'player-joined-game':
-      playerInfo.value.push({
-        name: data.name,
-        credits: data.credits,
-        action: '',
-        cards: [{}, {}],
-        highlighted: false,
-        admin: false,
-        winner: false,
-        folded: false,
-      })
+      fetchCurrentPlayers();
       break;
     case 'player-left':
-      playerInfo.value = playerInfo.value.filter(player => player.name !== data.name);
+      fetchCurrentPlayers();
       break;
     case 'current-players-info':
       const adminUser = data.admin;
       let playerData = data.players as Player[];
 
-      playerData = [
-        ...playerData.filter(p => p.name === selfUsername),
-        ...playerData.filter(p => p.name !== selfUsername),
-      ];
-
-      playerInfo.value = playerData.map(player => ({
-        name: player.name,
-        credits: player.credits,
-        action: '',
-        cards: [{}, {}],
-        highlighted: false,
-        admin: false,
-        winner: false,
-        folded: false,
-      }));
+      const selfPlayer = playerData.find(p => p.name === selfUsername);
+      if (selfPlayer) {
+        const selfIndex = playerData.indexOf(selfPlayer);
+        const firstHalf = playerData.slice(0, selfIndex);
+        const secondHalf = playerData.slice(selfIndex);
+        playerData = [...secondHalf, ...firstHalf];
+        
+        playerInfo.value = playerData.map(player => ({
+          name: player.name,
+          credits: player.credits,
+          action: '',
+          cards: [{}, {}],
+          highlighted: false,
+          admin: false,
+          winner: false,
+          folded: false,
+        }));
+      }
 
       const adminPlayer = playerInfo.value.find(p => p.name === adminUser);
       if (adminPlayer) {
@@ -238,6 +237,13 @@ gameSocket.onMessage((data) => {
       if (winner) {
         winner.winner = true;
       }
+      break;
+    }
+    case 'reset-highlight-winner': {
+      playerInfo.value = playerInfo.value.map(player => ({
+        ...player,
+        winner: false,
+      }));
       break;
     }
     case 'flop':

@@ -11,7 +11,7 @@ let isTurn = ref<boolean>(false);
 let currentPokerHand = 'Three of a Kind';
 
 const relevantActions = [
-  'BET', 'RAISE', 'ALL IN',
+  'BET', 'RAISE', 'ALLIN',
 ];
 let actionHistory: string[] = [];
 

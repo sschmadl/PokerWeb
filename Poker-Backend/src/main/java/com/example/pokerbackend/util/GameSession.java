@@ -87,7 +87,9 @@ public class GameSession {
     }
 
     public void broadCast(String message) {
+        System.out.println("Broadcast at" + System.currentTimeMillis());
         for (Pair<Player, WebSocketSession> pair : players.values()) {
+            System.out.println("1");
             try {
                 if (pair.b.isOpen()) {
                     pair.b.sendMessage(new TextMessage(message));
@@ -200,6 +202,7 @@ public class GameSession {
                 postBlinds();
                 communityCards.addAll(deck.dealCommunityCards());
                 dealCardsToPlayers();
+                sendHandName();
             }
 
         } catch (Exception e) {
@@ -488,6 +491,7 @@ public class GameSession {
                 revealWinners();
                 break;
         }
+        sendHandName();
     }
 
     public void revealWinners() {
@@ -560,6 +564,7 @@ public class GameSession {
         if (eligiblePlayers.size() == 1) {
             Player winner = eligiblePlayers.get(0);
             winner.setCredits(winner.getCredits() + sidePot.getAmount());
+            broadCast(gson.toJson(new HiglightWinnerCommand(winner.getName())));
             broadCast(gson.toJson(new ServerMessageCommand(
                     "Pot Winner",
                     winner.getName() + " wins " + sidePot.getAmount() + " chips",
@@ -784,6 +789,15 @@ public class GameSession {
                 admin = playerOrder.get(0).getName();
                 broadCast(gson.toJson(new CurrentPlayersInfoCommand(playerOrder,admin)));
             }
+        }
+    }
+
+    private void sendHandName(){
+        for (Player player : allPlayers){
+            WebSocketSession webSocketSession = players.get(player.getName()).b;
+            try{
+                webSocketSession.sendMessage(new TextMessage(gson.toJson(new BestHandName(player.getHand().getHandName()))));
+            }catch (Exception e){}
         }
     }
 }

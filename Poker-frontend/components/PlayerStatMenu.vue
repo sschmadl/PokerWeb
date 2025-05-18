@@ -1,6 +1,6 @@
 <script setup lang="ts">
-
-import type {Card} from "~/pages/poker-game.vue";
+import type { Card } from "~/pages/poker-game.vue";
+import { computed, ref } from "vue";
 
 const props = defineProps({
   menuWidth: {
@@ -11,8 +11,8 @@ const props = defineProps({
   cards: {
     type: Array as PropType<Array<Partial<Card>>>,
     default: () => [
-      {frontImage: '/cards_default/1J.svg', faceDown: true, highlighted: false},
-      {frontImage: '/cards_default/2J.svg', faceDown: true, highlighted: false},
+      { frontImage: '/cards_default/1J.svg', faceDown: true, highlighted: false },
+      { frontImage: '/cards_default/2J.svg', faceDown: true, highlighted: false },
     ]
   },
   profilePicture: {
@@ -37,9 +37,24 @@ const props = defineProps({
   isAdmin: {
     type: Boolean,
     default: false,
+  },
+  isWinner: {
+    type: Boolean,
+    default: false,
+  },
+  isFolded: {
+    type: Boolean,
+    default: false,
   }
 });
 
+const showExplosion = ref(false);
+function triggerExplosion() {
+  showExplosion.value = true;
+  setTimeout(() => {
+    showExplosion.value = false;
+  }, 800);
+}
 
 const cacheBustedProfilePicture = computed(() => {
   return props.profilePicture + '?t=' + Date.now();
@@ -50,12 +65,13 @@ const playerMoney = computed(() => props.playerMoney);
 const playerAction = computed(() => props.playerAction);
 const cards = computed(() => {
   return props.cards?.length ? props.cards : [
-    {frontImage: '/cards_default/1J.svg', faceDown: true, highlighted: false},
-    {frontImage: '/cards_default/2J.svg', faceDown: true, highlighted: false},
+    { frontImage: '/cards_default/1J.svg', faceDown: true, highlighted: false },
+    { frontImage: '/cards_default/2J.svg', faceDown: true, highlighted: false },
   ];
 });
 const highlighted = computed(() => props.highlighted);
 const isAdmin = computed(() => props.isAdmin);
+const isFolded = computed(() => props.isFolded);
 const profilePictureDiameter = computed(() => Math.floor(props.menuWidth * 0.4));
 const profilePictureTextMargin = computed(() => profilePictureDiameter.value * 0.2);
 const profilePictureMenuPadding = computed(() => profilePictureDiameter.value - profilePictureTextMargin.value + profilePictureDiameter.value * 0.05);
@@ -69,40 +85,75 @@ const pokerhandContainerFontSize = computed(() => Math.floor(pokerhandContainerH
 const roundEdgeCircleDiameter = computed(() => pokerhandContainerHeight.value + userNameContainerHeight.value);
 const personalCardHeight = computed(() => (userNameContainerHeight.value + pokerhandContainerHeight.value) * 1.5);
 
-
+watch(isFolded, () => {
+  if (isFolded.value) {
+    triggerExplosion();
+  }
+});
 </script>
 
 <template>
-  <div class="player-info-wrapper flex flex-col items-center w-auto">
+  <div class="player-info-wrapper flex flex-col items-center w-auto" ref="playerContainer">
+    <!-- Explosion Overlay -->
+    <div v-if="showExplosion" class="explosion-overlay">
+      <img :src="`/explosion.gif?t=${Date.now()}`" alt="" />
+    </div>
+    
     <!-- Profile & Cards Layout -->
     <div
         class="menu-container"
         :style="{ width: menuWidth + 'px' }"
     >
-      <!-- Profile picture (Adjust position) -->
-      <div class="player-profile-picture-container"
-           :style="{ position: 'absolute', zIndex: 5, top: menuWidth/3 + 'px', left: menuWidth/50 + 'px' }">
+      <!-- Profile Picture Container -->
+      <div
+          class="player-profile-picture-container"
+          :style="{
+          position: 'absolute',
+          zIndex: 5,
+          top: menuWidth / 3 + 'px',
+          left: menuWidth / 50 + 'px',
+          width: profilePictureDiameter + 'px',
+          height: profilePictureDiameter + 'px',
+        }"
+      >
+        <div
+            v-if="isWinner"
+            class="glow-layer"
+            :style="{
+            position: 'absolute',
+            top: '0',
+            left: '0',
+            width: '100%',
+            height: '100%',
+            borderRadius: '50%',
+            boxShadow: '0 0 ' + profilePictureDiameter * 0.8 + 'px ' + profilePictureDiameter * 0.3 + 'px rgba(255, 215, 0, 0.8)',
+            zIndex: -50,
+            animation: 'pulse-glow 2s infinite',
+          }"
+        />
+        
         <img
             :src="cacheBustedProfilePicture"
             class="profile-picture"
             :style="{
-            width: profilePictureDiameter + 'px',
-            height: profilePictureDiameter + 'px',
+            width: '100%',
+            height: '100%',
             borderRadius: '100%',
             border: profileBorderWidth + 'px solid ' + profileBorderColor,
+            position: 'relative',
+            zIndex: 2,
           }"
             alt="Profile Picture"
         />
       </div>
       
-      <!-- Cards -->
       <div class="player-cards-container" :style="{
         position: 'absolute',
         width: informationContainerWidth + 'px',
         zIndex: -5,
         display: 'inline-flex',
         marginLeft: profilePictureDiameter * 0.85 + 'px',
-        marginTop: profilePictureDiameter / 1.5, /* Adjust margin to avoid overlap */
+        marginTop: profilePictureDiameter / 1.5,
       }">
         <Card
             v-for="(card, index) in cards"
@@ -120,7 +171,6 @@ const personalCardHeight = computed(() => (userNameContainerHeight.value + poker
         zIndex: 1,
         marginTop: profilePictureDiameter + 'px',
       }">
-        <!-- Username section -->
         <div class="player-username-container bg-gray-400 dark:bg-gray-700" :style="{
           width: informationContainerWidth + 'px',
           height: userNameContainerHeight + 'px',
@@ -138,7 +188,6 @@ const personalCardHeight = computed(() => (userNameContainerHeight.value + poker
           }"></div>
         </div>
         
-        <!-- Money Section -->
         <div class="player-pokerhand-money-container bg-gray-500 dark:bg-gray-600" :style="{
           width: informationContainerWidth + 'px',
           height: pokerhandContainerHeight + 'px',
@@ -152,59 +201,55 @@ const personalCardHeight = computed(() => (userNameContainerHeight.value + poker
             height: roundEdgeCircleDiameter + 'px',
             clipPath: 'inset(' + userNameContainerHeight + 'px 0 0 0)',
             transform: 'translateX(-50%)',
-            marginBottom: (userNameContainerHeight) + 'px',
+            marginBottom: userNameContainerHeight + 'px',
           }"></div>
         </div>
         
-        <!-- Action + Turn Section Side-by-Side -->
         <div class="flex justify-between w-full" :style="{ width: informationContainerWidth + 'px' }">
-          <!-- Action Section (Left aligned) -->
           <div
               v-show="playerAction && playerAction.trim() !== ''"
               class="player-action-bar bg-yellow-300 dark:bg-yellow-600 text-black dark:text-white"
               :style="{
-                width: '69%',
-                fontSize: Math.floor(menuWidth * 0.04) + 'px',
-                padding: '2px 6px',
-                textAlign: 'center',
-                borderRadius: '0 0 6px 6px',
-                marginTop: '-2px',
-                visibility: playerAction && playerAction.trim() !== '' ? 'visible' : 'hidden'
-              }"
+              width: '68%',
+              fontSize: Math.floor(menuWidth * 0.07) + 'px',
+              padding: '2px 6px',
+              textAlign: 'center',
+              borderRadius: '0 0 6px 6px',
+              marginTop: '-2px',
+              visibility: playerAction && playerAction.trim() !== '' ? 'visible' : 'hidden'
+            }"
           >
             {{ playerAction }}
           </div>
           
-          <!-- Turn Section (Right aligned) -->
           <div
               v-show="true"
               class="player-action-bar bg-purple-300 dark:bg-purple-600 text-black dark:text-white"
               :style="{
-                width: '29%',
-                fontSize: Math.floor(menuWidth * 0.04) + 'px',
-                padding: '2px 6px',
-                textAlign: 'center',
-                borderRadius: '0 0 6px 6px',
-                marginTop: '-2px',
-                visibility: highlighted ? 'visible' : 'hidden'
-              }"
+              width: '30%',
+              fontSize: Math.floor(menuWidth * 0.07) + 'px',
+              padding: '2px 6px',
+              textAlign: 'center',
+              borderRadius: '0 0 6px 6px',
+              marginTop: '-2px',
+              visibility: highlighted ? 'visible' : 'hidden'
+            }"
           >
             Turn
           </div>
-        
         </div>
         
         <div
             class="player-crown-container"
             v-if="isAdmin"
             :style="{
-    position: 'absolute',
-    top: (menuWidth / 3 - profilePictureDiameter * 0.4) + 'px',
-    left: menuWidth / 50 + profilePictureDiameter * 0.25 + 'px',
-    zIndex: 6,
-    width: profilePictureDiameter * 0.5 + 'px',
-    height: profilePictureDiameter * 0.5 + 'px',
-  }"
+            position: 'absolute',
+            top: (menuWidth / 3 - profilePictureDiameter * 0.4) + 'px',
+            left: menuWidth / 50 + profilePictureDiameter * 0.25 + 'px',
+            zIndex: 6,
+            width: profilePictureDiameter * 0.5 + 'px',
+            height: profilePictureDiameter * 0.5 + 'px',
+          }"
         >
           <img
               src="/Crown.svg"
@@ -213,9 +258,7 @@ const personalCardHeight = computed(() => (userNameContainerHeight.value + poker
           />
         </div>
       </div>
-    
     </div>
-  
   </div>
 </template>
 
@@ -235,7 +278,6 @@ const personalCardHeight = computed(() => (userNameContainerHeight.value + poker
   width: 100%;
   line-height: 1.4;
 }
-
 
 .player-pokerhand-money-container {
   position: relative;
@@ -257,4 +299,24 @@ const personalCardHeight = computed(() => (userNameContainerHeight.value + poker
   align-items: center;
 }
 
+.player-info-wrapper {
+  position: relative;
+}
+
+.explosion-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 999;
+  pointer-events: none;
+  transform: translateY(40%);
+}
+
+.explosion-overlay img {
+  width: 100%;
+  height: 100%;
+  object-fit: fill;
+}
 </style>

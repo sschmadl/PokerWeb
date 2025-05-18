@@ -202,6 +202,11 @@ gameSocket.onMessage((data) => {
         for (let i = 0; i < communityCards.value.length; i++) {
           communityCards.value[i].faceDown = true;
         }
+        playerInfo.value = playerInfo.value.map(player => ({
+          ...player,
+          winner: false,
+          folded: false,
+        }));
       }
       break;
     case 'reveal-all-cards': {

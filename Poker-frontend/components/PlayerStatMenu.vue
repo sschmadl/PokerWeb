@@ -96,7 +96,7 @@ watch(isFolded, () => {
   <div class="player-info-wrapper flex flex-col items-center w-auto" ref="playerContainer">
     <!-- Explosion Overlay -->
     <div v-if="showExplosion" class="explosion-overlay">
-      <img :src="`/explosion.gif?t=${Date.now()}`" alt="Explosion" />
+      <img :src="`/explosion.gif?t=${Date.now()}`" alt="" />
     </div>
     
     <!-- Profile & Cards Layout -->

@@ -8,7 +8,7 @@ const selfUsername = useUsername().value;
 
 let isTurn = ref<boolean>(false);
 
-let currentPokerHand = '';
+let currentPokerHand = 'Three of a Kind';
 
 const relevantActions = [
   'BET', 'RAISE', 'ALLIN',
@@ -27,12 +27,6 @@ gameSocket.onMessage((data) => {
       isTurn.value = data.name === selfUsername;
       break;
     }
-    case 'updata-game-state': {
-      if (!data.gameRunning) {
-        isTurn.value = false;
-      }
-      break;
-    }
     case 'player-action': {
       if (relevantActions.includes(data.action)) {
         actionHistory.push(data.action);
@@ -48,9 +42,10 @@ gameSocket.onMessage((data) => {
       revertValuesToDefault();
       break;
     }
-    case 'best-hand': {
-      currentPokerHand = data.name;
-      break;
+    case 'update-game-state': {
+      if (!data.gameRunning) {
+        isTurn.value = false;
+      }
     }
   }
 });

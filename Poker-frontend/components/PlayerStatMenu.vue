@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { Card } from "~/pages/poker-game.vue";
 import { computed, ref } from "vue";
+import {useGameSocket} from "~/stores/useGameSocket";
 
 const props = defineProps({
   menuWidth: {

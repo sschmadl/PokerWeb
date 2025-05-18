@@ -211,6 +211,7 @@ gameSocket.onMessage((data) => {
         playerInfo.value = playerInfo.value.map(player => ({
           ...player,
           highlighted: false,
+          action: '',
         }));
       }
       break;
@@ -232,11 +233,11 @@ gameSocket.onMessage((data) => {
         ...player,
         winner: false,
       }));
-      const winner = playerInfo.value.find(p => p.name === data.name);
+      
+      const winner = playerInfo.value.find(player => player.name === data.name);
       if (winner) {
         winner.winner = true;
       }
-      
       break;
     }
     case 'flop':

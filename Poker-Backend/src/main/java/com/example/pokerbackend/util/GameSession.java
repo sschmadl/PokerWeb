@@ -292,7 +292,10 @@ public class GameSession {
                 player.setCurrentBet(player.getCurrentBet() + player.getCredits());
                 currentPot += player.getCurrentBet();
                 player.setCredits(0);
-
+                if (player.getCurrentBet() > highestBet){
+                    highestBet = player.getCurrentBet();
+                    lastRaised = player;
+                }
                 highestBet = Math.max(highestBet, player.getCurrentBet());
 
                 allInsThisRound.add(player);
@@ -329,6 +332,7 @@ public class GameSession {
                 currentPot += player.getCredits();
                 player.setCredits(0);
                 highestBet = player.getCurrentBet();
+                lastRaised = player;
 
                 allInsThisRound.add(player);
                 broadCast(gson.toJson(new NewCreditsCommand(player.getName(), player.getCredits())));
@@ -445,7 +449,7 @@ public class GameSession {
                 broadCast(gson.toJson(new FlopCommand(communityCards.subList(0, 3))));
                 broadCast(gson.toJson(new ServerMessageCommand("New betting round", "Entering " + gameState, "blue")));
 
-                if (nextPlayer.getCredits() == 0) {
+                if (nextPlayer.getCredits() == 0 || nextPlayer.isFolded()) {
                     announceNextPlayer();
                 } else {
                     broadCast(gson.toJson(new NextPlayerTurnCommand(nextPlayer.getName())));
@@ -458,7 +462,7 @@ public class GameSession {
                 broadCast(gson.toJson(new TurnCommand(communityCards.get(3))));
                 broadCast(gson.toJson(new ServerMessageCommand("New betting round", "Entering " + gameState, "blue")));
 
-                if (nextPlayer.getCredits() == 0) {
+                if (nextPlayer.getCredits() == 0 || nextPlayer.isFolded()) {
                     announceNextPlayer();
                 } else {
                     broadCast(gson.toJson(new NextPlayerTurnCommand(nextPlayer.getName())));
@@ -472,7 +476,7 @@ public class GameSession {
                 broadCast(gson.toJson(new RiverCommand(communityCards.get(4))));
                 broadCast(gson.toJson(new ServerMessageCommand("New betting round", "Entering " + gameState, "blue")));
 
-                if (nextPlayer.getCredits() == 0) {
+                if (nextPlayer.getCredits() == 0 || nextPlayer.isFolded()) {
                     announceNextPlayer();
                 } else {
                     broadCast(gson.toJson(new NextPlayerTurnCommand(nextPlayer.getName())));
@@ -576,17 +580,6 @@ public class GameSession {
 //                        winner.getHand().getBestHand()
 //                )));
             }
-            for (Player player : allPlayers) {
-                if (player.getCredits() == 0){
-                    WebSocketSession session = players.get(player.getName()).b;
-                    if (session.isOpen()){
-                        try {
-                            session.sendMessage(new TextMessage(gson.toJson(new RedirectCommand("/lobby-selection"))));
-                            session.sendMessage(new TextMessage(gson.toJson(new ServerMessageCommand("Kicked from Game","You got kicked for having 0 credits","red"))));
-                        }catch (Exception e){}
-                    }
-                }
-            }
         }
 
         // Reset game for next round
@@ -594,6 +587,18 @@ public class GameSession {
         gameState = GameState.WAITING;
         communityCards.clear();
         deck.resetDeck();
+
+        for (Player player : allPlayers) {
+            if (player.getCredits() == 0){
+                WebSocketSession session = players.get(player.getName()).b;
+                if (session.isOpen()){
+                    try {
+                        session.sendMessage(new TextMessage(gson.toJson(new RedirectCommand("/lobby-selection"))));
+                        session.sendMessage(new TextMessage(gson.toJson(new ServerMessageCommand("Kicked from Game","You got kicked for having 0 credits","red"))));
+                    }catch (Exception e){}
+                }
+            }
+        }
 
         // Check if game should continue (need at least 2 players)
         if (playerOrder.size() >= 2) {

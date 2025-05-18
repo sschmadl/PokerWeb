@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import { computed, ref, watch } from 'vue';
 
 const props = defineProps({
@@ -12,21 +12,55 @@ const props = defineProps({
     default: 0,
   },
   highlighted: {
-    Boolean,
+    type: Boolean,
     default: false,
   },
-
 });
 
 const card_back = '/cards_default/2B.svg';
-const card_front = computed(() => props.frontImage ?? '/cards_default/1J.svg');
+const card_front = ref(props.frontImage ?? '/cards_default/1J.svg');
 const highlighted = computed(() => props.highlighted ?? false);
 
 const isFlipped = ref(props.faceDown);
-watch(() => props.faceDown, (newVal) => {
-  isFlipped.value = newVal;
-});
+
+// Flip control: wait for image before flipping
+watch(
+    () => props.faceDown,
+    async (newFaceDown) => {
+      if (!newFaceDown && props.frontImage) {
+        // Wait for front image to load before flipping
+        await preloadImage(props.frontImage);
+        card_front.value = props.frontImage;
+        isFlipped.value = false;
+      } else {
+        isFlipped.value = true;
+      }
+    },
+    { immediate: true }
+);
+
+// Handle image URL change
+watch(
+    () => props.frontImage,
+    async (newImage) => {
+      if (!props.faceDown && newImage) {
+        await preloadImage(newImage);
+        card_front.value = newImage;
+      }
+    }
+);
+
+function preloadImage(src: string): Promise<void> {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.onload = () => resolve();
+    img.onerror = () => resolve();
+    img.src = src;
+  });
+}
+
 </script>
+
 
 
 <template>

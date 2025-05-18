@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import {onBeforeUnmount, onMounted, ref} from 'vue';
-import ActionButtons from '~/components/action-buttons.vue';
 import Chat from '~/components/Chat.vue';
 import {useUsername} from "~/composables/states";
 import {navigateTo} from "#app";
@@ -8,7 +7,8 @@ import {getCardByString} from "~/utils/getCardByString";
 
 const gameSocket = useGameSocket();
 const selfUsername = useUsername().value;
-let gameRunning = ref(false);
+const gameRunning = ref(false);
+
 
 const tableDiameter = ref(window.innerWidth / 2.5);
 const playerWidth = ref(tableDiameter.value / 3.5);
@@ -31,6 +31,8 @@ export type PlayerInfo = Player & {
   cards: [Card, Card];
   highlighted: boolean;
   admin: boolean;
+  winner: boolean;
+  folded: boolean;
 }
 
 const playerInfo = ref<PlayerInfo[]>([]);
@@ -56,7 +58,7 @@ function calculatePlayerPositions() {
 
   const positions = [];
   for (let i = 0; i < numPlayers; i++) {
-    const angle = (2 * Math.PI * i) / numPlayers - Math.PI / 2; // start at top center
+    const angle = (2 * Math.PI * i) / numPlayers - Math.PI / 2;
     const x = radius * Math.cos(angle);
     const y = radius * Math.sin(angle);
     positions.push({x, y});
@@ -99,6 +101,14 @@ function setActionText(name: string, action: string, amount?: number): void {
   else console.log('Cannot set action to player: ' + name + ', player doesnt exist.');
 }
 
+function toggleAllPlayerCards(faceDown: boolean) {
+  for (let i = 0; i < playerInfo.value.length; i++) {
+    for (let j = 0; j < playerInfo.value[i].cards.length; j++) {
+      const card = playerInfo.value[i].cards[j];
+      card.faceDown = faceDown;
+    }
+  }
+}
 
 gameSocket.onMessage((data) => {
   console.log(data.command);
@@ -111,6 +121,8 @@ gameSocket.onMessage((data) => {
         cards: [{}, {}],
         highlighted: false,
         admin: false,
+        winner: false,
+        folded: false,
       })
       break;
     case 'player-left':
@@ -132,6 +144,8 @@ gameSocket.onMessage((data) => {
         cards: [{}, {}],
         highlighted: false,
         admin: false,
+        winner: false,
+        folded: false,
       }));
 
       const adminPlayer = playerInfo.value.find(p => p.name === adminUser);
@@ -148,6 +162,11 @@ gameSocket.onMessage((data) => {
       const raiseAmount = data.amount;
       
       setActionText(name, action, raiseAmount);
+      
+      if (action === 'FOLD') {
+        const foldedPlayer = playerInfo.value.find(p => p.name === name);
+        if (foldedPlayer) foldedPlayer.folded = true;
+      }
       
       break;
     }
@@ -178,7 +197,26 @@ gameSocket.onMessage((data) => {
 
     case 'update-game-state':
       gameRunning.value = data.gameRunning;
+      if (data.gameRunning) {
+        toggleAllPlayerCards(true);
+        for (let i = 0; i < communityCards.value.length; i++) {
+          communityCards.value[i].faceDown = true;
+        }
+      }
       break;
+    case 'reveal-all-cards': {
+      const players: {name: string, cards: Array<string>}[] = data.players;
+      players.forEach(({name, cards}) => {
+        const player = playerInfo.value.find(p => p.name === name)
+        if (player) {
+          player.cards[0].frontImage = getCardByString(cards[0]);
+          player.cards[1].frontImage = getCardByString(cards[1]);
+        }
+      });
+      
+      toggleAllPlayerCards(false);
+      break;
+    }
     case 'flop':
       const flopCards = data.cards as Array<string>;
       flopCards.forEach((cardStr, i) => {
@@ -197,6 +235,7 @@ gameSocket.onMessage((data) => {
         frontImage: getCardByString(turnCard),
         faceDown: false,
       }
+      
       break;
     case 'river':
       const riverCard = data.card as string;
@@ -207,8 +246,6 @@ gameSocket.onMessage((data) => {
         faceDown: false,
       }
       break;
-
-
   }
 });
 
@@ -282,6 +319,8 @@ fetchCurrentPlayers();
             :profile-picture="fetchProfilePictureUrl(player.name)"
             :highlighted="player.highlighted"
             :is-admin="player.admin"
+            :is-winner="player.winner"
+            :is-folded="player.folded"
         />
       </div>
     </div>

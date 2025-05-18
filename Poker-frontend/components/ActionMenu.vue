@@ -11,7 +11,7 @@ let isTurn = ref<boolean>(false);
 let currentPokerHand = 'Three of a Kind';
 
 const relevantActions = [
-  'BET', 'RAISE',
+  'BET', 'RAISE', 'ALL IN',
 ];
 let actionHistory: string[] = [];
 
@@ -62,6 +62,60 @@ function handleActionSend(action: string, amount?: number | null): void {
   }
   gameSocket.sendMessage(JSON.stringify(message))
 }
+
+const filterInput = (event: KeyboardEvent) => {
+  const allowedKeys = ['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'Tab'];
+  
+  if (allowedKeys.includes(event.key)) {
+    // Always allow control keys
+    return;
+  }
+  
+  // Allow digits only
+  if (!/\d/.test(event.key)) {
+    event.preventDefault();
+    return;
+  }
+  
+  const input = event.target as HTMLInputElement;
+  const cursorPos = input.selectionStart ?? input.value.length;
+  
+  const nextValue =
+      input.value.slice(0, cursorPos) +
+      event.key +
+      input.value.slice(cursorPos);
+  
+  // Allow single zero only if input is empty
+  if (nextValue === '0') {
+    if (input.value.length !== 0) {
+      event.preventDefault();
+    }
+    return;
+  }
+  
+  // Allow replacing leading zero by typing a digit at the start
+  if (
+      cursorPos === 0 &&
+      input.value.startsWith('0') &&
+      /\d/.test(event.key)
+  ) {
+    const replacedValue = event.key + input.value.slice(1);
+    if (/^0\d+/.test(replacedValue)) {
+      event.preventDefault();
+    }
+    return;
+  }
+  
+  // Disallow leading zero in multi-digit numbers
+  if (/^0\d+/.test(nextValue)) {
+    event.preventDefault();
+  }
+};
+
+
+
+
+
 </script>
 
 <template>
@@ -97,9 +151,10 @@ function handleActionSend(action: string, amount?: number | null): void {
           <label class="text-sm text-black dark:text-white">Enter Raise Amount:</label>
           <input
               v-model.number="raiseAmount"
-              type="number"
               class="w-full text-lg rounded-md border border-gray-300 dark:border-gray-600 p-2"
+              @keydown="filterInput"
           />
+          
           <div class="flex justify-between mt-2">
             <UButton
                 class="confirm-raise-button text-black dark:text-white"

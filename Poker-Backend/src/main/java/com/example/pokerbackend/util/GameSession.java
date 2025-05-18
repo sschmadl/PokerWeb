@@ -11,6 +11,7 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class GameSession {
@@ -367,7 +368,7 @@ public class GameSession {
 
                 allInsThisRound.add(player);
                 broadCast(gson.toJson(new NewCreditsCommand(player.getName(), player.getCredits())));
-                broadCast(gson.toJson(new PlayerActionCommand(player.getName(), Action.ALLIN, highestBet)));
+                broadCast(gson.toJson(new PlayerActionCommand(player.getName(), Action.ALLIN, player.getCurrentBet())));
                 announceNextPlayer();
             } else {
                 currentPot += difference;
@@ -501,101 +502,153 @@ public class GameSession {
             System.out.println(sidePot);
         }
 
-        // Evaluate each side pot and distribute winnings
-        for (SidePot sidePot : sidePots) {
-            // Get all eligible players for this pot who haven't folded
-            List<Player> eligiblePlayers = new ArrayList<>(sidePot.getEligiblePlayers());
+        // Create a list of runnables for each pot reveal
+        List<Runnable> revealTasks = new ArrayList<>();
 
-            // If only one eligible player, they win the pot
-            if (eligiblePlayers.size() == 1) {
-                Player winner = eligiblePlayers.get(0);
-                winner.setCredits(winner.getCredits() + sidePot.getAmount());
-                broadCast(gson.toJson(new ServerMessageCommand(
-                        "Pot Winner",
-                        winner.getName() + " wins " + sidePot.getAmount() + " chips",
-                        "green")));
-                broadCast(gson.toJson(new NewCreditsCommand(winner.getName(), winner.getCredits())));
-                continue;
-            }
+        // Add initial delay before first pot reveal
+        revealTasks.add(() -> {}); // Empty initial task for initial delay
 
-            // Evaluate hands for all eligible players
-            List<PlayerHandEvaluation> evaluations = new ArrayList<>();
-            for (Player player : eligiblePlayers) {
-                PlayerHand hand = player.getHand();
-                evaluations.add(new PlayerHandEvaluation(
-                        player,
-                        hand.getHandRanking(),
-                        hand.getBestHand()
-                ));
-            }
-
-            // Sort evaluations by hand strength (descending)
-            evaluations.sort((e1, e2) -> {
-                // First compare hand rankings
-                int rankingCompare = Integer.compare(e2.handRanking, e1.handRanking);
-                if (rankingCompare != 0) return rankingCompare;
-
-                // If same ranking, compare the actual best hands card by card
-                for (int i = 0; i < e1.bestHand.size(); i++) {
-                    int cardCompare = Integer.compare(
-                            e2.bestHand.get(i).getRankValue(),
-                            e1.bestHand.get(i).getRankValue()
-                    );
-                    if (cardCompare != 0) return cardCompare;
-                }
-                return 0; // Exact same hand
+        // Create tasks for each pot reveal
+        for (int i = 0; i < sidePots.size(); i++) {
+            final int potIndex = i;
+            revealTasks.add(() -> {
+                SidePot sidePot = sidePots.get(potIndex);
+                revealPotWinners(sidePot, potIndex + 1, sidePots.size());
             });
+        }
 
-            // Find all winners (players with the same best hand)
-            List<PlayerHandEvaluation> winners = new ArrayList<>();
-            winners.add(evaluations.get(0));
+        // Add final tasks after all pots are revealed
+        revealTasks.add(() -> {
+            // Reset game for next round after a delay
+            scheduler.schedule(() -> {
+                resetGameForNextRound();
+            }, 3, TimeUnit.SECONDS);
+        });
 
-            for (int i = 1; i < evaluations.size(); i++) {
-                if (compareHandEvaluations(evaluations.get(0), evaluations.get(i)) == 0) {
-                    winners.add(evaluations.get(i));
-                } else {
-                    break;
-                }
-            }
+        // Schedule all tasks with delays
+        for (int i = 0; i < revealTasks.size(); i++) {
+            scheduler.schedule(revealTasks.get(i), i * 3, TimeUnit.SECONDS);
+        }
+    }
 
-            // Split the pot among winners
-            int chipsPerWinner = sidePot.getAmount() / winners.size();
-            int remainder = sidePot.getAmount() % winners.size();
+    private void revealPotWinners(SidePot sidePot, int potNumber, int totalPots) {
+        // Get all eligible players for this pot who haven't folded
+        List<Player> eligiblePlayers = new ArrayList<>(sidePot.getEligiblePlayers());
 
-            for (int i = 0; i < winners.size(); i++) {
-                Player winner = winners.get(i).player;
-                int winnings = chipsPerWinner + (i < remainder ? 1 : 0);
-                winner.setCredits(winner.getCredits() + winnings);
+        // Announce current pot being revealed
+        broadCast(gson.toJson(new ServerMessageCommand(
+                "Pot " + potNumber + "/" + totalPots,
+                "Revealing winner for pot of " + sidePot.getAmount() + " chips",
+                "blue")));
 
-                broadCast(gson.toJson(new ServerMessageCommand(
-                        "Pot Winner",
-                        winner.getName() + " wins " + winnings + " chips with " + winner.getHand().getHandName(),
-                        "green")));
-                broadCast(gson.toJson(new NewCreditsCommand(winner.getName(), winner.getCredits())));
+        // First reveal all eligible players' cards for this pot
+        for (Player player : eligiblePlayers) {
+            // Show this player's cards to everyone
+            ArrayList<Player> list = new ArrayList();
+            list.add(player);
+            broadCast(gson.toJson(new RevealAllCards(list)));
 
-                // Show winning hand to all players
-//                broadCast(gson.toJson(new ShowPlayerCardsCommand(
-//                        winner.getName(),
-//                        winner.getHand().getPlayerCards(),
-//                        winner.getHand().getBestHand()
-//                )));
+            // Add a small delay between revealing each player's cards
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
             }
         }
 
-        // Reset game for next round
+        // If only one eligible player, they win the pot
+        if (eligiblePlayers.size() == 1) {
+            Player winner = eligiblePlayers.get(0);
+            winner.setCredits(winner.getCredits() + sidePot.getAmount());
+            broadCast(gson.toJson(new ServerMessageCommand(
+                    "Pot Winner",
+                    winner.getName() + " wins " + sidePot.getAmount() + " chips",
+                    "green")));
+            broadCast(gson.toJson(new NewCreditsCommand(winner.getName(), winner.getCredits())));
+            return;
+        }
+
+        // Evaluate hands for all eligible players
+        List<PlayerHandEvaluation> evaluations = new ArrayList<>();
+        for (Player player : eligiblePlayers) {
+            PlayerHand hand = player.getHand();
+            evaluations.add(new PlayerHandEvaluation(
+                    player,
+                    hand.getHandRanking(),
+                    hand.getBestHand()
+            ));
+        }
+
+        // Sort evaluations by hand strength (descending)
+        evaluations.sort((e1, e2) -> {
+            // First compare hand rankings
+            int rankingCompare = Integer.compare(e2.handRanking, e1.handRanking);
+            if (rankingCompare != 0) return rankingCompare;
+
+            // If same ranking, compare the actual best hands card by card
+            for (int i = 0; i < e1.bestHand.size(); i++) {
+                int cardCompare = Integer.compare(
+                        e2.bestHand.get(i).getRankValue(),
+                        e1.bestHand.get(i).getRankValue()
+                );
+                if (cardCompare != 0) return cardCompare;
+            }
+            return 0; // Exact same hand
+        });
+
+        // Find all winners (players with the same best hand)
+        List<PlayerHandEvaluation> winners = new ArrayList<>();
+        winners.add(evaluations.get(0));
+
+        for (int i = 1; i < evaluations.size(); i++) {
+            if (compareHandEvaluations(evaluations.get(0), evaluations.get(i)) == 0) {
+                winners.add(evaluations.get(i));
+            } else {
+                break;
+            }
+        }
+
+        // Split the pot among winners
+        int chipsPerWinner = sidePot.getAmount() / winners.size();
+        int remainder = sidePot.getAmount() % winners.size();
+
+        for (int i = 0; i < winners.size(); i++) {
+            Player winner = winners.get(i).player;
+            int winnings = chipsPerWinner + (i < remainder ? 1 : 0);
+            winner.setCredits(winner.getCredits() + winnings);
+
+            // Show winning hand again with the announcement
+            broadCast(gson.toJson(new HiglightWinnerCommand(winner.getName())));
+
+            broadCast(gson.toJson(new ServerMessageCommand(
+                    "Pot Winner",
+                    winner.getName() + " wins " + winnings + " chips with " + winner.getHand().getHandName(),
+                    "green")));
+            broadCast(gson.toJson(new NewCreditsCommand(winner.getName(), winner.getCredits())));
+
+            // Add delay between winner announcements
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+        }
+    }
+
+    private void resetGameForNextRound() {
         smallBlindIndex = (smallBlindIndex + 1) % allPlayers.size();
         gameState = GameState.WAITING;
         communityCards.clear();
         deck.resetDeck();
 
         for (Player player : allPlayers) {
-            if (player.getCredits() == 0){
+            if (player.getCredits() == 0) {
                 WebSocketSession session = players.get(player.getName()).b;
-                if (session.isOpen()){
+                if (session.isOpen()) {
                     try {
                         session.sendMessage(new TextMessage(gson.toJson(new RedirectCommand("/lobby-selection"))));
-                        session.sendMessage(new TextMessage(gson.toJson(new ServerMessageCommand("Kicked from Game","You got kicked for having 0 credits","red"))));
-                    }catch (Exception e){}
+                        session.sendMessage(new TextMessage(gson.toJson(new ServerMessageCommand("Kicked from Game", "You got kicked for having 0 credits", "red"))));
+                    } catch (Exception e) {}
                 }
             }
         }

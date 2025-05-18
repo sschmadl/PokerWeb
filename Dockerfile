@@ -23,7 +23,7 @@ COPY Poker-Backend/mvnw .
 COPY Poker-Backend/.mvn .mvn
 
 # Cache dependencies here
-# RUN ./mvnw dependency:go-offline
+RUN ./mvnw dependency:go-offline
 
 COPY Poker-Backend/src ./src
 

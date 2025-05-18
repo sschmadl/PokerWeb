@@ -533,6 +533,7 @@ public class GameSession {
     }
 
     private void revealPotWinners(SidePot sidePot, int potNumber, int totalPots) {
+        broadCast(gson.toJson(new ResetHighlightWinnerCommand()));
         // Get all eligible players for this pot who haven't folded
         List<Player> eligiblePlayers = new ArrayList<>(sidePot.getEligiblePlayers());
 
@@ -790,7 +791,7 @@ public class GameSession {
         for (Player player : allPlayers){
             WebSocketSession webSocketSession = players.get(player.getName()).b;
             try{
-                webSocketSession.sendMessage(new TextMessage(gson.toJson(new BestHandName(player.getHand().getHandName()))));
+                webSocketSession.sendMessage(new TextMessage(gson.toJson(new BestHandNameCommand(player.getHand().getHandName()))));
             }catch (Exception e){}
         }
     }

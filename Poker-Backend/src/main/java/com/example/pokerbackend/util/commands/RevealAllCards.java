@@ -12,10 +12,9 @@ public class RevealAllCards {
     ArrayList<Map<Object, Object>> players = new ArrayList<>();
 
     public RevealAllCards(ArrayList<Player> players) {
-        ArrayList<String> cards = new ArrayList<>();
         for (Player player : players) {
+            ArrayList<String> cards = new ArrayList<>();
             Map<Object, Object> map = new HashMap<>();
-            cards.clear();
             for (PokerCard card : player.getHand().getPlayerCards()){
                 cards.add(card.getFormattedCard());
             }

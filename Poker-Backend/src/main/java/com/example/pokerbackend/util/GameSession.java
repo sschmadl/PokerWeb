@@ -496,6 +496,8 @@ public class GameSession {
 
     public void revealWinners() {
         broadCast(gson.toJson(new ServerMessageCommand("Showdown", "Revealing Winners", "blue")));
+        broadCast(gson.toJson(new RevealAllCards(new ArrayList<>(allPlayers))));
+        System.out.println(gson.toJson(new RevealAllCards(new ArrayList<>(allPlayers))));
 
         // First build all side pots based on contributions
         for (Player player : allPlayers) {
@@ -548,9 +550,6 @@ public class GameSession {
         // First reveal all eligible players' cards for this pot
         for (Player player : eligiblePlayers) {
             // Show this player's cards to everyone
-            ArrayList<Player> list = new ArrayList();
-            list.add(player);
-            broadCast(gson.toJson(new RevealAllCards(list)));
 
             // Add a small delay between revealing each player's cards
             try {

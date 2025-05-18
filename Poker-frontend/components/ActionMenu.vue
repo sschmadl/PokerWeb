@@ -42,6 +42,11 @@ gameSocket.onMessage((data) => {
       revertValuesToDefault();
       break;
     }
+    case 'update-game-state': {
+      if (!data.gameRunning) {
+        isTurn.value = false;
+      }
+    }
   }
 });
 

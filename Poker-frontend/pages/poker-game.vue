@@ -211,6 +211,7 @@ gameSocket.onMessage((data) => {
         playerInfo.value = playerInfo.value.map(player => ({
           ...player,
           highlighted: false,
+          action: '',
         }));
       }
       break;

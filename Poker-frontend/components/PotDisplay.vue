@@ -11,6 +11,13 @@ gameSocket.onMessage((data) => {
   switch (data.command) {
     case 'new-betting-round': {
       potCredits.value = data.pot;
+      break;
+    }
+    case 'update-game-state': {
+      if (!data.gameRunning) {
+        potCredits.value = 0;
+      }
+      break;
     }
   }
 });

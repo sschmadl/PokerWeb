@@ -531,7 +531,7 @@ public class GameSession {
 
         // Schedule all tasks with delays
         for (int i = 0; i < revealTasks.size(); i++) {
-            scheduler.schedule(revealTasks.get(i), i * 3, TimeUnit.SECONDS);
+            scheduler.schedule(revealTasks.get(i), i * 4, TimeUnit.SECONDS);
         }
     }
 

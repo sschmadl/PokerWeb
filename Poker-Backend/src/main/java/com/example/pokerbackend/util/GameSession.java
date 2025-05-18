@@ -87,7 +87,9 @@ public class GameSession {
     }
 
     public void broadCast(String message) {
+        System.out.println("Broadcast at" + System.currentTimeMillis());
         for (Pair<Player, WebSocketSession> pair : players.values()) {
+            System.out.println("1");
             try {
                 if (pair.b.isOpen()) {
                     pair.b.sendMessage(new TextMessage(message));
@@ -200,6 +202,7 @@ public class GameSession {
                 postBlinds();
                 communityCards.addAll(deck.dealCommunityCards());
                 dealCardsToPlayers();
+                sendHandName();
             }
 
         } catch (Exception e) {
@@ -413,7 +416,6 @@ public class GameSession {
         broadCast(gson.toJson(new NewCreditsCommand(smallBlind.getName(), smallBlind.getCredits())));
         broadCast(gson.toJson(new NewCreditsCommand(bigBlind.getName(), bigBlind.getCredits())));
 
-        sendhandName();
         announceNextPlayer();
     }
 
@@ -489,11 +491,13 @@ public class GameSession {
                 revealWinners();
                 break;
         }
-        sendhandName();
+        sendHandName();
     }
 
     public void revealWinners() {
         broadCast(gson.toJson(new ServerMessageCommand("Showdown", "Revealing Winners", "blue")));
+        broadCast(gson.toJson(new RevealAllCards(new ArrayList<>(allPlayers))));
+        System.out.println(gson.toJson(new RevealAllCards(new ArrayList<>(allPlayers))));
 
         // First build all side pots based on contributions
         for (Player player : allPlayers) {
@@ -529,7 +533,7 @@ public class GameSession {
 
         // Schedule all tasks with delays
         for (int i = 0; i < revealTasks.size(); i++) {
-            scheduler.schedule(revealTasks.get(i), i * 3, TimeUnit.SECONDS);
+            scheduler.schedule(revealTasks.get(i), i * 4, TimeUnit.SECONDS);
         }
     }
 
@@ -546,9 +550,6 @@ public class GameSession {
         // First reveal all eligible players' cards for this pot
         for (Player player : eligiblePlayers) {
             // Show this player's cards to everyone
-            ArrayList<Player> list = new ArrayList();
-            list.add(player);
-            broadCast(gson.toJson(new RevealAllCards(list)));
 
             // Add a small delay between revealing each player's cards
             try {
@@ -562,6 +563,7 @@ public class GameSession {
         if (eligiblePlayers.size() == 1) {
             Player winner = eligiblePlayers.get(0);
             winner.setCredits(winner.getCredits() + sidePot.getAmount());
+            broadCast(gson.toJson(new HiglightWinnerCommand(winner.getName())));
             broadCast(gson.toJson(new ServerMessageCommand(
                     "Pot Winner",
                     winner.getName() + " wins " + sidePot.getAmount() + " chips",
@@ -789,14 +791,12 @@ public class GameSession {
         }
     }
 
-    public void sendhandName(){
+    private void sendHandName(){
         for (Player player : allPlayers){
             WebSocketSession webSocketSession = players.get(player.getName()).b;
-            if (webSocketSession.isOpen()) {
-                try {
-                    webSocketSession.sendMessage(new TextMessage(gson.toJson(new BestHandCommand(player.getHand().getHandName()))));
-                }catch (Exception e){}
-            }
+            try{
+                webSocketSession.sendMessage(new TextMessage(gson.toJson(new BestHandName(player.getHand().getHandName()))));
+            }catch (Exception e){}
         }
     }
 }

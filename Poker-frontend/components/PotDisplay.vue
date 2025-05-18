@@ -1,9 +1,19 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 
+const gameSocket = useGameSocket();
+
 const sidePotVisible = ref(true);
 const potCredits = ref(0);
 const sidePotCredits = ref(0);
+
+gameSocket.onMessage((data) => {
+  switch (data.command) {
+    case 'new-betting-round': {
+      potCredits.value = data.pot;
+    }
+  }
+});
 </script>
 
 <template>

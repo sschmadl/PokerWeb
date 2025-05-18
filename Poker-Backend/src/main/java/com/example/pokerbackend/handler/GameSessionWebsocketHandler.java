@@ -72,8 +72,6 @@ public class GameSessionWebsocketHandler extends TextWebSocketHandler {
         Player player = playerFactory.createPlayer(username);
         gameSessionManager.addPlayer(player, session);
 
-        ServerMessageCommand serverMessageCommand = new ServerMessageCommand("Test", "Test message from the server", "pink");
-        session.sendMessage(new TextMessage(gson.toJson(serverMessageCommand)));
         //session.sendMessage(new TextMessage("Welcome " + username));
     }
 

@@ -451,7 +451,6 @@ public class GameSession {
                 gameState = GameState.FLOP;
                 broadCast(gson.toJson(new NewBettingRoundCommand(currentPot)));
                 broadCast(gson.toJson(new FlopCommand(communityCards.subList(0, 3))));
-                broadCast(gson.toJson(new ServerMessageCommand("New betting round", "Entering " + gameState, "blue")));
 
                 if (nextPlayer.getCredits() == 0 || nextPlayer.isFolded()) {
                     announceNextPlayer();
@@ -461,10 +460,8 @@ public class GameSession {
                 break;
             case FLOP:
                 gameState = GameState.TURN;
-
                 broadCast(gson.toJson(new NewBettingRoundCommand(currentPot)));
                 broadCast(gson.toJson(new TurnCommand(communityCards.get(3))));
-                broadCast(gson.toJson(new ServerMessageCommand("New betting round", "Entering " + gameState, "blue")));
 
                 if (nextPlayer.getCredits() == 0 || nextPlayer.isFolded()) {
                     announceNextPlayer();
@@ -474,11 +471,8 @@ public class GameSession {
                 break;
             case TURN:
                 gameState = GameState.RIVER;
-
-
                 broadCast(gson.toJson(new NewBettingRoundCommand(currentPot)));
                 broadCast(gson.toJson(new RiverCommand(communityCards.get(4))));
-                broadCast(gson.toJson(new ServerMessageCommand("New betting round", "Entering " + gameState, "blue")));
 
                 if (nextPlayer.getCredits() == 0 || nextPlayer.isFolded()) {
                     announceNextPlayer();
@@ -488,6 +482,7 @@ public class GameSession {
                 break;
             case RIVER:
                 gameState = GameState.SHOWDOWN;
+                broadCast(gson.toJson(new NewBettingRoundCommand(currentPot)));
                 revealWinners();
                 break;
         }

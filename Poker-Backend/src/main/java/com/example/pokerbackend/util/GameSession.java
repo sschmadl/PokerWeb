@@ -292,7 +292,10 @@ public class GameSession {
                 player.setCurrentBet(player.getCurrentBet() + player.getCredits());
                 currentPot += player.getCurrentBet();
                 player.setCredits(0);
-
+                if (player.getCurrentBet() > highestBet){
+                    highestBet = player.getCurrentBet();
+                    lastRaised = player;
+                }
                 highestBet = Math.max(highestBet, player.getCurrentBet());
 
                 allInsThisRound.add(player);
@@ -329,6 +332,7 @@ public class GameSession {
                 currentPot += player.getCredits();
                 player.setCredits(0);
                 highestBet = player.getCurrentBet();
+                lastRaised = player;
 
                 allInsThisRound.add(player);
                 broadCast(gson.toJson(new NewCreditsCommand(player.getName(), player.getCredits())));

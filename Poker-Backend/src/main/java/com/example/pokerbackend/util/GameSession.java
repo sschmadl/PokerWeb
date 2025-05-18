@@ -413,6 +413,7 @@ public class GameSession {
         broadCast(gson.toJson(new NewCreditsCommand(smallBlind.getName(), smallBlind.getCredits())));
         broadCast(gson.toJson(new NewCreditsCommand(bigBlind.getName(), bigBlind.getCredits())));
 
+        sendhandName();
         announceNextPlayer();
     }
 
@@ -488,6 +489,7 @@ public class GameSession {
                 revealWinners();
                 break;
         }
+        sendhandName();
     }
 
     public void revealWinners() {
@@ -783,6 +785,17 @@ public class GameSession {
             if (!playerOrder.isEmpty()) {
                 admin = playerOrder.get(0).getName();
                 broadCast(gson.toJson(new CurrentPlayersInfoCommand(playerOrder,admin)));
+            }
+        }
+    }
+
+    public void sendhandName(){
+        for (Player player : allPlayers){
+            WebSocketSession webSocketSession = players.get(player.getName()).b;
+            if (webSocketSession.isOpen()) {
+                try {
+                    webSocketSession.sendMessage(new TextMessage(gson.toJson(new BestHandCommand(player.getHand().getHandName()))));
+                }catch (Exception e){}
             }
         }
     }

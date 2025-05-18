@@ -27,6 +27,12 @@ gameSocket.onMessage((data) => {
       isTurn.value = data.name === selfUsername;
       break;
     }
+    case 'updata-game-state': {
+      if (!data.gameRunning) {
+        isTurn.value = false;
+      }
+      break;
+    }
     case 'player-action': {
       if (relevantActions.includes(data.action)) {
         actionHistory.push(data.action);

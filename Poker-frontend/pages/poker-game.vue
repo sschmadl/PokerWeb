@@ -207,6 +207,11 @@ gameSocket.onMessage((data) => {
           winner: false,
           folded: false,
         }));
+      } else {
+        playerInfo.value = playerInfo.value.map(player => ({
+          ...player,
+          highlighted: false,
+        }));
       }
       break;
     case 'reveal-all-cards': {
@@ -220,6 +225,18 @@ gameSocket.onMessage((data) => {
       });
       
       toggleAllPlayerCards(false);
+      break;
+    }
+    case 'highlight-winner': {
+      playerInfo.value = playerInfo.value.map(player => ({
+        ...player,
+        winner: false,
+      }));
+      const winner = playerInfo.value.find(p => p.name === data.name);
+      if (winner) {
+        winner.winner = true;
+      }
+      
       break;
     }
     case 'flop':

@@ -8,7 +8,7 @@ const selfUsername = useUsername().value;
 
 let isTurn = ref<boolean>(false);
 
-let currentPokerHand = 'Three of a Kind';
+let currentPokerHand = '';
 
 const relevantActions = [
   'BET', 'RAISE', 'ALLIN',
@@ -40,6 +40,10 @@ gameSocket.onMessage((data) => {
     }
     case 'new-betting-round': {
       revertValuesToDefault();
+      break;
+    }
+    case 'best-hand': {
+      currentPokerHand = data.name;
       break;
     }
   }

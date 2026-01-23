@@ -200,7 +200,6 @@ public class GameSession {
                     player.resetTotalContributionsToPot();
                 }
                 postBlinds();
-                communityCards.addAll(deck.dealCommunityCards());
                 dealCardsToPlayers();
                 sendHandName();
             }
@@ -448,6 +447,7 @@ public class GameSession {
         }
         switch (gameState) {
             case PREFLOP:
+                communityCards.addAll(deck.dealCommunityCards(3));
                 gameState = GameState.FLOP;
                 broadCast(gson.toJson(new NewBettingRoundCommand(currentPot)));
                 broadCast(gson.toJson(new FlopCommand(communityCards.subList(0, 3))));
@@ -459,6 +459,7 @@ public class GameSession {
                 }
                 break;
             case FLOP:
+                communityCards.addAll(deck.dealCommunityCards(1));
                 gameState = GameState.TURN;
                 broadCast(gson.toJson(new NewBettingRoundCommand(currentPot)));
                 broadCast(gson.toJson(new TurnCommand(communityCards.get(3))));
@@ -470,6 +471,7 @@ public class GameSession {
                 }
                 break;
             case TURN:
+                communityCards.addAll(deck.dealCommunityCards(1));
                 gameState = GameState.RIVER;
                 broadCast(gson.toJson(new NewBettingRoundCommand(currentPot)));
                 broadCast(gson.toJson(new RiverCommand(communityCards.get(4))));

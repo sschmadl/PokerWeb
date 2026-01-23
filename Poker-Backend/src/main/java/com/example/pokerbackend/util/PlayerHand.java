@@ -183,7 +183,7 @@ public class PlayerHand {
     }
 
     public int getHandRanking() {
-        if (handRanking != null && handRankingForXCommunityCards == communityCards.size()) return handRanking;
+//        if (handRanking != null && handRankingForXCommunityCards == communityCards.size()) return handRanking;
         if (isRoyalFlush()) handRanking = 10;
         else if (isStraightFlush()) handRanking = 9;
         else if (isFourOfAKind()) handRanking = 8;
@@ -199,7 +199,7 @@ public class PlayerHand {
     }
 
     public String getHandName() {
-        if (handName != null && handRankingForXCommunityCards == communityCards.size()) return handName;
+//        if (handName != null && handRankingForXCommunityCards == communityCards.size()) return handName;
         handName = switch (getHandRanking()) {
             case 10 -> "Royal Flush";
             case 9 -> "Straight Flush";
@@ -217,7 +217,7 @@ public class PlayerHand {
     }
 
     public List<PokerCard> getBestHand() {
-        if (bestHand != null && bestHandForXCommunityCards == communityCards.size()) return bestHand;
+//        if (bestHand != null && bestHandForXCommunityCards == communityCards.size()) return bestHand;
         bestHand = switch (getHandRanking()) {
             case 10 -> buildBestRoyalFlushHand();
             case 9 -> buildBestStraightFLush();

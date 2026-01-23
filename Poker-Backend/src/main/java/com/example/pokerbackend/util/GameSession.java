@@ -789,8 +789,8 @@ public class GameSession {
 
     private void sendHandName(){
         for (Player player : allPlayers){
-            WebSocketSession webSocketSession = players.get(player.getName()).b;
             try{
+                WebSocketSession webSocketSession = players.get(player.getName()).b;
                 webSocketSession.sendMessage(new TextMessage(gson.toJson(new BestHandNameCommand(player.getHand().getHandName()))));
             }catch (Exception e){}
         }

@@ -31,11 +31,11 @@
 - <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/docker/docker-original.svg" alt="Docker" width="20" height="20" style="vertical-align:middle;"> Docker  
 
 ## Mitwirkende  
-- Leon Arbeithaber (https://github.com/larbeith)  
+- Leon Arbeithuber (https://github.com/larbeith)  
 - Daniel Kimmerstorfer (https://github.com/Dendoxyn)  
 - Simon Schmadlbauer (https://github.com/sschmadl)  
 
 ## Kontakt  
-- Leon Arbeithaber – larbeith@htl-steyr.ac.at  
+- Leon Arbeithuber – larbeith@htl-steyr.ac.at  
 - Daniel Kimmerstorfer – dkimmers@htl-steyr.ac.at  
 - Simon Schmadlbauer – sschmadl@htl-steyr.ac.at  
